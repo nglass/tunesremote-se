@@ -1,0 +1,3 @@
+jmdns               - 3.2.2
+sqlite-jdbc         - 3.7.2
+sqlite-jdbc-javadoc - 3.7.2

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="libs/sqlite-jdbc.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/JTunesControl/libs/sqlite-jdbc-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="libs/jmdns.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/JTunesControl/libs/jmdns-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="output" path="build"/>
+</classpath>
