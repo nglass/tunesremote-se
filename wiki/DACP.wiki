@@ -7,7 +7,7 @@ DACP is similar to the well-known DAAP, using Bonjour MDNS to find libraries, th
 These pages contains information either collected from the internet or worked out by myself.
 
 ==Protocol==
-ContentCodes
+DAAP ContentCodes
 
 
 ==Internet Resources==
