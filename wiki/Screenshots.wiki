@@ -1,2 +1,3 @@
 Main display
-[screenshot.png]
+
+[http://tunesremote-se.googlecode.com/svn/wiki/screenshot.png]
