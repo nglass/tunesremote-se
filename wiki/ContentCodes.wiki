@@ -184,15 +184,15 @@ Inspired by http://www.deleet.de/projekte/daap/?ContentCodes I ran the GET /cont
 
 Type indicates number of bytes in which codename data must be present
 
- Type   Size in Bytes
- 0x0001 1 byte integer
- 0x0002 1 unsigned byte integer
- 0x0003 2 byte integer
- 0x0003 2 (unsigned ?) byte integer
- 0x0005 4 byte integer
- 0x0006 4 byte showing seconds (used for dmap.utcoffset)
- 0x0007 8 byte long integer (persistent id, song album id, song size etc)
- 0x0009 text string
- 0x000A date/timestamp
- 0x000B version (protocol version etc.)
- 0x000C list/container(can contain other tags)
+|| *Type* || *Details* ||
+|| 0x0001 || 1 byte integer ||
+|| 0x0002 || 1 unsigned byte integer ||
+|| 0x0003 || 2 byte integer ||
+|| 0x0003 || 2 (unsigned ?) byte integer ||
+|| 0x0005 || 4 byte integer ||
+|| 0x0006 || 4 byte showing seconds (used for dmap.utcoffset) ||
+|| 0x0007 || 8 byte long integer (persistent id, song album id, song size etc) ||
+|| 0x0009 || text string ||
+|| 0x000A || date/timestamp ||
+|| 0x000B || version (protocol version etc.) ||
+|| 0x000C || list/container(can contain other tags) ||
