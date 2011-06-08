@@ -1,5 +1,5 @@
 === DAAP ContentCodes===
-Inspired by http://www.deleet.de/projekte/daap/?ContentCodes I ran the GET /content-codes? query using TunesRemoteSE against latest iTunes 10.3.1.  The following list was returned.  Unfortunately it doesn't seem to contain the dacp specific codes :
+Inspired by http://www.deleet.de/projekte/daap/?ContentCodes I ran the GET /content-codes? query using TunesRemoteSE against latest iTunes 10.3.1.  The following list was returned.  Unfortunately it doesn't seem to contain the dacp specific codes, but the field names are useful for querying the database :
 
 || *Code* || *Name* || *Type* ||
 || miid || dmap.itemid || 5 || 
