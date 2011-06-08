@@ -1,0 +1,2 @@
+===ContentCodes===
+Inspired by http://www.deleet.de/projekte/daap/?ContentCodes I ran the GET /content-codes? query using TunesRemoteSE.  The following list was returned:
