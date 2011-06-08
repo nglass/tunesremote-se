@@ -1,4 +1,4 @@
-=Screenshot=
+=Screenshots=
 ==Main display==
 
 [http://tunesremote-se.googlecode.com/svn/wiki/screenshot.png]
