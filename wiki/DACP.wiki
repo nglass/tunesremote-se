@@ -1,0 +1,18 @@
+=DACP=
+
+Digital Audio Control Protocol (DACP) is a protocol used by the Apple Remote application (app) on iOS mobile devices (iPad, iPhone and iPod Touch) to control iTunes running on a remote computer.
+
+These pages contains information either collected from the internet or worked out by myself.
+
+==Protocol==
+ContentCodes
+
+
+==Internet Resources==
+===DAAP===
+http://tapjam.net/daap
+http://www.deleet.de/projekte/daap/?ContentCodes
+
+===DACP===
+http://dacp.jsharkey.org/
+http://code.google.com/p/tunesremote-plus/
