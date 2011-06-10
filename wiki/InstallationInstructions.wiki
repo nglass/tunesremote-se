@@ -17,10 +17,10 @@ Mac users should download the latest Mac OSX release of TunesRemote-SE.
 Everyone else should get the regular download.
 
 == Windows ==
-Unpack the zip file.  Double clicking on the included TunesRemoteSE.jar file should launch the application.
+Unpack the zip file.  Double clicking on the included TunesRemoteSE.jar file should launch the application.  The first time you run TunesRemote-SE you will be asked where you want it to store files.
 
 == Mac OSX ==
-Mac users unpack the zip file and drag the TunesRemote-SE application to your Applications folder.  Double clicking the application will launch TunesRemote-SE
+Mac users unpack the zip file and drag the TunesRemote-SE application to your Applications folder.  Double clicking the application will launch TunesRemote-SE.  The first time you run TunesRemote-SE you will be asked where you want it to store files.
 
 == Linux / Other ==
 Unpack the TunesRemoteSE.jar file from the zip file.
@@ -28,4 +28,4 @@ Launch the application by running:
 {{{
 java -jar TunesRemoteSE.jar
 }}}
-
+The first time you run TunesRemote-SE you will be asked where you want it to store files.
