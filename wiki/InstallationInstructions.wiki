@@ -31,7 +31,7 @@ java -jar TunesRemoteSE.jar
 The first time you run TunesRemote-SE you will be asked where you want it to store files.
 
 == Library Pairing ==
-When you start TunesRemote-SE you will be presented with a list of all the [DACP DACP-compatible] media players on your local network.  However you need to pair the application with your media player before you can control it.
+When you start TunesRemote-SE you will be (usually be - outstanding issue) presented with a list of all the [DACP DACP-compatible] media players on your local network.  However you need to pair the application with your media player before you can control it.
 
 [http://tunesremote-se.googlecode.com/svn/wiki/libraries.png]
 
