@@ -1,0 +1,15 @@
+#labels Featured,Phase-Deploy
+= Installation Instructions =
+
+== Requirements ==
+TunesRemote-SE requires a Java 6 runtime environment to be able run.  I develop and test TunesRemote-SE using the Oracle Java runtime, though others may also work.
+
+Windows, Solaris and Linux users can get the latest Oracle JRE here:
+http://java.com/en/download/index.jsp
+
+Currently MacOSX ships with its own Java runtime, though in the future this is going to change.
+
+Ubuntu instructions can be found here:
+https://help.ubuntu.com/community/Java
+
+== Downloads ==
