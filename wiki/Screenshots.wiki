@@ -6,3 +6,7 @@
 ==Preferences==
 
 [http://tunesremote-se.googlecode.com/svn/wiki/prefs.png]
+
+==Library Selector==
+
+[http://tunesremote-se.googlecode.com/svn/wiki/libraries.png]
