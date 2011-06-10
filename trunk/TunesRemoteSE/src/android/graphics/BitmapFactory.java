@@ -14,9 +14,13 @@ public class BitmapFactory {
      * @return The decoded bitmap, or null if the image could not be decode.
      */
     public static Bitmap decodeByteArray(byte[] data, int offset, int length) {
-    	byte[] datacopy = new byte[length];
-    	System.arraycopy(data, offset, datacopy, 0, length);  	
-        return new Bitmap(datacopy);
+    	if (length > 0) {
+	    	byte[] datacopy = new byte[length];
+	    	System.arraycopy(data, offset, datacopy, 0, length);  	
+	        return new Bitmap(datacopy);
+    	} else {
+    		return null;
+    	}
     }
 
 }
