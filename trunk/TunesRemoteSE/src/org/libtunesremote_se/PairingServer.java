@@ -59,7 +59,8 @@ public class PairingServer extends Thread {
 	protected ServerSocket server;
 	protected final Random random = new Random();
 	protected int portNumber = 0;
-	protected String serverPairingCode;
+	protected String pairCode;
+	protected String serviceGuid;
 
 	private PairingDatabase pairingDatabase; 
 
@@ -67,23 +68,21 @@ public class PairingServer extends Thread {
 		return portNumber;
 	}
 	
-	// probably want a randomised code that we store in the db
-	public String getServerPairingCode() {
-		return serverPairingCode;
+	// this code is used in validating pair codes by hashing with response
+	public String getPairCode() {
+		return pairCode;
+	}
+	
+	// this is the GUID that uniquely identifies this remote
+	public String getServiceGuid() {
+		return serviceGuid;
 	}
 
 	public PairingServer(String configDirectory) {
 		pairingDatabase = new PairingDatabase(configDirectory);
 		
-		// get server pairing code
-		serverPairingCode = pairingDatabase.findCode("me");
-		// or initialise it to a random value
-		if (serverPairingCode == null) {
-			byte[] code = new byte[8];
-			random.nextBytes(code);
-			serverPairingCode = toHex(code);
-			pairingDatabase.updateCode("me", serverPairingCode);  
-		}
+		pairCode = pairingDatabase.getPairCode();
+		serviceGuid = pairingDatabase.getServiceGuid();
 		
 		try {
 			// open a free port

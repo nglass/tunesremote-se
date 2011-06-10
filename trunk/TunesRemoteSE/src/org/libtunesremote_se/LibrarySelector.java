@@ -84,6 +84,7 @@ public class LibrarySelector extends JDialog {
 							JOptionPane.showMessageDialog
 								(frame, "Error: Could not start session", "Error", JOptionPane.ERROR_MESSAGE);
 							session = null;
+							exception.printStackTrace();
 						}
 						
 						// start gui

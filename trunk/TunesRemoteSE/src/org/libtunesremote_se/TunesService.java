@@ -45,20 +45,18 @@ public class TunesService extends Thread implements ServiceListener, Closeable {
 			// Start the pairing server
 			pairingServer = new PairingServer(configDirectory);
 			pairingServer.start();
-
+			
 			// Register the Pairing Service
 			final Hashtable<String, String> values = new Hashtable<String, String>();
-			byte[] number = new byte[4];
-			random.nextBytes(number);
 			values.put("DvNm", applicationName);
 			values.put("RemV", "10000");
 			values.put("DvTy", "iPod");
 			values.put("RemN", "Remote");
 			values.put("txtvers", "1");
-			values.put("Pair", pairingServer.getServerPairingCode());
+			values.put("Pair", pairingServer.getPairCode());
 
 			// NOTE: this "Pair" above is *not* the guid--we generate and return that in PairingServer
-			pairservice = ServiceInfo.create(REMOTE_TYPE, "0000000000000000000000000000000000000006", pairingServer.getPortNumber(), 0, 0, values);
+			pairservice = ServiceInfo.create(REMOTE_TYPE, pairingServer.getServiceGuid(), pairingServer.getPortNumber(), 0, 0, values);
 
 			zeroConf.registerService(pairservice);
 
@@ -79,8 +77,28 @@ public class TunesService extends Thread implements ServiceListener, Closeable {
 		}
 	}
 
+	public void updateService(String serviceName, ServiceInfo serviceInfo) {
+		final String libraryName = serviceInfo.getPropertyString("CtlN");
+		final String address = serviceInfo.getHostAddress();
+		final String library = serviceInfo.getPropertyString("DbId");
+		final int port = serviceInfo.getPort();
+
+		LibraryDetails ent = new LibraryDetails
+		    (libraryName, serviceName, address, library, port);
+
+		if (serviceList.contains(ent)) {
+			serviceList.setElementAt(ent, serviceList.indexOf(ent));
+		} else {
+			serviceList.addElement(ent);
+		}
+	}
+	
 	public void serviceAdded(ServiceEvent event) {
 		System.out.println("serviceAdded(event=" + event.toString() + ")");
+	
+		// Force resolution of new service
+		ServiceInfo info = event.getDNS().getServiceInfo(event.getType(), event.getName());
+		updateService(event.getName(), info);
 	}
 
 	public void serviceRemoved(ServiceEvent event) {
@@ -97,20 +115,8 @@ public class TunesService extends Thread implements ServiceListener, Closeable {
 		System.out.println("serviceResolved(event=" + event.toString() + ")");
 
 		final String serviceName = event.getName();
-		final ServiceInfo serviceInfo = event.getInfo();	      
-		final String libraryName = serviceInfo.getPropertyString("CtlN");
-		final String address = serviceInfo.getHostAddress();
-		final String library = serviceInfo.getPropertyString("DbId");
-		final int port = serviceInfo.getPort();
-
-		LibraryDetails ent = new LibraryDetails
-		    (libraryName, serviceName, address, library, port);
-
-		if (serviceList.contains(ent)) {
-			serviceList.setElementAt(ent, serviceList.indexOf(ent));
-		} else {
-			serviceList.addElement(ent);
-		}
+		final ServiceInfo serviceInfo = event.getInfo();
+		updateService(serviceName, serviceInfo);
 	}   
 	
 	public static void startService(String configDirectory, String applicationName) {
