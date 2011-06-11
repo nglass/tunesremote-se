@@ -337,4 +337,22 @@ public class Session {
          }
       });
    }
+   
+   // Query the media server about the content codes it handles
+   // print to stderr as a wiki-table
+   public void listContentCodes() {
+	   try {
+		   Response contentcodes = RequestHelper.requestParsed(String.format("%s/content-codes?session-id=%s", this
+				   .getRequestBase(), this.sessionId), false);
+
+		   for (Response resp : contentcodes.getNested("mccr").findArray("mdcl")) {
+			   System.err.println("\"" + resp.getString("mcnm") + "\", \"" +
+					   resp.getString("mcna") + "\", \"" +
+					   resp.getNumberLong("mcty") + "\"");
+
+		   }
+	   } catch (Exception e) {
+		   e.printStackTrace();
+	   }
+   }
 }

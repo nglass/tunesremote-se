@@ -43,9 +43,9 @@ public class ResponseParser {
 
    public final static String TAG = ResponseParser.class.toString();
    public final static Pattern BRANCHES = 
-	   Pattern.compile("(cmst|mlog|agal|mlcl|mshl|mlit|abro|abar|agar|apso|caci|avdb|cmgt|aply|adbs)");
+	   Pattern.compile("(cmst|mlog|agal|mccr|mdcl|mlcl|mshl|mlit|abro|abar|agar|apso|caci|avdb|cmgt|aply|adbs)");
    public final static Pattern STRINGS = 
-	   Pattern.compile("(minm|cann|cana|cang|canl|asaa|asal|asar|asgn|assa|assu)");
+	   Pattern.compile("(minm|cann|cana|cang|canl|asaa|asal|asar|asgn|assa|assu|mcnm|mcna)");
    public final static Pattern RAWS = Pattern.compile("(canp)");
 
    public static int performSearch(byte[] raw, TagListener listener, Pattern listenFor, boolean haltmlit)
