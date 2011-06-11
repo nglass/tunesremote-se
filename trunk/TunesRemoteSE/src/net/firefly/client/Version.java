@@ -19,8 +19,6 @@
  */
 package net.firefly.client;
 
-import java.util.jar.JarFile;
-
 public class Version {
 
 	public static String APPLICATION_NAME = "TunesRemote SE";
