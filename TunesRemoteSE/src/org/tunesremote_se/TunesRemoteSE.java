@@ -10,15 +10,13 @@ import net.firefly.client.controller.ConfigurationManager;
 import net.firefly.client.gui.context.Context;
 import net.firefly.client.gui.swing.dialog.AboutDialog;
 import net.firefly.client.gui.swing.dialog.ConfigLocationDialog;
-import net.firefly.client.gui.swing.other.SplashScreen;
+//import net.firefly.client.gui.swing.other.SplashScreen;
 import net.firefly.client.model.configuration.Configuration;
 import net.firefly.client.tools.FireflyClientException;
 
 import java.lang.reflect.*;
 import java.awt.Image;
 import java.awt.Toolkit;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 
 import apple.dts.samplecode.osxadapter.OSXAdapter;
 
@@ -28,13 +26,15 @@ public class TunesRemoteSE {
 	
     public static boolean MAC_OS_X = (System.getProperty("os.name").toLowerCase().startsWith("mac os x"));
 	
-    protected AboutDialog aboutDialog;
+    protected AboutDialog aboutDialog = null;
   
     Configuration config = null;
     
     Image icon;
 
 	public static void main (String [] args) throws ClassNotFoundException {
+		System.out.println("Launching " + Version.getLongApplicationName() + " ...");
+		
 		if (MAC_OS_X) {
 			// ensure property is set to place menus at top of screen
 			System.setProperty("com.apple.mrj.application.apple.menu.about.name", "TunesRemote SE");
