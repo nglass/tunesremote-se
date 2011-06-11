@@ -18,8 +18,6 @@ public class PairingDatabase {
 	private final static String KEY_PAIRING_CODE = "pair";
 	private final static String KEY_SERVICE_GUID = "serviceguid";
 	
-	protected final Random random = new Random();
-	
 	protected final static byte[] CHAR_TABLE = new byte[] { (byte) '0',
 		(byte) '1', (byte) '2', (byte) '3', (byte) '4', (byte) '5',
 		(byte) '6', (byte) '7', (byte) '8', (byte) '9', (byte) 'A',
@@ -50,6 +48,8 @@ public class PairingDatabase {
 								TABLE_PAIR + "(" +
 								FIELD_PAIR_SERVICENAME + " text primary key, " +
 								FIELD_PAIR_GUID + " text)");
+					
+					Random random = new Random();
 					
 					// generate pair code
 					byte[] pair = new byte[8];

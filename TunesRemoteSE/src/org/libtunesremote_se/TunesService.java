@@ -3,7 +3,6 @@ package org.libtunesremote_se;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Hashtable;
-import java.util.Random;
 
 import javax.jmdns.JmDNS;
 import javax.jmdns.ServiceEvent;
@@ -21,7 +20,6 @@ public class TunesService extends Thread implements ServiceListener, Closeable {
 	private String applicationName;
 	private ServiceInfo pairservice;
 	private volatile PairingServer pairingServer;
-	protected final Random random = new Random();
 
 	private JmDNS zeroConf = null;
 
