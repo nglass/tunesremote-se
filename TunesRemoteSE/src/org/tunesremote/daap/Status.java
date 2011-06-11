@@ -25,6 +25,8 @@
 
 package org.tunesremote.daap;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -35,8 +37,7 @@ import android.os.Handler;
 import android.util.Log;
 
 /**
- * Status handles status information, including background timer thread also
- * subscribes to keep-alive event updates.
+ * Status handles status information, including background timer thread also subscribes to keep-alive event updates.
  * <p>
  */
 public class Status {
@@ -71,7 +72,7 @@ public class Status {
    private long rating = -1;
    private long playlistId = 0;
    private long containerItemId = 0;
-   private long songId = 0;
+   private long trackId = 0;
    private String trackName = "", trackArtist = "", trackAlbum = "", trackGenre = "";
    private long progressTotal = 0, progressRemain = 0;
    private final Session session;
@@ -172,11 +173,7 @@ public class Status {
          while (true) {
             try {
                // sleep a few seconds to make sure we dont kill stuff
-               try {
-                  Thread.sleep(1000);
-               } catch (java.lang.InterruptedException e) {
-            	   // do nothing
-               }
+               Thread.sleep(1000);
                if (destroyThread.get())
                   break;
 
@@ -188,13 +185,8 @@ public class Status {
                parseUpdate(RequestHelper.requestParsed(
                         String.format("%s/ctrl-int/1/playstatusupdate?revision-number=%d&session-id=%s", session.getRequestBase(), revision, session.sessionId),
                         true));
-               //System.err.println("keepalive received update");
-            } catch (java.net.SocketTimeoutException e) {
-            	System.err.println("socket time out");
-            	revision = 1;
             } catch (Exception e) {
-               //Log.d
-               System.err.println(String.format("Exception in keepalive thread, so killing try# %d", failures.get()) + e);
+               Log.d(TAG, String.format("Exception in keepalive thread, so killing try# %d", failures.get()), e);
                if (failures.incrementAndGet() > MAX_FAILURES)
                   destroy();
             }
@@ -248,7 +240,7 @@ public class Status {
       int playStatus = (int) resp.getNumberLong("caps");
       int shuffleStatus = (int) resp.getNumberLong("cash");
       int repeatStatus = (int) resp.getNumberLong("carp");
-      
+
       // update state if changed
       if (playStatus != this.playStatus || shuffleStatus != this.shuffleStatus || repeatStatus != this.repeatStatus) {
          updateType = UPDATE_STATE;
@@ -337,13 +329,13 @@ public class Status {
       containerItemId |= (bs[10] & 0xff) << 8;
       containerItemId |= bs[11] & 0xff;
 	   
-	  songId = 0;
+	  trackId = 0;
 
       // This is a PITA in Java....
-      songId = (bs[12] & 0xff) << 24;
-      songId |= (bs[13] & 0xff) << 16;
-      songId |= (bs[14] & 0xff) << 8;
-      songId |= bs[15] & 0xff;
+      trackId = (bs[12] & 0xff) << 24;
+      trackId |= (bs[13] & 0xff) << 16;
+      trackId |= (bs[14] & 0xff) << 8;
+      trackId |= bs[15] & 0xff;
 
    }
 
@@ -354,7 +346,7 @@ public class Status {
             try {
                Response resp = RequestHelper.requestParsed(
                         String.format("%s/databases/%d/items?session-id=%s&meta=daap.songuserrating&type=music&query='dmap.itemid:%d'",
-                                 session.getRequestBase(), session.databaseId, session.sessionId, songId), false);
+                                 session.getRequestBase(), session.databaseId, session.sessionId, trackId), false);
 
                if (update != null) {
                   // 2 different responses possible!
@@ -387,6 +379,158 @@ public class Status {
       /*
        * cmgt --+ mstt 4 000000c8 == 200 cmvo 4 00000054 == 84
        */
+   }
+
+   /**
+    * Reads the list of available speakers
+    * @return list of available speakers
+    */
+   public List<Speaker> getSpeakers() {
+
+      List<Speaker> speakers = new ArrayList<Speaker>();
+
+      try {
+         Log.d(TAG, "getSpeakers() requesting...");
+
+         String temp = String.format("%s/ctrl-int/1/getspeakers?session-id=%s", session.getRequestBase(), session.sessionId);
+
+         byte[] raw = RequestHelper.request(temp, false);
+
+         Response response = ResponseParser.performParse(raw);
+
+         Response casp = response.getNested("casp");
+
+         List<Response> mdclArray = casp.findArray("mdcl");
+
+         // The master volume is required to compute the speakers' absolute
+         // volume
+         long masterVolume = getVolume();
+
+         for (Response mdcl : mdclArray) {
+            Speaker speaker = new Speaker();
+            speaker.setName(mdcl.getString("minm"));
+            long id = mdcl.getNumberLong("msma");
+            speaker.setId(id);
+            int relativeVolume = (int) mdcl.getNumberLong("cmvo");
+            boolean isActive = mdcl.containsKey("caia");
+            speaker.setActive(isActive);
+            // mastervolume/100 * relativeVolume/100 * 100
+            int absoluteVolume = isActive ? (int) masterVolume * relativeVolume / 100 : 0;
+            speaker.setAbsoluteVolume(absoluteVolume);
+            speakers.add(speaker);
+         }
+
+      } catch (Exception e) {
+         Log.e(TAG, "Could not get speakers: ", e);
+      }
+
+      return speakers;
+
+   }
+
+   /**
+    * Sets (activates or deactivates) the speakers as defined in the given list.
+    * @param speakers all speakers to read the active flag from
+    */
+   public void setSpeakers(List<Speaker> speakers) {
+
+      try {
+         Log.d(TAG, "setSpeakers() requesting...");
+
+         String idsString = "";
+         boolean first = true;
+         // The list of speakers to activate is a comma-separated string with
+         // the hex versions of the speakers' IDs
+         for (Speaker speaker : speakers) {
+            if (speaker.isActive()) {
+               if (!first) {
+                  idsString += ",";
+               } else {
+                  first = false;
+               }
+               idsString += speaker.getIdAsHex();
+            }
+         }
+
+         String url = String.format("%s/ctrl-int/1/setspeakers?speaker-id=%s&session-id=%s", session.getRequestBase(), idsString, session.sessionId);
+
+         RequestHelper.request(url, false);
+
+      } catch (Exception e) {
+         Log.e(TAG, "Could not set speakers: ", e);
+      }
+   }
+
+   /**
+    * Sets the volume of a single speaker. To recreate the behaviour of the original iOS Remote App, there are some
+    * additional information required because there is some hassle between relative and master volume.
+    * @param speakerId ID of the speaker to set the volume of
+    * @param newVolume the new volume to set
+    * @param formerVolume the former volume of this speaker
+    * @param speakersMaxVolume the maximum volume of all available speakers
+    * @param secondMaxVolume the volume of the second loudest speaker
+    * @param masterVolume the current master volume
+    */
+   public void setSpeakerVolume(long speakerId, int newVolume, int formerVolume, int speakersMaxVolume, int secondMaxVolume, long masterVolume) {
+      try {
+         /*************************************************************
+          * If this speaker will become or is currently the loudest or is the only activated speaker, it will be
+          * controlled via the master volume.
+          *************************************************************/
+         if (newVolume > masterVolume || formerVolume == speakersMaxVolume) {
+            if (newVolume < secondMaxVolume) {
+               // First equalize the volume of this speaker with the second
+               // loudest
+               setAbsoluteVolume(speakerId, secondMaxVolume);
+               int relativeVolume = newVolume * 100 / secondMaxVolume;
+               // then go on by decreasing the relative volume of this speaker
+               setRelativeVolume(speakerId, relativeVolume);
+            } else {
+               // the speaker will remain the loudest, so just control the
+               // absolute volume (master volume)
+               setAbsoluteVolume(speakerId, newVolume);
+            }
+         }
+         /*************************************************************
+          * Otherwise its relative volume will be controlled
+          *************************************************************/
+         else {
+            int relativeVolume = newVolume * 100 / (int) masterVolume;
+            setRelativeVolume(speakerId, relativeVolume);
+         }
+      } catch (Exception e) {
+         Log.e(TAG, "Error when setting speaker volume: ", e);
+      }
+   }
+
+   /**
+    * Helper to control a speakers's absolute volume. This uses the URL parameters
+    * <code>setproperty?dmcp.volume=%d&include-speaker-id=%s</code> which results in iTunes controlling the master
+    * volume and the selected speaker synchronously.
+    * @param speakerId ID of the speaker to control
+    * @param absoluteVolume the volume to set absolutely
+    * @throws Exception
+    */
+   private void setAbsoluteVolume(long speakerId, int absoluteVolume) throws Exception {
+      String url;
+      url = String.format("%s/ctrl-int/1/setproperty?dmcp.volume=%d&include-speaker-id=%s" + "&session-id=%s", session.getRequestBase(), absoluteVolume,
+               speakerId, session.sessionId);
+      RequestHelper.request(url, false);
+   }
+
+   /**
+    * Helper to control a speaker's relative volume. This relative volume is a value between 0 and 100 describing the
+    * relative volume of a speaker in comparison to the master volume. For this the URL parameters
+    * <code>%s/ctrl-int/1/setproperty?speaker-id=%s&dmcp.volume=%d</code> are used.
+    * @param speakerId ID of the speaker to control
+    * @param relativeVolume the relative volume to set
+    * @throws Exception
+    */
+   private void setRelativeVolume(long speakerId, int relativeVolume) throws Exception {
+      String url;
+      url = String.format("%s/ctrl-int/1/setproperty?speaker-id=%s&dmcp.volume=%d" + "&session-id=%s", session.getRequestBase(), speakerId, relativeVolume,
+               session.sessionId);
+      RequestHelper.request(url, false);
    }
 
    public int getProgress() {
@@ -429,10 +573,6 @@ public class Status {
       return this.trackGenre;
    }
    
-   public long getTrackSongId() {
-	  return this.songId;
-   }
-   
    public long getContainerItemId() {
 	  return this.containerItemId;
    }
@@ -447,5 +587,9 @@ public class Status {
 
    public String getAlbumId() {
       return this.albumId;
+   }
+
+   public long getTrackId() {
+      return trackId;
    }
 }

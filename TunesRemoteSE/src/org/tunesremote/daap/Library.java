@@ -25,6 +25,7 @@
 
 package org.tunesremote.daap;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.regex.Pattern;
 
@@ -58,10 +59,11 @@ public class Library {
    public long readSearch(TagListener listener, String search, long start, long items) {
       long total = -1;
       try {
-         String encodedSearch = URLEncoder.encode(search).replaceAll("\\+", "%20");
+         String encodedSearch = Library.escapeUrlString(search);
          String query = String
-                  .format("%s/databases/%d/items?session-id=%s&meta=dmap.itemname,dmap.itemid,dmap.persistentid,daap.songartist,daap.songalbum,daap.songtime,daap.songtracknumber&type=music&sort=album&query=('dmap.itemname:*%s*','daap.songartist:*%s*','daap.songalbum:*%s*')&index=%d-%d",
-                           session.getRequestBase(), session.databaseId, session.sessionId, encodedSearch, encodedSearch, encodedSearch, start, items);
+                  .format("%s/databases/%d/containers/%d/items?session-id=%s&meta=dmap.itemname,dmap.itemid,dmap.persistentid,daap.songartist,daap.songalbum,daap.songtime,daap.songuserrating,daap.songtracknumber&type=music&sort=name&include-sort-headers=1&query=(('com.apple.itunes.mediakind:1','com.apple.itunes.mediakind:4','com.apple.itunes.mediakind:8')+('dmap.itemname:*%s*','daap.songartist:*%s*','daap.songalbum:*%s*'))&index=%d-%d",
+                           session.getRequestBase(), session.databaseId, session.libraryId, session.sessionId, encodedSearch, encodedSearch, encodedSearch,
+                           start, items);
          byte[] raw = RequestHelper.request(query, false);
          Response resp = ResponseParser.performParse(raw, listener, MLIT_PATTERN);
          // apso or adbs
@@ -102,7 +104,7 @@ public class Library {
 
    public void readAlbums(TagListener listener, String artist) {
 
-      final String encodedArtist = URLEncoder.encode(artist).replaceAll("\\+", "%20");
+      final String encodedArtist = Library.escapeUrlString(artist);
 
       try {
 
@@ -164,8 +166,8 @@ public class Library {
 
       try {
          String temp = String
-                  .format("%s/databases/%d/items?session-id=%s&meta=dmap.itemname,dmap.itemid,daap.songartist,daap.songalbum,daap.songalbum,daap.songtime,daap.songtracknumber&type=music&sort=album&query='daap.songalbumid:%s'",
-                           session.getRequestBase(), session.databaseId, session.sessionId, albumid);
+                  .format("%s/databases/%d/containers/%d/items?session-id=%s&meta=dmap.itemname,dmap.itemid,daap.songartist,daap.songalbum,daap.songalbum,daap.songtime,daap.songuserrating,daap.songtracknumber&type=music&sort=album&query='daap.songalbumid:%s'",
+                           session.getRequestBase(), session.databaseId, session.libraryId, session.sessionId, albumid);
 
          // make tracks list request
          // http://192.168.254.128:3689/databases/36/containers/113/items?session-id=1301749047&meta=dmap.itemname,dmap.itemid,daap.songartist,daap.songalbum,daap.songalbum,daap.songtime,daap.songtracknumber&type=music&sort=album&query='daap.songalbumid:11624070975347817354'
@@ -183,16 +185,15 @@ public class Library {
    public void readAllTracks(String artist, TagListener listener) {
 
       // check if we have a local cache create a wrapping taglistener to create local cache
-
-      final String encodedArtist = URLEncoder.encode(artist).replaceAll("\\+", "%20");
+      final String encodedArtist = Library.escapeUrlString(artist);
 
       try {
          // make tracks list request
          // http://192.168.254.128:3689/databases/36/containers/113/items?session-id=1301749047&meta=dmap.itemname,dmap.itemid,daap.songartist,daap.songalbum,daap.songalbum,daap.songtime,daap.songtracknumber&type=music&sort=album&query='daap.songalbumid:11624070975347817354'
          byte[] raw = RequestHelper
                   .request(String
-                           .format("%s/databases/%d/items?session-id=%s&meta=dmap.itemname,dmap.itemid,daap.songartist,daap.songalbum,daap.songalbum,daap.songtime,daap.songtracknumber&type=music&sort=album&query='daap.songartist:%s'",
-                                    session.getRequestBase(), session.databaseId, session.sessionId, encodedArtist), false);
+                           .format("%s/databases/%d/containers/%d/items?session-id=%s&meta=dmap.itemname,dmap.itemid,daap.songartist,daap.songalbum,daap.songalbum,daap.songtime,daap.songuserrating,daap.songtracknumber&type=music&sort=album&query='daap.songartist:%s'",
+                                    session.getRequestBase(), session.databaseId, session.libraryId, session.sessionId, encodedArtist), false);
 
          // parse list, passing off events in the process
          ResponseParser.performSearch(raw, listener, MLIT_PATTERN, false);
@@ -215,7 +216,7 @@ public class Library {
          // http://192.168.254.128:3689/databases/36/containers/1234/items?session-id=2025037772&meta=dmap.itemname,dmap.itemid,daap.songartist,daap.songalbum,dmap.containeritemid,com.apple.tunes.has-video
          byte[] raw = RequestHelper
                   .request(String
-                           .format("%s/databases/%d/containers/%s/items?session-id=%s&meta=dmap.itemname,dmap.itemid,daap.songartist,daap.songalbum,daap.songtime,dmap.containeritemid,com.apple.tunes.has-video",
+                           .format("%s/databases/%d/containers/%s/items?session-id=%s&meta=dmap.itemname,dmap.itemid,daap.songartst,daap.songalbum,daap.songtime,dmap.containeritemid,com.apple.tunes.has-video",
                                     session.getRequestBase(), session.databaseId, playlistid, session.sessionId), false);
 
          // parse list, passing off events in the process
@@ -232,7 +233,7 @@ public class Library {
 
       try {
          String temp = String
-                  .format("%s/ctrl-int/1/items?session-id=%s&meta=dmap.itemname,dmap.itemid,daap.songartist,daap.songalbum,daap.songalbum,daap.songtime,daap.songtracknumber&type=music&sort=album&query='daap.songalbumid:%s'",
+                  .format("%s/ctrl-int/1/items?session-id=%s&meta=dmap.itemname,dmap.itemid,daap.songartist,daap.songalbum,daap.songalbum,daap.songtime,daap.songuserrating,daap.songtracknumber&type=music&sort=album&query='daap.songalbumid:%s'",
                            session.getRequestBase(), session.sessionId, albumid);
 
          byte[] raw = RequestHelper.request(temp, false);
@@ -276,4 +277,22 @@ public class Library {
       }
    }
 
+   /**
+    * URL encode a string escaping single quotes first.
+    * <p>
+    * @param input the string to encode
+    * @return the URL encoded string value
+    */
+   public static String escapeUrlString(final String input) {
+      String encoded = "";
+      try {
+    	  encoded = URLEncoder.encode(input, "UTF-8");
+    	  encoded = encoded.replaceAll("\\+", "%20");
+          encoded = encoded.replaceAll("%27", "%5C'");
+      } catch (UnsupportedEncodingException e) {
+    	  // TODO Auto-generated catch block
+    	  e.printStackTrace();
+      }
+      return encoded;
+   }
 }
