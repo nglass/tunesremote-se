@@ -427,7 +427,8 @@ public class MediaPlayer implements android.os.Handler {
 			
 			if (playList != null) {
 				// TODO work out how to request filtered / searched tunes in playlist	
-				session.controlPlayPlaylist(playList.getPersistentId(), songToPlay.getContainerId());
+				session.controlPlayPlaylist(playList.getPersistentId(), 
+						String.format("%x", songToPlay.getContainerId()));
 				
 			} else if (searchQuery != null && searchQuery.length() > 0){
 				controlPlaySearch(searchQuery, context.getFilteredSongList().getSelectedIndex());
@@ -533,7 +534,7 @@ public class MediaPlayer implements android.os.Handler {
 		}
 		
 		if (sc == null && masterSongList != null) {
-			sc = masterSongList.getSongByDatabaseId(status.getTrackSongId());			
+			sc = masterSongList.getSongByDatabaseId(status.getTrackId());			
 		}
 		
 		// If we really cant find the song in the database then
@@ -547,7 +548,7 @@ public class MediaPlayer implements android.os.Handler {
 			s.setTitle(status.getTrackName());
 			s.setTime(status.getProgressTotal() * 1000);
 			s.setGenre(status.getTrackGenre());
-			s.setDatabaseItemId(status.getTrackSongId());
+			s.setDatabaseItemId(status.getTrackId());
 			
 			sc.setContainerId(status.getContainerItemId());
 			sc.setSong(s);	
