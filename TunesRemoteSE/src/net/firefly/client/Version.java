@@ -19,20 +19,25 @@
  */
 package net.firefly.client;
 
+import java.util.jar.JarFile;
+
 public class Version {
 
 	public static String APPLICATION_NAME = "TunesRemote SE";
-
-	public static int APPLICATION_VERSION_MAJOR = 1;
-
-	public static int APPLICATION_VERSION_MINOR = 0;
 	
-	public static boolean isBeta(){
-		return true;
-	}
+	private static String version = null;
 	
 	public static String getVersion(){
-		return APPLICATION_VERSION_MAJOR + "." + APPLICATION_VERSION_MINOR + (isBeta()?" beta":"");
+		if (version == null) {
+			String implementation = Version.class.getPackage().getImplementationVersion();
+			if (implementation == null) {
+				version = "DEVELOPMENT BUILD";
+			} else {
+				version = "Revision " + implementation;
+			}
+		}
+		
+		return version;
 	}
 	
 	public static String getLongApplicationName(){

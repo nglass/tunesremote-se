@@ -94,7 +94,7 @@ public class AboutDialog extends JDialog implements PropertyChangeListener {
 		JTabbedPane tabbedPane = new JTabbedPane();
 		
 		// -- labels
-		JLabel versionLabel = new JLabel("<html><b>" + Version.APPLICATION_NAME + " - Version " + Version.getVersion());
+		JLabel versionLabel = new JLabel("<html><b>" + Version.APPLICATION_NAME + " - " + Version.getVersion());
 		JLabel homeDirLabel = new JLabel("<html>Configuation: " + config.getConfigRootDirectory());
 		JLabel authorLabel = new JLabel("<html><i>&copy; Nick Glass 2011");
 
