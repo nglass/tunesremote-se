@@ -7,7 +7,6 @@ import org.libtunesremote_se.CloseOnLastWindow;
 import org.libtunesremote_se.LibraryDetails;
 import org.tunesremote.daap.Session;
 
-import net.firefly.client.controller.ConfigurationManager;
 import net.firefly.client.controller.request.PlaylistRequestManager;
 import net.firefly.client.controller.request.TunesRemoteRequestManager;
 import net.firefly.client.gui.context.Context;
@@ -16,7 +15,6 @@ import net.firefly.client.gui.swing.frame.ClientFrame;
 import net.firefly.client.model.configuration.Configuration;
 import net.firefly.client.model.library.LibraryInfo;
 import net.firefly.client.player.MediaPlayer;
-import net.firefly.client.tools.FireflyClientException;
 
 public class TunesRemoteSession {
 	

@@ -19,14 +19,10 @@
  */
 package net.firefly.client.controller;
 
-//import java.util.ArrayList;
 import hirondelle.web4j.util.EscapeChars;
 
 import java.util.HashSet;
 import java.util.Iterator;
-//import java.util.List;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.SortedSet;
@@ -128,7 +124,6 @@ public class ListManager {
 		return albumList;
 	}
 
-	// TODO - you are working on this!!!!!
 	// -- flags: sum FLG_SEARCH_GENRE FLG_SEARCH_ARTIST, FLG_SEARCH_ALBUM, FLG_SEARCH_TITLE
 	public static SongList filterList(SongList songList, String pattern, int flags) {
 		SongList result = new SongList();
