@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="build_dist" name="Create Runnable Jar for Project TunesRemoteSE">
+	<typedef resource="org/tigris/subversion/svnant/svnantlib.xml" />
+
+	<!--this file was created by Eclipse Runnable JAR Export Wizard-->
+	<!--ANT 1.7 is required                                        -->
+	<target name="build_dist" depends="version">
+		<mkdir dir="dist"/>
+		
+		<jar destfile="dist/TunesRemoteSE.jar" filesetmanifest="mergewithoutmain">
+			<manifest>
+				<attribute name="Main-Class" value="org.tunesremote_se.TunesRemoteSE" />
+				<attribute name="Class-Path" value="." />
+				<attribute name="Implementation-Version" value="${revision.max}" />
+				<attribute name="SVN-Revision" value="${revision.max}" />
+				<attribute name="SVN-Repository" value="${repository.url}" />
+			</manifest>
+			<fileset dir="build" />
+			<zipfileset excludes="META-INF/*.SF" src="libs/sqlite-jdbc.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="libs/jmdns.jar" />
+		</jar>
+
+		<zip destfile="dist/TunesRemoteSE-r${revision.max}.zip">
+			<fileset file="dist/TunesRemoteSE.jar" casesensitive="yes" />
+			<fileset file="COPYING" casesensitive="yes" />
+		</zip>
+
+		<!-- create OSX app bundle -->
+		<svn>
+			<export srcPath="osx" destPath="dist/TunesRemoteSE.app" force="true" />
+		</svn>
+
+		<copy file="dist/TunesRemoteSE.jar" todir="dist/TunesRemoteSE.app/Contents/Resources/Java/" overwrite="true" />
+
+		<zip destfile="dist/TunesRemoteSE-OSX-r${revision.max}.zip">
+			<fileset dir="dist" includes="TunesRemoteSE.app/" />
+			<fileset file="COPYING" casesensitive="yes" />
+		</zip>
+
+	</target>
+
+	<target name="version">
+		<svn>
+			<wcVersion path="." />
+		</svn>
+		<echo message="Revision Information:" />
+		<echo message="Subversion revision: ${revision.max}" />
+		<echo message="Subversion repository url: ${repository.url}" />
+	</target>
+
+</project>
