@@ -20,6 +20,7 @@
 package net.firefly.client.gui.swing.button;
 
 import java.awt.Insets;
+import java.awt.event.MouseEvent;
 
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -40,6 +41,10 @@ public class ShuffleButton extends JLabel implements PlayerModeChangedEventListe
 	protected ImageIcon enabledIcon;
 
 	protected ImageIcon disabledIcon;
+	
+	protected ImageIcon currentIcon;
+	
+	protected ImageIcon pressedIcon;
 
 	public ShuffleButton(Context context) {
 		this.context = context;
@@ -47,21 +52,31 @@ public class ShuffleButton extends JLabel implements PlayerModeChangedEventListe
 	}
 
 	protected void initialize() {
-		this.disabledIcon = new ImageIcon(getClass()
-				.getResource("/net/firefly/client/resources/images/shuffle-off.png"));
+		this.disabledIcon = new ImageIcon(getClass().getResource("/net/firefly/client/resources/images/shuffle-off.png"));
 		this.enabledIcon = new ImageIcon(getClass().getResource("/net/firefly/client/resources/images/shuffle-on.png"));
 
+		this.pressedIcon = new ImageIcon(getClass().getResource("/net/firefly/client/resources/images/shuffle-pressed.png"));
+		this.currentIcon = this.disabledIcon;
+		
 		setToolTipText(ResourceManager.getLabel("player.control.shuffle", context.getConfig().getLocale()));
 		
 		setOpaque(false);
 		setVerticalAlignment(SwingConstants.CENTER);
-		setIcon(this.disabledIcon);
+		setIcon(this.currentIcon);
 
 		setBackground(null);
 		setIconTextGap(0);
 		setBorder(new EmptyBorder(new Insets(0, 0, 0, 0)));
 
 		addMouseListener(new java.awt.event.MouseAdapter() {
+			public void mousePressed(java.awt.event.MouseEvent e) {
+				setIcon(pressedIcon);
+			}
+
+			public void mouseReleased(MouseEvent arg0) {
+				setIcon(currentIcon);
+			}
+			
 			public void mouseClicked(java.awt.event.MouseEvent e) {
 				if (context.getPlayer().getPlayerMode().equals(PlayerMode.MODE_SHUFFLE)) {
 					context.getPlayer().setPlayerMode(PlayerMode.MODE_NORMAL);
@@ -77,9 +92,10 @@ public class ShuffleButton extends JLabel implements PlayerModeChangedEventListe
 
 	public void onPlayerModeChange(PlayerModeChangedEvent evt) {
 		if (context.getPlayer().getPlayerMode().equals(PlayerMode.MODE_SHUFFLE)) {
-			setIcon(enabledIcon);
+			this.currentIcon = enabledIcon;
 		} else {
-			setIcon(disabledIcon);
+			this.currentIcon = disabledIcon;
 		}
+		setIcon(this.currentIcon);
 	}
 }

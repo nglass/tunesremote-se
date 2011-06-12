@@ -18,11 +18,13 @@ import net.firefly.client.model.playlist.IPlaylist;
 import net.firefly.client.player.events.PlayerErrorOccurredEvent;
 import net.firefly.client.player.events.PlayerModeChangedEvent;
 import net.firefly.client.player.events.PlayerStatusChangedEvent;
+import net.firefly.client.player.events.RepeatModeChangedEvent;
 import net.firefly.client.player.events.SongChangedEvent;
 import net.firefly.client.player.events.TimePlayedChangedEvent;
 import net.firefly.client.player.listeners.PlayerErrorOccuredEventListener;
 import net.firefly.client.player.listeners.PlayerModeChangedEventListener;
 import net.firefly.client.player.listeners.PlayerStatusChangedEventListener;
+import net.firefly.client.player.listeners.RepeatModeChangedEventListener;
 import net.firefly.client.player.listeners.SongChangedEventListener;
 import net.firefly.client.player.listeners.TimePlayedChangedEventListener;
 
@@ -43,6 +45,8 @@ public class MediaPlayer implements android.os.Handler {
 	protected PlayerMode playerMode;
 	
 	protected PlayerStatus playerStatus;
+	
+	protected RepeatMode repeatMode;
 
 	protected boolean supportSeeking;
 	
@@ -75,6 +79,7 @@ public class MediaPlayer implements android.os.Handler {
 		this.listenerList = new EventListenerList();
 		this.playerStatus = PlayerStatus.STATUS_STOPPED;
 		this.playerMode = PlayerMode.MODE_NORMAL;
+		this.repeatMode = RepeatMode.REPEAT_OFF;
 		this.supportSeeking = false;
 		this.cover = null;
 		
@@ -472,6 +477,17 @@ public class MediaPlayer implements android.os.Handler {
 		changeMode(mode);
 	}
 	
+	public void setRepeatMode(RepeatMode mode) {
+		if (mode == RepeatMode.REPEAT_OFF) {
+			session.controlRepeat(Status.REPEAT_OFF);
+		} else if (mode == RepeatMode.REPEAT_SINGLE) {
+			session.controlRepeat(Status.REPEAT_SINGLE);
+		} else if (mode == RepeatMode.REPEAT_ALL) {
+			session.controlRepeat(Status.REPEAT_ALL);
+		}
+		changeRepeatMode(mode);
+	}
+	
 	//
 	// Status
 	//
@@ -482,10 +498,16 @@ public class MediaPlayer implements android.os.Handler {
 		firePlayerStatusChange(new PlayerStatusChangedEvent(this, oldStatus, newStatus));
 	}
 	
-	protected void changeMode(PlayerMode newMode) {		
+	protected void changeMode(PlayerMode newMode) {
 		PlayerMode oldMode = this.playerMode;
 		this.playerMode = newMode;
 		firePlayerModeChange(new PlayerModeChangedEvent(this, oldMode, newMode));	
+	}
+	
+	protected void changeRepeatMode(RepeatMode newMode) {
+		RepeatMode oldMode = this.repeatMode;
+		this.repeatMode = newMode;
+		fireRepeatModeChange(new RepeatModeChangedEvent(this, oldMode, newMode));	
 	}
 	
 	protected void updateStatus() {
@@ -510,6 +532,21 @@ public class MediaPlayer implements android.os.Handler {
 		   break;
 	   default:
 		   System.err.println("Error shuffle mode = " + status.getShuffle());
+		   break;
+	   }
+	   
+	   switch(status.getRepeat()) {
+	   case Status.REPEAT_OFF:
+		   changeRepeatMode(RepeatMode.REPEAT_OFF);
+		   break;
+	   case Status.REPEAT_SINGLE:
+		   changeRepeatMode(RepeatMode.REPEAT_SINGLE);
+		   break;
+	   case Status.REPEAT_ALL:
+		   changeRepeatMode(RepeatMode.REPEAT_ALL);
+		   break;
+	   default:
+		   System.err.println("Error repeat mode = " + status.getRepeat());
 		   break;
 	   }
 	}
@@ -593,6 +630,10 @@ public class MediaPlayer implements android.os.Handler {
 		return this.playerMode;
 	}
 	
+	public RepeatMode getRepeatMode() {
+		return this.repeatMode;
+	}
+	
 	public SongContainer getPlayingSong() {
 		return this.playingSong;
 	}
@@ -613,6 +654,7 @@ public class MediaPlayer implements android.os.Handler {
 
 	public void addPlayerStatusChangedEventListener(PlayerStatusChangedEventListener listener) {
 		listenerList.add(PlayerStatusChangedEventListener.class, listener);
+		listener.onPlayerStatusChange(new PlayerStatusChangedEvent(this, playerStatus, playerStatus));
 	}
 
 	public void removePlayerStatusChangedEventListener(PlayerStatusChangedEventListener listener) {
@@ -630,6 +672,7 @@ public class MediaPlayer implements android.os.Handler {
 	
 	public void addPlayerModeChangedEventListener(PlayerModeChangedEventListener listener) {
 		listenerList.add(PlayerModeChangedEventListener.class, listener);
+		listener.onPlayerModeChange(new PlayerModeChangedEvent(this, playerMode, playerMode));
 	}
 
 	public void removePlayerModeChangedEventListener(PlayerModeChangedEventListener listener) {
@@ -645,8 +688,27 @@ public class MediaPlayer implements android.os.Handler {
 		}
 	}
 
+	public void addRepeatModeChangedEventListener(RepeatModeChangedEventListener listener) {
+		listenerList.add(RepeatModeChangedEventListener.class, listener);
+		listener.onRepeatModeChange(new RepeatModeChangedEvent(this, repeatMode, repeatMode));
+	}
+
+	public void removeRepeatModeChangedEventListener(RepeatModeChangedEventListener listener) {
+		listenerList.remove(RepeatModeChangedEventListener.class, listener);
+	}
+
+	protected void fireRepeatModeChange(RepeatModeChangedEvent e) {
+		Object[] listeners = listenerList.getListenerList();
+		for (int i = 0; i < listeners.length; i += 2) {
+			if (listeners[i] == RepeatModeChangedEventListener.class) {
+				((RepeatModeChangedEventListener) listeners[i + 1]).onRepeatModeChange(e);
+			}
+		}
+	}
+	
 	public void addSongChangedEventListener(SongChangedEventListener listener) {
 		listenerList.add(SongChangedEventListener.class, listener);
+		listener.onSongChange(new SongChangedEvent(this, playingSong));
 	}
 
 	public void removeSongChangedEventListener(SongChangedEventListener listener) {

@@ -27,20 +27,25 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 
+import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+import javax.swing.JRadioButtonMenuItem;
 import javax.swing.KeyStroke;
 
 import net.firefly.client.controller.ResourceManager;
 import net.firefly.client.gui.context.Context;
 import net.firefly.client.player.PlayerMode;
 import net.firefly.client.player.PlayerStatus;
+import net.firefly.client.player.RepeatMode;
 import net.firefly.client.player.events.PlayerModeChangedEvent;
+import net.firefly.client.player.events.RepeatModeChangedEvent;
 import net.firefly.client.player.listeners.PlayerModeChangedEventListener;
+import net.firefly.client.player.listeners.RepeatModeChangedEventListener;
 
-public class ControlsMenu extends JMenu implements PlayerModeChangedEventListener {
+public class ControlsMenu extends JMenu implements PlayerModeChangedEventListener, RepeatModeChangedEventListener  {
 
 	private static final long serialVersionUID = -9090183035989912470L;
 
@@ -53,6 +58,12 @@ public class ControlsMenu extends JMenu implements PlayerModeChangedEventListene
 	protected ImageIcon disabledIcon;
 
 	protected final JCheckBoxMenuItem shuffleMenuItem = new JCheckBoxMenuItem();
+	
+	protected JMenu repeatSubmenu;
+	
+	protected ButtonGroup repeatButtonGroup;
+	
+	JRadioButtonMenuItem repeatOff, repeatAll, repeatOne;
 
 	public ControlsMenu(Context context, Frame rootContainer) {
 		this.context = context;
@@ -106,7 +117,6 @@ public class ControlsMenu extends JMenu implements PlayerModeChangedEventListene
 		previousMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, Event.CTRL_MASK, true));
 
 		shuffleMenuItem.setText(ResourceManager.getLabel("player.control.shuffle", context.getConfig().getLocale()));
-		shuffleMenuItem.setIconTextGap(0);
 		shuffleMenuItem.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
 				if (shuffleMenuItem.isSelected()) {
@@ -117,6 +127,44 @@ public class ControlsMenu extends JMenu implements PlayerModeChangedEventListene
 			}
 		});
 
+		// -- Open saved library sub menu
+		repeatSubmenu = new JMenu();
+		repeatSubmenu.setText(ResourceManager.getLabel("player.control.repeat", context.getConfig().getLocale()));
+
+		repeatButtonGroup = new ButtonGroup();
+		ActionListener repeatActionListener = new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String command=e.getActionCommand();
+				if (command.equals("OFF")) {
+					context.getPlayer().setRepeatMode(RepeatMode.REPEAT_OFF);
+				} else if (command.equals("ONE")) {
+					context.getPlayer().setRepeatMode(RepeatMode.REPEAT_SINGLE);
+				} else if (command.equals("ALL")) {
+					context.getPlayer().setRepeatMode(RepeatMode.REPEAT_ALL);
+				}
+			}
+		};
+		
+		repeatOff = new JRadioButtonMenuItem("Off");
+		repeatOff.setActionCommand("OFF");
+		repeatOff.addActionListener(repeatActionListener);
+		repeatSubmenu.add(repeatOff);
+		repeatButtonGroup.add(repeatOff);
+		
+		repeatAll = new JRadioButtonMenuItem("All");
+		repeatAll.setActionCommand("ALL");
+		repeatAll.addActionListener(repeatActionListener);
+		repeatSubmenu.add(repeatAll);
+		repeatButtonGroup.add(repeatAll);
+		
+		repeatOne = new JRadioButtonMenuItem("One");
+		repeatOne.setActionCommand("ONE");
+		repeatOne.addActionListener(repeatActionListener);
+		repeatSubmenu.add(repeatOne);
+		repeatButtonGroup.add(repeatOne);
+		
+		repeatButtonGroup.setSelected(repeatOff.getModel(), true);
+		
 		// -- Add the menu items
 		add(playPauseMenuItem);
 		addSeparator();
@@ -124,8 +172,10 @@ public class ControlsMenu extends JMenu implements PlayerModeChangedEventListene
 		add(previousMenuItem);
 		addSeparator();
 		add(shuffleMenuItem);
+		add(repeatSubmenu);
 
 		context.getPlayer().addPlayerModeChangedEventListener(this);
+		context.getPlayer().addRepeatModeChangedEventListener(this);
 	}
 
 	public void onPlayerModeChange(PlayerModeChangedEvent evt) {
@@ -133,6 +183,17 @@ public class ControlsMenu extends JMenu implements PlayerModeChangedEventListene
 			shuffleMenuItem.setSelected(true);
 		} else {
 			shuffleMenuItem.setSelected(false);
+		}
+	}
+
+	@Override
+	public void onRepeatModeChange(RepeatModeChangedEvent evt) {
+		if (evt.getNewMode().equals(RepeatMode.REPEAT_OFF)) {
+			repeatButtonGroup.setSelected(repeatOff.getModel(), true);
+		} else if (evt.getNewMode().equals(RepeatMode.REPEAT_SINGLE)) {
+			repeatButtonGroup.setSelected(repeatOne.getModel(), true);
+		} else if (evt.getNewMode().equals(RepeatMode.REPEAT_ALL)) {
+			repeatButtonGroup.setSelected(repeatAll.getModel(), true);
 		}
 	}
 }
