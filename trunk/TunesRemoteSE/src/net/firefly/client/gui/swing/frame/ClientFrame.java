@@ -22,6 +22,7 @@ package net.firefly.client.gui.swing.frame;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Frame;
 import java.awt.GraphicsEnvironment;
 import java.awt.GridBagConstraints;
@@ -53,6 +54,7 @@ import net.firefly.client.gui.context.events.FilteredSongListChangedEvent;
 import net.firefly.client.gui.context.events.GlobalSongListChangedEvent;
 import net.firefly.client.gui.context.listeners.FilteredSongListChangedEventListener;
 import net.firefly.client.gui.context.listeners.GlobalSongListChangedEventListener;
+import net.firefly.client.gui.swing.button.RepeatButton;
 import net.firefly.client.gui.swing.button.ShuffleButton;
 import net.firefly.client.gui.swing.dialog.ErrorDialog;
 import net.firefly.client.gui.swing.menu.ClientMenuBar;
@@ -121,15 +123,19 @@ public class ClientFrame extends JFrame implements PlayerErrorOccuredEventListen
 		JPanel statusBar = new JPanel(new GridBagLayout());
 		GridBagConstraints separatorGBC = new GridBagConstraints(0, 0, 3, 1, 300, 0, GridBagConstraints.CENTER,
 				GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 1, 1);
-		GridBagConstraints statusLabelGBC = new GridBagConstraints(1, 1, 1, 1, 300, 0, GridBagConstraints.CENTER,
-				GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 1, 1);
-		GridBagConstraints shuffleButtonGBC = new GridBagConstraints(1, 1, 1, 1, 300, 0, GridBagConstraints.WEST,
+		GridBagConstraints shuffleButtonGBC = new GridBagConstraints(0, 1, 1, 1, 0, 0, GridBagConstraints.WEST,
 				GridBagConstraints.NONE, new Insets(0, 2, 0, 0), 1, 1);
+		GridBagConstraints repeatButtonGBC = new GridBagConstraints(1, 1, 1, 1, 0, 0, GridBagConstraints.WEST,
+				GridBagConstraints.NONE, new Insets(0, 2, 0, 0), 1, 1);
+		GridBagConstraints statusLabelGBC = new GridBagConstraints(2, 1, 1, 1, 300, 0, GridBagConstraints.CENTER,
+				GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 1, 1);
 
 		statusBarLabel = new JLabel(" ");
+		statusBarLabel.setFont(statusBarLabel.getFont().deriveFont(Font.PLAIN));
 		statusBar.add(new JSeparator(JSeparator.HORIZONTAL), separatorGBC);
-		statusBar.add(statusBarLabel, statusLabelGBC);
 		statusBar.add(new ShuffleButton(context), shuffleButtonGBC);
+		statusBar.add(new RepeatButton(context), repeatButtonGBC);
+		statusBar.add(statusBarLabel, statusLabelGBC);
 
 		getContentPane().add(statusBar, BorderLayout.SOUTH);
 
@@ -375,7 +381,7 @@ public class ClientFrame extends JFrame implements PlayerErrorOccuredEventListen
 					totalSize += s.getSize();
 				}
 			}
-			if (nbSongs != 0 && totalTime != 0 && totalSize != 0) {
+			if (nbSongs != 0) {
 				String time = "";
 				// time
 				totalTime = totalTime / 1000; // --> seconds
@@ -397,24 +403,30 @@ public class ClientFrame extends JFrame implements PlayerErrorOccuredEventListen
 							+ ResourceManager.getLabel("status.bar.time.day", context.getConfig().getLocale());
 				}
 
-				String size = "";
-				totalSize = totalSize / 1024; // --> kbytes
-				if (totalSize < 1024) {
-					size = totalSize + " "
-							+ ResourceManager.getLabel("status.bar.size.kilo", context.getConfig().getLocale());
-				} else if (totalSize < (1024 * 1024)) {
-					float isize = ((float) totalSize / 1024);
-					size = nf.format(isize) + " "
-							+ ResourceManager.getLabel("status.bar.size.mega", context.getConfig().getLocale());
-				} else if (totalSize < (1024 * 1024 * 1024)) {
-					float isize = ((float) totalSize / (1024 * 1024));
-					size = nf.format(isize) + " "
-							+ ResourceManager.getLabel("status.bar.size.giga", context.getConfig().getLocale());
+				String song = nbSongs + " " + ResourceManager.getLabel("status.bar.song", context.getConfig().getLocale());
+				String info;
+				
+				if (totalSize > 0) {
+					String size = "";
+					totalSize = totalSize / 1024; // --> kbytes
+					if (totalSize < 1024) {
+						size = totalSize + " "
+						+ ResourceManager.getLabel("status.bar.size.kilo", context.getConfig().getLocale());
+					} else if (totalSize < (1024 * 1024)) {
+						float isize = ((float) totalSize / 1024);
+						size = nf.format(isize) + " "
+						+ ResourceManager.getLabel("status.bar.size.mega", context.getConfig().getLocale());
+					} else if (totalSize < (1024 * 1024 * 1024)) {
+						float isize = ((float) totalSize / (1024 * 1024));
+						size = nf.format(isize) + " "
+						+ ResourceManager.getLabel("status.bar.size.giga", context.getConfig().getLocale());
+					}
+					
+					info = song + " - " + time + " - " + size;
+				} else {
+					info = song + " - " + time;
 				}
 
-				String song = nbSongs + " " + ResourceManager.getLabel("status.bar.song", context.getConfig().getLocale());
-
-				String info = song + " - " + time + " - " + size;
 				statusBarLabel.setText(info);
 			} else {
 				statusBarLabel.setText(" ");
