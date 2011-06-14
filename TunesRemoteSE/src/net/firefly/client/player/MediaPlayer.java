@@ -47,6 +47,8 @@ public class MediaPlayer implements android.os.Handler {
 	protected PlayerStatus playerStatus;
 	
 	protected RepeatMode repeatMode;
+	
+	protected boolean visualizerOn, fullscreen;
 
 	protected boolean supportSeeking;
 	
@@ -81,6 +83,8 @@ public class MediaPlayer implements android.os.Handler {
 		this.playerMode = PlayerMode.MODE_NORMAL;
 		this.repeatMode = RepeatMode.REPEAT_OFF;
 		this.supportSeeking = false;
+		this.visualizerOn = false;
+		this.fullscreen = false;
 		this.cover = null;
 		
 		updateStatus();
@@ -488,6 +492,16 @@ public class MediaPlayer implements android.os.Handler {
 		changeRepeatMode(mode);
 	}
 	
+	public void setVisualizer(boolean enabled) {
+		session.controlVisualiser(enabled);
+		visualizerOn = enabled;
+	}
+
+	public void setFullscreen(boolean enabled) {
+		session.controlFullscreen(enabled);
+		fullscreen = enabled;
+	}
+	
 	//
 	// Status
 	//
@@ -511,44 +525,47 @@ public class MediaPlayer implements android.os.Handler {
 	}
 	
 	protected void updateStatus() {
-	   switch (status.getPlayStatus()) {
-	   case Status.STATE_PAUSED:
-		   changeStatus(PlayerStatus.STATUS_PAUSED);
-		   break;
-	   case Status.STATE_PLAYING:
-		   changeStatus(PlayerStatus.STATUS_PLAYING);
-		   break;
-	   default:
-		   changeStatus(PlayerStatus.STATUS_STOPPED);
-		   break;
-	   }
-	   
-	   switch(status.getShuffle()) {
-	   case Status.SHUFFLE_OFF:
-		   changeMode(PlayerMode.MODE_NORMAL);
-		   break;
-	   case Status.SHUFFLE_ON:
-		   changeMode(PlayerMode.MODE_SHUFFLE);
-		   break;
-	   default:
-		   System.err.println("Error shuffle mode = " + status.getShuffle());
-		   break;
-	   }
-	   
-	   switch(status.getRepeat()) {
-	   case Status.REPEAT_OFF:
-		   changeRepeatMode(RepeatMode.REPEAT_OFF);
-		   break;
-	   case Status.REPEAT_SINGLE:
-		   changeRepeatMode(RepeatMode.REPEAT_SINGLE);
-		   break;
-	   case Status.REPEAT_ALL:
-		   changeRepeatMode(RepeatMode.REPEAT_ALL);
-		   break;
-	   default:
-		   System.err.println("Error repeat mode = " + status.getRepeat());
-		   break;
-	   }
+		visualizerOn = status.isVisualizerOn();
+		fullscreen = status.isVisualizerFullscreen();
+
+		switch (status.getPlayStatus()) {
+		case Status.STATE_PAUSED:
+			changeStatus(PlayerStatus.STATUS_PAUSED);
+			break;
+		case Status.STATE_PLAYING:
+			changeStatus(PlayerStatus.STATUS_PLAYING);
+			break;
+		default:
+			changeStatus(PlayerStatus.STATUS_STOPPED);
+			break;
+		}
+
+		switch(status.getShuffle()) {
+		case Status.SHUFFLE_OFF:
+			changeMode(PlayerMode.MODE_NORMAL);
+			break;
+		case Status.SHUFFLE_ON:
+			changeMode(PlayerMode.MODE_SHUFFLE);
+			break;
+		default:
+			System.err.println("Error shuffle mode = " + status.getShuffle());
+			break;
+		}
+
+		switch(status.getRepeat()) {
+		case Status.REPEAT_OFF:
+			changeRepeatMode(RepeatMode.REPEAT_OFF);
+			break;
+		case Status.REPEAT_SINGLE:
+			changeRepeatMode(RepeatMode.REPEAT_SINGLE);
+			break;
+		case Status.REPEAT_ALL:
+			changeRepeatMode(RepeatMode.REPEAT_ALL);
+			break;
+		default:
+			System.err.println("Error repeat mode = " + status.getRepeat());
+			break;
+		}
 	}
 	
 	protected void updatePlayingSong() {
@@ -648,6 +665,14 @@ public class MediaPlayer implements android.os.Handler {
 
 	public byte[] getCover() {
 		return cover;
+	}
+	
+	public boolean isVisualizerOn() {
+		return visualizerOn;
+	}
+	
+	public boolean isFullscreen() {
+		return fullscreen;
 	}
 	
 	// -- events management
