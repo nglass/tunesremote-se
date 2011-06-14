@@ -44,6 +44,8 @@ public class ClientMenuBar extends JMenuBar implements InterfaceLockEventListene
 	
 	private ControlsMenu controlsMenu;
 	
+	private ViewMenu viewMenu;
+	
 	private HelpMenu helpMenu;
 	
 
@@ -57,9 +59,11 @@ public class ClientMenuBar extends JMenuBar implements InterfaceLockEventListene
 	private void initialize() {
 		this.fileMenu = new FileMenu(context, rootContainer);
 		this.editMenu = new EditMenu(context, rootContainer);
+		this.viewMenu = new ViewMenu(context, rootContainer);
 		this.controlsMenu = new ControlsMenu(context, rootContainer);
 		add(fileMenu);
 		add(editMenu);
+		add(viewMenu);
 		add(controlsMenu);
 		
 		if (!MAC_OS_X) {
@@ -72,6 +76,7 @@ public class ClientMenuBar extends JMenuBar implements InterfaceLockEventListene
 	public void onInterfaceLockChange(InterfaceLockEvent evt) {
 		fileMenu.setEnabled(!evt.getLock());
 		editMenu.setEnabled(!evt.getLock());
+		viewMenu.setEnabled(!evt.getLock());
 		controlsMenu.setEnabled(!evt.getLock());
 		helpMenu.setEnabled(!evt.getLock());
 	}

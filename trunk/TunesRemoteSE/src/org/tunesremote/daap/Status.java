@@ -68,6 +68,7 @@ public class Status {
    public Bitmap coverCache = null;
    public String albumId = "";
    protected int repeatStatus = REPEAT_OFF, shuffleStatus = SHUFFLE_OFF, playStatus = STATE_PAUSED;
+   protected boolean visualizer = false, fullscreen = false;
    protected final AtomicBoolean destroyThread = new AtomicBoolean(false);
    private long rating = -1;
    private long playlistId = 0;
@@ -240,13 +241,22 @@ public class Status {
       int playStatus = (int) resp.getNumberLong("caps");
       int shuffleStatus = (int) resp.getNumberLong("cash");
       int repeatStatus = (int) resp.getNumberLong("carp");
+      boolean visualizer = (resp.getNumberLong("cavs") > 0);
+      boolean fullscreen = (resp.getNumberLong("cafs") > 0);
 
       // update state if changed
-      if (playStatus != this.playStatus || shuffleStatus != this.shuffleStatus || repeatStatus != this.repeatStatus) {
+      if (playStatus != this.playStatus || 
+          shuffleStatus != this.shuffleStatus || 
+          repeatStatus != this.repeatStatus ||
+          visualizer != this.visualizer ||
+          fullscreen != this.fullscreen) {
+    	  
          updateType = UPDATE_STATE;
          this.playStatus = playStatus;
          this.shuffleStatus = shuffleStatus;
          this.repeatStatus = repeatStatus;
+         this.visualizer = visualizer;
+         this.fullscreen = fullscreen;
 
          Log.d(TAG, "about to interrupt #1");
          this.progress.interrupt();
@@ -591,5 +601,13 @@ public class Status {
 
    public long getTrackId() {
       return trackId;
+   }
+   
+   public boolean isVisualizerOn() {
+	  return visualizer;
+   }
+   
+   public boolean isVisualizerFullscreen() {
+	  return fullscreen;
    }
 }

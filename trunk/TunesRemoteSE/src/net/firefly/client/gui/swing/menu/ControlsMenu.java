@@ -19,8 +19,8 @@
  */
 package net.firefly.client.gui.swing.menu;
 
-import java.awt.Event;
 import java.awt.Frame;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -72,6 +72,8 @@ public class ControlsMenu extends JMenu implements PlayerModeChangedEventListene
 	}
 
 	private void initialize() {
+		int shortcutKey = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
+		
 		// -- icons
 		this.disabledIcon = new ImageIcon(getClass().getResource("/net/firefly/client/resources/images/uncheck.gif"));
 		this.enabledIcon = new ImageIcon(getClass().getResource("/net/firefly/client/resources/images/check.gif"));
@@ -96,7 +98,7 @@ public class ControlsMenu extends JMenu implements PlayerModeChangedEventListene
 				}
 			}
 		});
-		playPauseMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, Event.CTRL_MASK, true));
+		playPauseMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, shortcutKey, true));
 
 		JMenuItem nextMenuItem = new JMenuItem();
 		nextMenuItem.setText(ResourceManager.getLabel("menu.controls.next", context.getConfig().getLocale()));
@@ -105,7 +107,7 @@ public class ControlsMenu extends JMenu implements PlayerModeChangedEventListene
 				context.getPlayer().next();
 			}
 		});
-		nextMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, Event.CTRL_MASK, true));
+		nextMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, shortcutKey, true));
 
 		JMenuItem previousMenuItem = new JMenuItem();
 		previousMenuItem.setText(ResourceManager.getLabel("menu.controls.previous", context.getConfig().getLocale()));
@@ -114,7 +116,7 @@ public class ControlsMenu extends JMenu implements PlayerModeChangedEventListene
 				context.getPlayer().previous();
 			}
 		});
-		previousMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, Event.CTRL_MASK, true));
+		previousMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, shortcutKey, true));
 
 		shuffleMenuItem.setText(ResourceManager.getLabel("player.control.shuffle", context.getConfig().getLocale()));
 		shuffleMenuItem.addItemListener(new ItemListener() {
@@ -145,19 +147,22 @@ public class ControlsMenu extends JMenu implements PlayerModeChangedEventListene
 			}
 		};
 		
-		repeatOff = new JRadioButtonMenuItem("Off");
+		repeatOff = new JRadioButtonMenuItem();
+		repeatOff.setText(ResourceManager.getLabel("menu.controls.repeat.off", context.getConfig().getLocale()));
 		repeatOff.setActionCommand("OFF");
 		repeatOff.addActionListener(repeatActionListener);
 		repeatSubmenu.add(repeatOff);
 		repeatButtonGroup.add(repeatOff);
 		
-		repeatAll = new JRadioButtonMenuItem("All");
+		repeatAll = new JRadioButtonMenuItem();
+		repeatAll.setText(ResourceManager.getLabel("menu.controls.repeat.all", context.getConfig().getLocale()));
 		repeatAll.setActionCommand("ALL");
 		repeatAll.addActionListener(repeatActionListener);
 		repeatSubmenu.add(repeatAll);
 		repeatButtonGroup.add(repeatAll);
 		
-		repeatOne = new JRadioButtonMenuItem("One");
+		repeatOne = new JRadioButtonMenuItem();
+		repeatOne.setText(ResourceManager.getLabel("menu.controls.repeat.one", context.getConfig().getLocale()));
 		repeatOne.setActionCommand("ONE");
 		repeatOne.addActionListener(repeatActionListener);
 		repeatSubmenu.add(repeatOne);

@@ -317,6 +317,16 @@ public class Session {
       });
    }
    
+   public void controlVisualiser(boolean enabled) {
+	   // GET /ctrl-int/1/setproperty?dacp.visualizer=1&session-id=283658916
+	   this.fireAction(String.format("%s/ctrl-int/1/setproperty?dacp.visualizer=%d&session-id=%s", this.getRequestBase(), enabled?1:0, this.sessionId), true);
+   }
+
+   public void controlFullscreen(boolean enabled) {
+	   // GET /ctrl-int/1/setproperty?dacp.fullscreen=1&session-id=283658916
+	   this.fireAction(String.format("%s/ctrl-int/1/setproperty?dacp.fullscreen=%d&session-id=%s", this.getRequestBase(), enabled?1:0, this.sessionId), true);
+   }
+   
    // Query the media server about the content codes it handles
    // print to stderr as a csv file
    public void listContentCodes() {

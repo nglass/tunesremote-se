@@ -286,12 +286,11 @@ public class Library {
    public static String escapeUrlString(final String input) {
       String encoded = "";
       try {
-    	  encoded = URLEncoder.encode(input, "UTF-8");
-    	  encoded = encoded.replaceAll("\\+", "%20");
-          encoded = encoded.replaceAll("%27", "%5C'");
+         encoded = URLEncoder.encode(input, "UTF-8");
+         encoded = encoded.replaceAll("\\+", "%20");
+         encoded = encoded.replaceAll("%27", "%5C'");
       } catch (UnsupportedEncodingException e) {
-    	  // TODO Auto-generated catch block
-    	  e.printStackTrace();
+         Log.w(TAG, "escapeUrlString Exception:" + e.getMessage());
       }
       return encoded;
    }

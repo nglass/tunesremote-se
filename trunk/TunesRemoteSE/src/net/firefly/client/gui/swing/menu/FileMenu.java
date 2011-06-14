@@ -21,6 +21,7 @@ package net.firefly.client.gui.swing.menu;
 
 import java.awt.Event;
 import java.awt.Frame;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -70,6 +71,7 @@ public class FileMenu extends JMenu {
 	}
 
 	private void initialize() {
+		int shortcutKey = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
 		
 		// -- create dialogs
 		//this.newHostDialog = new NewHostDialog(context, rootContainer);
@@ -87,12 +89,12 @@ public class FileMenu extends JMenu {
 		newLibraryMenuItem = new JMenuItem();
 		newLibraryMenuItem.setText(ResourceManager.getLabel("menu.file.open.library", context.getConfig().getLocale()));
 		newLibraryMenuItem.addActionListener(new NewLibraryMenuActionListener(rootContainer));
-		newLibraryMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, Event.CTRL_MASK, true));
+		newLibraryMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, shortcutKey, true));
 		
 		reloadLibraryMenuItem = new JMenuItem();
 		reloadLibraryMenuItem.setText(ResourceManager.getLabel("menu.file.reload.library", context.getConfig().getLocale()));
 		//reloadLibraryMenuItem.addActionListener(new ReloadLibraryMenuActionListener(context, rootContainer));
-		reloadLibraryMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, Event.CTRL_MASK, true));
+		reloadLibraryMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, shortcutKey, true));
 
 		addStaticPlaylistMenuItem = new JMenuItem();
 		
@@ -104,7 +106,7 @@ public class FileMenu extends JMenu {
 		final ClientFrame cf = (ClientFrame)rootContainer;
 		closeLibraryMenuItem = new JMenuItem();
 		closeLibraryMenuItem.setText(ResourceManager.getLabel("menu.file.close.library", context.getConfig().getLocale()));
-		closeLibraryMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W, Event.CTRL_MASK, true));
+		closeLibraryMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W, shortcutKey, true));
 		closeLibraryMenuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				cf.processWindowEvent(new WindowEvent(rootContainer, WindowEvent.WINDOW_CLOSING));
