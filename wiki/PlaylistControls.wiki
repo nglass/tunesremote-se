@@ -4,12 +4,12 @@ Here I will be adding information about controlling playlists with DACP.
 
 *Add Playlist*
 
-{{{GET /databases/64/edit?action=add&edit-params='dmap.itemname:New%20Playlist'&session-id=556874004 HTTP/1.1\r\n}}}
+{{{GET /databases/64/edit?action=add&edit-params='dmap.itemname:New%20Playlist'&session-id=556874004}}}
 
 *Rename Playlist*
 
-{{{GET /databases/64/containers/68612/edit?action=rename&edit-params='dmap.itemname:Renamed%20Playlist'&session-id=706060394 HTTP/1.1\r\n}}}
+{{{GET /databases/64/containers/68612/edit?action=rename&edit-params='dmap.itemname:Renamed%20Playlist'&session-id=706060394}}}
 
 *Delete Playlist*
 
-{{{GET /databases/64/edit?action=remove&edit-params='dmap.itemid:68612'&session-id=706060394 HTTP/1.1\r\n}}}
+{{{GET /databases/64/edit?action=remove&edit-params='dmap.itemid:68612'&session-id=706060394}}}
