@@ -10,6 +10,7 @@ iTunes is a trademark of Apple Inc., registered in the U.S. and other countries.
 
 ==Protocol==
 DAAP ContentCodes
+PlaylistControls
 
 
 ==Internet Resources==
