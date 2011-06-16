@@ -9,8 +9,8 @@ These pages contains information either collected from the internet or worked ou
 iTunes is a trademark of Apple Inc., registered in the U.S. and other countries. This program makes no claim to be either authorized or approved by Apple, Inc. The reverse engineering of DACP doesn't appear to circumvent any protection covered under the DMCA, and is similar to the open-source efforts of the Samba project. This project is simply interested in allowing interoperability.
 
 ==Protocol==
-DAAP ContentCodes
-PlaylistControls
+   * DAAP ContentCodes
+   * PlaylistControls
 
 
 ==Internet Resources==
