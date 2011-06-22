@@ -6,6 +6,14 @@ Here I will be adding information about controlling playlists with DACP.
 
 {{{GET /databases/64/edit?action=add&edit-params='dmap.itemname:New%20Playlist'&session-id=556874004}}}
 
+iTunes returns the id of the new playlist in a medc structure.
+
+{{{
+medc  --+
+        mstt   4      200
+        miid   4      28770
+}}}
+
 *Rename Playlist*
 
 {{{GET /databases/64/containers/68612/edit?action=rename&edit-params='dmap.itemname:Renamed%20Playlist'&session-id=706060394}}}
@@ -13,3 +21,16 @@ Here I will be adding information about controlling playlists with DACP.
 *Delete Playlist*
 
 {{{GET /databases/64/edit?action=remove&edit-params='dmap.itemid:68612'&session-id=706060394}}}
+
+*Add Single Track*
+
+{{{GET /databases/64/containers/28770/edit?action=add&edit-params='dmap.itemid:6228'&session-id=2057152154}}}
+
+once again we get a medc structure back
+{{{
+medc  --+
+        mstt   4      200
+        mlit  --+
+                mcti    4    28773
+}}}
+mcti tells us the new container-item-id of the track in the playlist.
