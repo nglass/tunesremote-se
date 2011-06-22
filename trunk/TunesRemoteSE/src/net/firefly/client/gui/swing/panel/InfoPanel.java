@@ -45,6 +45,7 @@ import javax.swing.event.ChangeListener;
 
 import net.firefly.client.controller.ResourceManager;
 import net.firefly.client.gui.context.Context;
+import net.firefly.client.gui.swing.other.MarqueeLabel;
 import net.firefly.client.gui.swing.other.PlayingSlider;
 import net.firefly.client.model.data.Song;
 import net.firefly.client.model.data.SongContainer;
@@ -62,7 +63,9 @@ public class InfoPanel extends JPanel implements PlayerStatusChangedEventListene
 
 	protected Context context;
 
-	protected JLabel playerStatusSongTitleLabel;
+	protected JLabel playerStatusLabel;
+	
+	protected JLabel playerSongTitleLabel;
 
 	protected JLabel playerSongInfoLabel;
 
@@ -79,7 +82,9 @@ public class InfoPanel extends JPanel implements PlayerStatusChangedEventListene
 	protected static ImageIcon statusPlayingIcon;
 	protected static ImageIcon statusStoppedIcon;
 
-	protected static Color borderColor = new Color(128, 128, 128);
+	public static final Color borderColor = new Color(128, 128, 128);
+	public static final Color top = new Color(0xec,0xef,0xe0);
+	public static final Color bottom = new Color(0xe9, 0xec, 0xd4);
 
 	public InfoPanel(Context context) {
 		this.context = context;
@@ -97,8 +102,9 @@ public class InfoPanel extends JPanel implements PlayerStatusChangedEventListene
 
 		setLayout(new GridBagLayout());
 		Dimension d = new Dimension(40, 20);
-		playerStatusSongTitleLabel = new JLabel(getSongTitle(null), getStatusIcon(PlayerStatus.STATUS_STOPPED), JLabel.LEFT);
-		playerSongInfoLabel = new JLabel(" ");
+		playerStatusLabel = new JLabel(getStatusIcon(PlayerStatus.STATUS_STOPPED));
+		playerSongTitleLabel = new MarqueeLabel(getSongTitle(null));
+		playerSongInfoLabel = new MarqueeLabel(" ");
 		playerSongInfoLabel.setFont(getFont().deriveFont(Font.ITALIC));
 		playerPlayedTimeLabel = new JLabel("", JLabel.RIGHT);
 		playerPlayedTimeLabel.setPreferredSize(d);
@@ -109,23 +115,27 @@ public class InfoPanel extends JPanel implements PlayerStatusChangedEventListene
 
 		playingSlider = new PlayingSlider(context);
 
-		GridBagConstraints playerPlayedTimeLabelGBC = new GridBagConstraints(0, 1, 1, 1, 0, 0, GridBagConstraints.EAST,
+		GridBagConstraints playerStatusLabelGBC = new GridBagConstraints(0, 1, 1, 1, 0, 0,
+				GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 15, -5, 5), 0, 0);
+		
+		GridBagConstraints playerPlayedTimeLabelGBC = new GridBagConstraints(1, 2, 1, 1, 0, 0, GridBagConstraints.EAST,
 				GridBagConstraints.NONE, new Insets(0, 0, 0, 2), 0, 0);
-		GridBagConstraints playerTotalTimeLabelGBC = new GridBagConstraints(2, 1, 1, 1, 0, 0, GridBagConstraints.WEST,
+		GridBagConstraints playerTotalTimeLabelGBC = new GridBagConstraints(3, 2, 1, 1, 0, 0, GridBagConstraints.WEST,
 				GridBagConstraints.NONE, new Insets(0, 2, 0, 0), 0, 0);
-		GridBagConstraints playingSliderGBC = new GridBagConstraints(1, 1, 1, 1, 200, 0, GridBagConstraints.CENTER,
+		GridBagConstraints playingSliderGBC = new GridBagConstraints(2, 2, 1, 1, 200, 0, GridBagConstraints.CENTER,
 				GridBagConstraints.HORIZONTAL, new Insets(0, 2, 0, 2), 0, 0);
+	
+		GridBagConstraints playerSongTitleLabelGBC = new GridBagConstraints(1, 0, 3, 1, 200, 0,
+				GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 2), 0, 0);
 
-		GridBagConstraints playerStatusSongTitleLabelGBC = new GridBagConstraints(1, 0, 1, 1, 0, 0,
-				GridBagConstraints.SOUTH, GridBagConstraints.NONE, new Insets(0, 15, -5, 15), 0, 0);
+		GridBagConstraints playerSongInfoLabelGBC = new GridBagConstraints(1, 1, 3, 1, 200, 0, 
+				GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 2), 0, 0);
 
-		GridBagConstraints playerSongInfoLabelGBC = new GridBagConstraints(1, 2, 1, 1, 0, 0, GridBagConstraints.CENTER,
-				GridBagConstraints.NORTH, new Insets(0, 15, 0, 15), 0, 0);
-
+		add(playerStatusLabel, playerStatusLabelGBC);
 		add(playerPlayedTimeLabel, playerPlayedTimeLabelGBC);
 		add(playerTotalTimeLabel, playerTotalTimeLabelGBC);
 		add(playingSlider, playingSliderGBC);
-		add(playerStatusSongTitleLabel, playerStatusSongTitleLabelGBC);
+		add(playerSongTitleLabel, playerSongTitleLabelGBC);
 		add(playerSongInfoLabel, playerSongInfoLabelGBC);
 
 		playerSongInfoLabel.addComponentListener(new ComponentAdapter() {
@@ -177,19 +187,22 @@ public class InfoPanel extends JPanel implements PlayerStatusChangedEventListene
 
 	public void onPlayerStatusChange(PlayerStatusChangedEvent evt) {
 		PlayerStatus newPlayerStatus = evt.getNewStatus();
-		playerStatusSongTitleLabel.setIcon(getStatusIcon(newPlayerStatus));
+		playerStatusLabel.setIcon(getStatusIcon(newPlayerStatus));
 		// playerStatusLabel.setText(getStatusString(newPlayerStatus));
-		playerStatusSongTitleLabel.setText(getSongTitle(context.getPlayer().getPlayingSong().getSong()));
-		if (getStatusString(PlayerStatus.STATUS_STOPPED).equals(playerStatusSongTitleLabel.getText())) {
-			playerStatusSongTitleLabel.setFont(getFont());
+		playerSongTitleLabel.setText(getSongTitle(context.getPlayer().getPlayingSong().getSong()));
+		if (getStatusString(PlayerStatus.STATUS_STOPPED).equals(playerSongTitleLabel.getText())) {
+			playerSongTitleLabel.setFont(getFont());
 		} else {
-			playerStatusSongTitleLabel.setFont(getFont().deriveFont(Font.BOLD));
+			playerSongTitleLabel.setFont(getFont().deriveFont(Font.BOLD));
 		}
 		playerSongInfoLabel.setText(getSongInfo(context.getPlayer().getPlayingSong().getSong()));
 		if (!newPlayerStatus.equals(PlayerStatus.STATUS_PLAYING)) {
 			playerPlayedTimeLabel.setText("");
 			playerTotalTimeLabel.setText("");
 		}
+		
+		playingSlider.setEnabled(context.getPlayer().isSupportSeeking());
+		
 		repaint();
 	}
 
@@ -266,7 +279,12 @@ public class InfoPanel extends JPanel implements PlayerStatusChangedEventListene
 		Date totalTimeDate = new Date(totalTimeInMillis);
 		Date timePlayedDate = new Date(timePlayedInMillis);
 		playerPlayedTimeLabel.setText(TimeFormatTools.format(timePlayedDate));
-		playerTotalTimeLabel.setText(TimeFormatTools.format(totalTimeDate));
+		
+		if (context.getPlayer().isSupportSeeking()) {
+			playerTotalTimeLabel.setText(TimeFormatTools.format(totalTimeDate));
+		} else {
+			playerTotalTimeLabel.setText("");
+		}
 		
 		if (!this.playingSlider.getValueIsAdjusting()) {
 			if (!sliderInhibited) {
@@ -279,8 +297,13 @@ public class InfoPanel extends JPanel implements PlayerStatusChangedEventListene
 			}
 		}
 	}
-
-	protected void customPaintBorder(Graphics g) {
+	
+	// paint the background
+	public void paintComponent(Graphics g) {
+		g.setColor(getBackground());
+		g.fillRect(0, 0, getWidth(), getHeight());
+		g.setColor(getForeground());
+		
 		JComponent c = this;
 		Graphics2D g2d = (Graphics2D) g;
 		g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -293,10 +316,23 @@ public class InfoPanel extends JPanel implements PlayerStatusChangedEventListene
 		int x = vInsets.left;
 		int y = vInsets.top;
 		int arc = 10;
-
+		
+		// Rear Border
 		g2d.setPaint(Color.WHITE);
 		g2d.drawRoundRect(x + 1, y + 1, w - 2, h - 2, arc, arc);
+		
+		// Fill
+		g2d.setPaint(top);
+		g2d.fillRoundRect(x, y, w - 2, (h - 2)/2, arc, arc);
+		g2d.fillRect(x, y + ((h-2)/2)-arc, w-2, arc);
+		
+		g2d.setPaint(bottom);
+		g2d.fillRoundRect(x, y + ((h-2)/2), w - 2, (h - 2)/2, arc, arc);
+		g2d.fillRect(x, y + ((h-2)/2), w-2, arc);
+		
+		// Front Border
 		g2d.setPaint(borderColor);
 		g2d.drawRoundRect(x, y, w - 2, h - 2, arc, arc);
+		
 	}
 }

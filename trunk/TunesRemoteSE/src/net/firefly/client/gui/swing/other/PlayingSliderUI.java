@@ -26,9 +26,10 @@ import java.awt.Rectangle;
 
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
-import javax.swing.UIManager;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.basic.BasicSliderUI;
+
+import net.firefly.client.gui.swing.panel.InfoPanel;
 
 public class PlayingSliderUI extends BasicSliderUI {
 
@@ -49,8 +50,8 @@ public class PlayingSliderUI extends BasicSliderUI {
 	public void installUI(JComponent c) {
 		thumbIcon = new ImageIcon(getClass().getResource("/net/firefly/client/resources/images/pos-slider.png"));
 		borderColor = new Color(132, 130, 132);
-		trackColor = new Color(247, 247, 247);
-		filledTrackColor = UIManager.getColor("Tree.selectionBackground");
+		trackColor = InfoPanel.bottom; //new Color(247, 247, 247);
+		filledTrackColor = new Color(128, 128, 128);
 		super.installUI(c);
 		scrollListener.setScrollByBlock(false);
 	}
@@ -58,7 +59,7 @@ public class PlayingSliderUI extends BasicSliderUI {
 	public void paintThumb(Graphics g) {
 		Rectangle knobBounds = thumbRect;
 		g.translate(knobBounds.x, knobBounds.y);
-		thumbIcon.paintIcon(slider, g, 0, 1);
+		thumbIcon.paintIcon(slider, g, 0, 0);
 		g.translate(-knobBounds.x, -knobBounds.y);
 	}
 
@@ -71,7 +72,7 @@ public class PlayingSliderUI extends BasicSliderUI {
 
 		// Draw the border
 		g.setColor(borderColor);
-		g.drawRect(0, 0, contentRect.width - 7, thumbRect.height + 1);
+		g.drawRect(0, 0, contentRect.width - 7, thumbRect.height - 1);
 
 		// Draw the fill
 		int middleOfThumb = 0;

@@ -20,6 +20,7 @@
 package net.firefly.client.gui.swing.dialog;
 
 import java.awt.Color;
+import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
@@ -35,6 +36,8 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.MissingResourceException;
 
 import javax.swing.JButton;
@@ -48,6 +51,8 @@ import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
 
 import net.firefly.client.Version;
 import net.firefly.client.controller.ResourceManager;
@@ -70,6 +75,24 @@ public class AboutDialog extends JDialog implements PropertyChangeListener {
 	protected int height;
 
 	protected JButton okButton;
+	
+	// Opens Desktop Browser and browses to address
+	class Browser implements HyperlinkListener {
+		 
+        public void hyperlinkUpdate(HyperlinkEvent e) {
+            if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+            	try {
+					Desktop.getDesktop().browse(e.getURL().toURI());
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				} catch (URISyntaxException e1) {
+					e1.printStackTrace();
+				}
+            }
+        }
+    }
+
+	protected Browser browser = new Browser();
 	
 	// -- CONSTRUCTOR(S)
 
@@ -103,6 +126,7 @@ public class AboutDialog extends JDialog implements PropertyChangeListener {
 		try {
 			String content = ResourceManager.loadHtml("contact");
 			contactPane = new JEditorPane("text/html", content);
+			contactPane.addHyperlinkListener(this.browser);
 		} catch (MissingResourceException e) {
 			e.printStackTrace();
 		} catch (FireflyClientException e) {
@@ -121,6 +145,7 @@ public class AboutDialog extends JDialog implements PropertyChangeListener {
 		try {
 			String content = ResourceManager.loadHtml("resources");
 			resourcesPane = new JEditorPane("text/html", content);
+			resourcesPane.addHyperlinkListener(this.browser);
 		} catch (MissingResourceException e) {
 			e.printStackTrace();
 		} catch (FireflyClientException e) {

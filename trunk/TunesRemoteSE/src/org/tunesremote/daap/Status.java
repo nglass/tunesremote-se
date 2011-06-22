@@ -71,6 +71,7 @@ public class Status {
    protected boolean visualizer = false, fullscreen = false;
    protected final AtomicBoolean destroyThread = new AtomicBoolean(false);
    private long rating = -1;
+   private long databaseId = 0;
    private long playlistId = 0;
    private long containerItemId = 0;
    private long trackId = 0;
@@ -234,6 +235,13 @@ public class Status {
       resp = resp.getNested("cmst");
       this.revision = resp.getNumberLong("cmsr");
       
+      // store now playing info
+      long databaseId = this.databaseId;
+      long playlistId = this.playlistId;
+      long containerItemId = this.containerItemId;
+      long trackId = this.trackId;
+      
+      // update now playing info
       byte[] canp = resp.getRaw("canp");
       if (canp != null)
     	  extractNowPlaying(canp);
@@ -270,7 +278,9 @@ public class Status {
       this.albumId = resp.getNumberString("asai");
 
       // update if track changed
-      if (!trackName.equals(this.trackName) || !trackArtist.equals(this.trackArtist) || !trackAlbum.equals(this.trackAlbum)) {
+      if (trackId != this.trackId || containerItemId != this.containerItemId ||
+    		  playlistId != this.playlistId || databaseId != this.databaseId) {
+    	  
          updateType = UPDATE_TRACK;
          this.trackName = trackName;
          this.trackArtist = trackArtist;
@@ -322,26 +332,26 @@ public class Status {
    }
 
    private void extractNowPlaying(byte[] bs) {
-
+	  // This is a PITA in Java....
+	  databaseId = 0;
+	  databaseId = (bs[0] & 0xff) << 24;
+	  databaseId |= (bs[1] & 0xff) << 16;
+	  databaseId |= (bs[2] & 0xff) << 8;
+	  databaseId |= bs[3] & 0xff;
+	   
       playlistId = 0;
-
-      // This is a PITA in Java....
       playlistId = (bs[4] & 0xff) << 24;
       playlistId |= (bs[5] & 0xff) << 16;
       playlistId |= (bs[6] & 0xff) << 8;
       playlistId |= bs[7] & 0xff;
 	   
       containerItemId = 0;
-
-      // This is a PITA in Java....
       containerItemId = (bs[8] & 0xff) << 24;
       containerItemId |= (bs[9] & 0xff) << 16;
       containerItemId |= (bs[10] & 0xff) << 8;
       containerItemId |= bs[11] & 0xff;
 	   
 	  trackId = 0;
-
-      // This is a PITA in Java....
       trackId = (bs[12] & 0xff) << 24;
       trackId |= (bs[13] & 0xff) << 16;
       trackId |= (bs[14] & 0xff) << 8;
@@ -349,6 +359,7 @@ public class Status {
 
    }
 
+   // fetch rating of current playing item
    public void fetchRating() {
       // spawn thread to fetch rating
       ThreadExecutor.runTask(new Runnable() {
@@ -356,7 +367,7 @@ public class Status {
             try {
                Response resp = RequestHelper.requestParsed(
                         String.format("%s/databases/%d/items?session-id=%s&meta=daap.songuserrating&type=music&query='dmap.itemid:%d'",
-                                 session.getRequestBase(), session.databaseId, session.sessionId, trackId), false);
+                                 session.getRequestBase(), databaseId, session.sessionId, trackId), false);
 
                if (update != null) {
                   // 2 different responses possible!
@@ -587,6 +598,10 @@ public class Status {
 	  return this.containerItemId;
    }
 
+   public long getDatabaseId() {
+	  return this.databaseId;
+   }
+   
    public long getPlaylistId() {
 	  return this.playlistId;
    }

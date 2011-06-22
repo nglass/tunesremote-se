@@ -85,19 +85,19 @@ public class ControlsPanel extends JPanel {
 		// -- organize
 
 		// -- left panel
-		layout.putConstraint(SpringLayout.SOUTH, left, -10, SpringLayout.SOUTH, this);
-		layout.putConstraint(SpringLayout.NORTH, left, 0, SpringLayout.NORTH, this);
+		layout.putConstraint(SpringLayout.SOUTH, left, -5, SpringLayout.SOUTH, this);
+		layout.putConstraint(SpringLayout.NORTH, left, 5, SpringLayout.NORTH, this);
 		layout.putConstraint(SpringLayout.WEST, left, 0, SpringLayout.WEST, this);
 
 		// -- search field
-		layout.putConstraint(SpringLayout.SOUTH, searchField, -10, SpringLayout.SOUTH, this);
-		layout.putConstraint(SpringLayout.NORTH, searchField, 0, SpringLayout.NORTH, this);
+		layout.putConstraint(SpringLayout.SOUTH, searchField, -5, SpringLayout.SOUTH, this);
+		layout.putConstraint(SpringLayout.NORTH, searchField, 5, SpringLayout.NORTH, this);
 		layout.putConstraint(SpringLayout.EAST, searchField, 0, SpringLayout.EAST, this);
 
 		// -- info panel
 		int sideMargin = 30;
-		layout.putConstraint(SpringLayout.SOUTH, infoPanel, -10, SpringLayout.SOUTH, this);
-		layout.putConstraint(SpringLayout.NORTH, infoPanel, 0, SpringLayout.NORTH, this);
+		layout.putConstraint(SpringLayout.SOUTH, infoPanel, -5, SpringLayout.SOUTH, this);
+		layout.putConstraint(SpringLayout.NORTH, infoPanel, 5, SpringLayout.NORTH, this);
 		layout.putConstraint(SpringLayout.EAST, infoPanel, -sideMargin, SpringLayout.WEST, searchField);
 		layout.putConstraint(SpringLayout.WEST, infoPanel, sideMargin, SpringLayout.EAST, left);
 

@@ -89,14 +89,7 @@ public class ViewMenu extends JMenu implements PlayerStatusChangedEventListener 
 	@Override
 	public void onPlayerStatusChange(PlayerStatusChangedEvent evt) {
 		MediaPlayer player = context.getPlayer();
-		
-		if (player.isVisualizerOn()) {
-			visualizerMenuItem.setSelected(true);
-			fullscreenMenuItem.setEnabled(true);
-			fullscreenMenuItem.setSelected(player.isFullscreen());
-		} else {
-			visualizerMenuItem.setSelected(false);
-			fullscreenMenuItem.setEnabled(false);	
-		}
+		visualizerMenuItem.setSelected(player.isVisualizerOn());
+		fullscreenMenuItem.setSelected(player.isFullscreen());
 	}
 }
