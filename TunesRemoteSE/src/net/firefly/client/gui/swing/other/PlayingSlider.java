@@ -25,11 +25,10 @@ import java.awt.event.MouseEvent;
 import javax.swing.JSlider;
 
 import net.firefly.client.gui.context.Context;
-//import net.firefly.client.gui.context.events.ContextResetEvent;
-//import net.firefly.client.gui.context.listeners.ContextResetEventListener;
+import net.firefly.client.gui.context.events.ContextResetEvent;
+import net.firefly.client.gui.context.listeners.ContextResetEventListener;
 
-// TODO: context reset handler
-public class PlayingSlider extends JSlider /*implements ContextResetEventListener*/ {
+public class PlayingSlider extends JSlider implements ContextResetEventListener {
 
 	private static final long serialVersionUID = 2321434758978390770L;
 
@@ -64,7 +63,7 @@ public class PlayingSlider extends JSlider /*implements ContextResetEventListene
 		
 		setBackground(null);
 		
-//		context.addContextResetEventListener(this);
+		context.addContextResetEventListener(this);
 	}
 
 	public void updateUI() {
@@ -73,7 +72,7 @@ public class PlayingSlider extends JSlider /*implements ContextResetEventListene
 		}
 	}
 
-//	public void onContextReset(ContextResetEvent evt) {
-//		setValue(0);
-//	}
+	public void onContextReset(ContextResetEvent evt) {
+		setValue(0);
+	}
 }

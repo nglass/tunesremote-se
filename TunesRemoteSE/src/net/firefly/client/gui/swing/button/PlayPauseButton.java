@@ -45,6 +45,10 @@ public class PlayPauseButton extends JLabel implements PlayerStatusChangedEventL
 
 	protected ImageIcon pressedPauseIcon;
 
+	protected ImageIcon stopIcon;
+
+	protected ImageIcon pressedStopIcon;
+	
 	public PlayPauseButton(Context context) {
 		this.context = context;
 		initialize();
@@ -56,7 +60,10 @@ public class PlayPauseButton extends JLabel implements PlayerStatusChangedEventL
 		this.pressedPlayIcon = new ImageIcon(getClass().getResource("/net/firefly/client/resources/images/play-on.png"));
 		this.pauseIcon = new ImageIcon(getClass().getResource("/net/firefly/client/resources/images/pause.png"));
 		this.pressedPauseIcon = new ImageIcon(getClass().getResource("/net/firefly/client/resources/images/pause-on.png"));
+		this.stopIcon = new ImageIcon(getClass().getResource("/net/firefly/client/resources/images/stop.png"));
+		this.pressedStopIcon = new ImageIcon(getClass().getResource("/net/firefly/client/resources/images/stop-on.png"));
 
+		
 		setToolTipText(ResourceManager.getLabel("player.control.play.pause", context.getConfig().getLocale()));
 
 		setOpaque(false);
@@ -80,16 +87,20 @@ public class PlayPauseButton extends JLabel implements PlayerStatusChangedEventL
 			public void mousePressed(java.awt.event.MouseEvent e) {
 				if (getIcon().toString().equals(playIcon.toString())) {
 					setIcon(pressedPlayIcon);
-				} else {
+				} else if (getIcon().toString().equals(pauseIcon.toString())) {
 					setIcon(pressedPauseIcon);
+				} else {
+					setIcon(pressedStopIcon);
 				}
 			}
 
 			public void mouseReleased(MouseEvent arg0) {
 				if (getIcon().toString().equals(pressedPlayIcon.toString())) {
 					setIcon(playIcon);
-				} else {
+				} else if (getIcon().toString().equals(pressedPauseIcon.toString())) {
 					setIcon(pauseIcon);
+				} else {
+					setIcon(stopIcon);
 				}
 			}
 		});
@@ -101,8 +112,10 @@ public class PlayPauseButton extends JLabel implements PlayerStatusChangedEventL
 		PlayerStatus newPlayerStatus = evt.getNewStatus();
 		if (newPlayerStatus.equals(PlayerStatus.STATUS_STOPPED)) {
 			setIcon(this.playIcon);
-		} else {
+		} else if (context.getPlayer().isSupportSeeking()) {
 			setIcon(this.pauseIcon);
+		} else {
+			setIcon(this.stopIcon);
 		}
 	}
 }
