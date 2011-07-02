@@ -1,3 +1,6 @@
-jmdns               - 3.2.2
-sqlite-jdbc         - 3.7.2
-sqlite-jdbc-javadoc - 3.7.2
+jmdns                      - 3.2.2
+sqlite-jdbc                - 3.7.2
+sqlite-jdbc-javadoc        - 3.7.2
+org-netbeans-swing-outline - 7.0
+org-openide-awt            - 7.0
+org-openide-util           - 7.0

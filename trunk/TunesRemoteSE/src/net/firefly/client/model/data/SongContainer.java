@@ -1,7 +1,27 @@
+/*
+ * This file is part of TunesRemote SE.
+ *
+ * TunesRemote SE is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * any later version.
+ *
+ * TunesRemote SE is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with TunesRemote SE; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ * 
+ * Copyright 2011 Nick Glass
+ */
 package net.firefly.client.model.data;
 
 public class SongContainer implements Cloneable {
 
+   protected long playlistId = 0;
 	protected long containerId = 0;
 	protected Song song = null;
 	
@@ -11,6 +31,14 @@ public class SongContainer implements Cloneable {
 
 	public void setContainerId(long containerId) {
 		this.containerId = containerId;
+	}
+	
+	public long getPlaylistId() {
+	   return playlistId;
+	}
+	
+	public void setPlaylistId(long playlistId) {
+	   this.playlistId = playlistId;
 	}
 
 	public Song getSong() {
@@ -37,6 +65,7 @@ public class SongContainer implements Cloneable {
 		}
 		
 		if (this.containerId == that.containerId &&
+		    this.playlistId == that.playlistId &&
 		    (this.song == that.song || 
 			 (this.song != null && that.song != null &&
 			  this.song.getDatabaseItemId() == that.song.getDatabaseItemId()))) {
@@ -46,12 +75,14 @@ public class SongContainer implements Cloneable {
 	}
 	
 	public String toString() {
-		StringBuffer sb = new StringBuffer();
-		sb.append("------------------------ song-container---------------------\n");
-		sb.append("song-container-id     : ").append(this.containerId).append("\n");
-		sb.append("song                  :\n").append(this.song.toString());
-		sb.append("-------------------------------------------------------\n");
-		return sb.toString();
+	   return this.song.getTitle();
+	   
+		//StringBuffer sb = new StringBuffer();
+		//sb.append("------------------------ song-container---------------------\n");
+		//sb.append("song-container-id     : ").append(this.containerId).append("\n");
+		//sb.append("song                  :\n").append(this.song.toString());
+		//sb.append("-------------------------------------------------------\n");
+		//return sb.toString();
 	}
 	
 	public Object clone(){

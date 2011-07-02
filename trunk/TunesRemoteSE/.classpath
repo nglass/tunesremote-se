@@ -12,5 +12,8 @@
 			<attribute name="javadoc_location" value="jar:platform:/resource/JTunesControl/libs/jmdns-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="libs/org-openide-awt.jar"/>
+	<classpathentry kind="lib" path="libs/org-netbeans-swing-outline.jar"/>
+	<classpathentry kind="lib" path="libs/org-openide-util.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

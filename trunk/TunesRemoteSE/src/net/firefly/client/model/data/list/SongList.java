@@ -110,6 +110,10 @@ public class SongList implements Cloneable {
 		}
 	}
 
+   public int indexOf(SongContainer song) {
+      return this.songs.indexOf(song);
+   }
+	
 	public SongContainer selectedSong(Context context) {
 		if (context.getPlayer() != null) {
 			if (PlayerMode.MODE_SHUFFLE == context.getPlayer().getPlayerMode() && index == 0) {

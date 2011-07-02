@@ -76,6 +76,13 @@ public class PlaylistTreeModel extends DefaultTreeModel implements PlaylistListC
 			DefaultMutableTreeNode music = new DefaultMutableTreeNode(c.getLibraryInfo().getLibraryName());
 			ROOT.add(library);
 			library.add(music);
+			
+			if (c.getSession().supportsRadio()) {
+			   c.getRadiolists().setName(c.getSession().getRadioDatabaseName());
+			   DefaultMutableTreeNode radio = new DefaultMutableTreeNode(c.getRadiolists());
+			   library.add(radio);
+			}
+			
 			DefaultMutableTreeNode aPlaylist = null;
 			PlaylistList pll = c.getPlaylists();
 			if (pll != null && pll.size() > 0) {

@@ -17,14 +17,39 @@
  * 
  * Copyright 2011 Nick Glass
  */
-package org.tunesremote_se;
+package net.firefly.client.model.playlist.list;
 
-import org.libtunesremote_se.LibraryDetails;
-import org.libtunesremote_se.TunesRemoteSessionCallback;
-import org.tunesremote.daap.Session;
+import net.firefly.client.model.playlist.PlaylistStatus;
 
-public class NewSessionCallback implements TunesRemoteSessionCallback {
-	public void newSession(LibraryDetails l, Session s) {
-		new TunesRemoteSession(l,s);
-	}
+public class RadiolistList extends PlaylistList {
+   
+   protected String name;
+   
+   protected PlaylistStatus status;
+   
+   public RadiolistList() {
+      super();
+      this.status = PlaylistStatus.NOT_LOADED;
+   }
+   
+   public PlaylistStatus getStatus() {
+      return status;
+   }
+   
+   public void setStatus(PlaylistStatus status) {
+      this.status = status;
+   }
+   
+   public void setName(String name) {
+      this.name = name;
+   }
+   
+   public String getName() {
+      return this.name;
+   }
+   
+   public String toString() {
+      return name;
+   }
+   
 }

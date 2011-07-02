@@ -21,6 +21,8 @@ package net.firefly.client.gui.context;
 
 import javax.swing.event.EventListenerList;
 
+import org.tunesremote.daap.Session;
+
 import net.firefly.client.controller.request.IRequestManager;
 import net.firefly.client.controller.request.PlaylistRequestManager;
 import net.firefly.client.gui.context.events.ContextResetEvent;
@@ -42,6 +44,7 @@ import net.firefly.client.gui.context.listeners.FilteredSongListChangedEventList
 import net.firefly.client.gui.context.listeners.GlobalSongListChangedEventListener;
 import net.firefly.client.gui.context.listeners.InterfaceLockEventListener;
 import net.firefly.client.gui.context.listeners.PlaylistListChangedEventListener;
+import net.firefly.client.gui.context.listeners.RadiolistListChangedEventListener;
 import net.firefly.client.gui.context.listeners.SavedLibraryListChangedEventListener;
 import net.firefly.client.gui.context.listeners.SelectedPlaylistChangedEventListener;
 import net.firefly.client.gui.context.listeners.StaticPlaylistCreationEventListener;
@@ -58,6 +61,7 @@ import net.firefly.client.model.data.list.SongList;
 import net.firefly.client.model.library.LibraryInfo;
 import net.firefly.client.model.playlist.IPlaylist;
 import net.firefly.client.model.playlist.list.PlaylistList;
+import net.firefly.client.model.playlist.list.RadiolistList;
 import net.firefly.client.player.MediaPlayer;
 
 public class Context {
@@ -65,8 +69,12 @@ public class Context {
 	protected Configuration config;
 
 	protected LibraryInfo libraryInfo;
+	
+	protected Session session;
 
 	protected PlaylistList playlists;
+	
+	protected RadiolistList radiolists;
 
 	protected IPlaylist selectedPlaylist;
 
@@ -129,6 +137,7 @@ public class Context {
 	public Context(Configuration config) {
 		this.config = config;
 		this.playlists = PlaylistList.EMPTY_PLAYLIST_LIST;
+		this.radiolists = new RadiolistList();
 		this.selectedPlaylist = null;
 		this.globalSongList = SongList.EMPTY_SONG_LIST;
 		this.globalGenreList = new GenreList(config.getLocale());
@@ -151,6 +160,7 @@ public class Context {
 	public void reset() {
 		setLibraryInfo(null);
 		setPlaylists(PlaylistList.EMPTY_PLAYLIST_LIST);
+		this.radiolists = new RadiolistList();
 		setGlobalGenreList(new GenreList(getConfig().getLocale()));
 		setGlobalArtistList(new ArtistList(getConfig().getLocale()));
 		setGlobalAlbumList(new AlbumList(getConfig().getLocale()));
@@ -354,7 +364,15 @@ public class Context {
 		this.libraryInfo = libraryInfo;
 	}
 
-	public String getSearchmask() {
+	public Session getSession() {
+      return session;
+   }
+
+   public void setSession(Session session) {
+      this.session = session;
+   }
+
+   public String getSearchmask() {
 		return searchmask;
 	}
 
@@ -364,6 +382,10 @@ public class Context {
 
 	public PlaylistList getPlaylists() {
 		return playlists;
+	}
+	
+	public RadiolistList getRadiolists() {
+	   return radiolists;
 	}
 
 	public void setPlaylists(PlaylistList playlists) {
@@ -531,6 +553,23 @@ public class Context {
 		}
 	}
 
+   public void addRadiolistListChangedEventListener(RadiolistListChangedEventListener listener) {
+      listenerList.add(RadiolistListChangedEventListener.class, listener);
+   }
+
+   public void removeRadiolistListChangedEventListener(RadiolistListChangedEventListener listener) {
+      listenerList.remove(RadiolistListChangedEventListener.class, listener);
+   }
+
+   public void fireRadiolistListChange(SelectedPlaylistChangedEvent e) {
+      Object[] listeners = listenerList.getListenerList();
+      for (int i = 0; i < listeners.length; i += 2) {
+         if (listeners[i] == RadiolistListChangedEventListener.class) {
+            ((RadiolistListChangedEventListener) listeners[i + 1]).onRadiolistListChange(e);
+         }
+      }
+   }
+	
 	public void addSelectedPlaylistChangedEventListener(SelectedPlaylistChangedEventListener listener) {
 		listenerList.add(SelectedPlaylistChangedEventListener.class, listener);
 	}

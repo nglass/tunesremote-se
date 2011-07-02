@@ -68,7 +68,7 @@ public class Status {
    public Bitmap coverCache = null;
    public String albumId = "";
    protected int repeatStatus = REPEAT_OFF, shuffleStatus = SHUFFLE_OFF, playStatus = STATE_PAUSED;
-   protected boolean visualizer = false, fullscreen = false;
+   protected boolean visualizer = false, fullscreen = false, geniusSelectable = false;
    protected final AtomicBoolean destroyThread = new AtomicBoolean(false);
    private long rating = -1;
    private long databaseId = 0;
@@ -251,13 +251,15 @@ public class Status {
       int repeatStatus = (int) resp.getNumberLong("carp");
       boolean visualizer = (resp.getNumberLong("cavs") > 0);
       boolean fullscreen = (resp.getNumberLong("cafs") > 0);
+      boolean geniusSelectable = resp.containsKey("ceGS");
 
       // update state if changed
       if (playStatus != this.playStatus || 
           shuffleStatus != this.shuffleStatus || 
           repeatStatus != this.repeatStatus ||
           visualizer != this.visualizer ||
-          fullscreen != this.fullscreen) {
+          fullscreen != this.fullscreen ||
+          geniusSelectable != this.geniusSelectable) {
     	  
          updateType = UPDATE_STATE;
          this.playStatus = playStatus;
@@ -265,6 +267,7 @@ public class Status {
          this.repeatStatus = repeatStatus;
          this.visualizer = visualizer;
          this.fullscreen = fullscreen;
+         this.geniusSelectable = geniusSelectable;
 
          Log.d(TAG, "about to interrupt #1");
          this.progress.interrupt();
@@ -332,31 +335,30 @@ public class Status {
    }
 
    private void extractNowPlaying(byte[] bs) {
-	  // This is a PITA in Java....
-	  databaseId = 0;
-	  databaseId = (bs[0] & 0xff) << 24;
-	  databaseId |= (bs[1] & 0xff) << 16;
-	  databaseId |= (bs[2] & 0xff) << 8;
-	  databaseId |= bs[3] & 0xff;
-	   
+      // This is a PITA in Java....
+      databaseId = 0;
+      databaseId = (bs[0] & 0xff) << 24;
+      databaseId |= (bs[1] & 0xff) << 16;
+      databaseId |= (bs[2] & 0xff) << 8;
+      databaseId |= bs[3] & 0xff;
+
       playlistId = 0;
       playlistId = (bs[4] & 0xff) << 24;
       playlistId |= (bs[5] & 0xff) << 16;
       playlistId |= (bs[6] & 0xff) << 8;
       playlistId |= bs[7] & 0xff;
-	   
+
       containerItemId = 0;
       containerItemId = (bs[8] & 0xff) << 24;
       containerItemId |= (bs[9] & 0xff) << 16;
       containerItemId |= (bs[10] & 0xff) << 8;
       containerItemId |= bs[11] & 0xff;
-	   
-	  trackId = 0;
+
+      trackId = 0;
       trackId = (bs[12] & 0xff) << 24;
       trackId |= (bs[13] & 0xff) << 16;
       trackId |= (bs[14] & 0xff) << 8;
       trackId |= bs[15] & 0xff;
-
    }
 
    // fetch rating of current playing item
@@ -615,14 +617,18 @@ public class Status {
    }
 
    public long getTrackId() {
-      return trackId;
+      return this.trackId;
    }
    
    public boolean isVisualizerOn() {
-	  return visualizer;
+	   return this.visualizer;
    }
    
-   public boolean isVisualizerFullscreen() {
-	  return fullscreen;
+   public boolean isFullscreen() {
+	   return this.fullscreen;
+   }
+   
+   public boolean isGeniusSelectable() {
+      return this.geniusSelectable;
    }
 }

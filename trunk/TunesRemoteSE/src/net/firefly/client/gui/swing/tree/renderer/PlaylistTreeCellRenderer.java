@@ -43,6 +43,7 @@ import net.firefly.client.model.playlist.M3UPlaylist;
 import net.firefly.client.model.playlist.PlaylistStatus;
 import net.firefly.client.model.playlist.SmartPlaylist;
 import net.firefly.client.model.playlist.StaticPlaylist;
+import net.firefly.client.model.playlist.list.RadiolistList;
 
 public class PlaylistTreeCellRenderer extends DefaultTreeCellRenderer {
 
@@ -145,6 +146,13 @@ public class PlaylistTreeCellRenderer extends DefaultTreeCellRenderer {
 					} else {
 						setFont(NOT_LOADED_PLAYLIST_FONT);
 					}
+				} else if (o instanceof RadiolistList) {
+               PlaylistStatus ps = ((RadiolistList) o).getStatus();
+               if (ps == PlaylistStatus.LOADED) {
+                  setFont(PLAYLIST_FONT);
+               } else {
+                  setFont(NOT_LOADED_PLAYLIST_FONT);
+               }
 				} else {
 					setFont(PLAYLIST_FONT);
 				}
@@ -174,7 +182,7 @@ public class PlaylistTreeCellRenderer extends DefaultTreeCellRenderer {
 		if (row == 1) {
 			return LIBRARY_ICON;
 
-		} else if (row > 2) {
+		} else if (row > 1) {
 			if (o instanceof StaticPlaylist) {
 				if (((StaticPlaylist) o).getStatus() == PlaylistStatus.LOADING) {
 					return LOADING_PLAYLIST_ICON;
@@ -193,6 +201,12 @@ public class PlaylistTreeCellRenderer extends DefaultTreeCellRenderer {
 				} else {
 					return SMART_PLAYLIST_ICON;
 				}
+			} else if (o instanceof RadiolistList) {
+            if (((RadiolistList) o).getStatus() == PlaylistStatus.LOADING) {
+               return LOADING_PLAYLIST_ICON;
+            } else {
+               return STATIC_PLAYLIST_ICON;
+            }
 			}
 		}
 		return super.getLeafIcon();

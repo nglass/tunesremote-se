@@ -1,6 +1,8 @@
 package org.tunesremote_se;
 
+import javax.swing.ImageIcon;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 
 import org.libtunesremote_se.LibrarySelector;
 import org.libtunesremote_se.TunesService;
@@ -34,7 +36,13 @@ public class TunesRemoteSE {
 
 	public static void main (String [] args) throws ClassNotFoundException {
 		System.out.println("Launching " + Version.getLongApplicationName() + " ...");
+
+	   UIManager.put("Tree.expandedIcon", 
+	         new ImageIcon(TunesRemoteSE.class.getResource("/net/firefly/client/resources/images/tree-down.png")));
 		
+	   UIManager.put("Tree.collapsedIcon", 
+            new ImageIcon(TunesRemoteSE.class.getResource("/net/firefly/client/resources/images/tree-right.png")));
+	   
 		if (MAC_OS_X) {
 			// ensure property is set to place menus at top of screen
 			System.setProperty("com.apple.mrj.application.apple.menu.about.name", "TunesRemote SE");

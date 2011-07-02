@@ -39,6 +39,8 @@ public class PlayingSliderUI extends BasicSliderUI {
 
 	protected static ImageIcon thumbIcon;
 
+	protected boolean supportSeeking = true;
+	
 	public static ComponentUI createUI(JComponent c) {
 		return new PlayingSliderUI();
 	}
@@ -50,17 +52,19 @@ public class PlayingSliderUI extends BasicSliderUI {
 	public void installUI(JComponent c) {
 		thumbIcon = new ImageIcon(getClass().getResource("/net/firefly/client/resources/images/pos-slider.png"));
 		borderColor = new Color(132, 130, 132);
-		trackColor = InfoPanel.bottom; //new Color(247, 247, 247);
+		trackColor = InfoPanel.bottom;
 		filledTrackColor = new Color(128, 128, 128);
 		super.installUI(c);
 		scrollListener.setScrollByBlock(false);
 	}
 
 	public void paintThumb(Graphics g) {
-		Rectangle knobBounds = thumbRect;
-		g.translate(knobBounds.x, knobBounds.y);
-		thumbIcon.paintIcon(slider, g, 0, 0);
-		g.translate(-knobBounds.x, -knobBounds.y);
+	   if (supportSeeking) {
+	      Rectangle knobBounds = thumbRect;
+	      g.translate(knobBounds.x, knobBounds.y);
+	      thumbIcon.paintIcon(slider, g, 0, 0);
+	      g.translate(-knobBounds.x, -knobBounds.y);
+	   }
 	}
 
 	public void paintTrack(Graphics g) {
@@ -75,13 +79,15 @@ public class PlayingSliderUI extends BasicSliderUI {
 		g.drawRect(0, 0, contentRect.width - 7, thumbRect.height - 1);
 
 		// Draw the fill
-		int middleOfThumb = 0;
-		middleOfThumb = thumbRect.x + 2;
-		middleOfThumb -= trackRect.x; // To compensate for the translate()
+		if (supportSeeking) {
+		   int middleOfThumb = 0;
+		   middleOfThumb = thumbRect.x + 2;
+		   middleOfThumb -= trackRect.x; // To compensate for the translate()
 
-		g.setColor(filledTrackColor);
-		for (int i = 1; i < middleOfThumb / 2; i++) {
-			g.drawLine((i * 2) , 2, (i * 2) , thumbRect.height - 1);
+		   g.setColor(filledTrackColor);
+		   for (int i = 1; i < middleOfThumb / 2; i++) {
+		      g.drawLine((i * 2) , 2, (i * 2) , thumbRect.height - 1);
+		   }
 		}
 
 		g.translate(-trackRect.x, -trackRect.y);
@@ -124,6 +130,10 @@ public class PlayingSliderUI extends BasicSliderUI {
 	 */
 	protected int getThumbOverhang() {
 		return (int) (getThumbSize().getHeight() - getTrackWidth()) / 2;
+	}
+	
+	public void setSupportSeeking(boolean supportSeeking) {
+	   this.supportSeeking = supportSeeking;
 	}
 
 }

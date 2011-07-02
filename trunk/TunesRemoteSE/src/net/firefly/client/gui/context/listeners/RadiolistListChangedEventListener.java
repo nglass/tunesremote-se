@@ -17,14 +17,14 @@
  * 
  * Copyright 2011 Nick Glass
  */
-package org.tunesremote_se;
+package net.firefly.client.gui.context.listeners;
 
-import org.libtunesremote_se.LibraryDetails;
-import org.libtunesremote_se.TunesRemoteSessionCallback;
-import org.tunesremote.daap.Session;
+import java.util.EventListener;
 
-public class NewSessionCallback implements TunesRemoteSessionCallback {
-	public void newSession(LibraryDetails l, Session s) {
-		new TunesRemoteSession(l,s);
-	}
+import net.firefly.client.gui.context.events.SelectedPlaylistChangedEvent;
+
+public interface RadiolistListChangedEventListener extends EventListener {
+
+   public void onRadiolistListChange(SelectedPlaylistChangedEvent evt);
+
 }
