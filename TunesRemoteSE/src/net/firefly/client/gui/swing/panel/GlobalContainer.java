@@ -40,6 +40,7 @@ import net.firefly.client.gui.swing.table.AlbumTable;
 import net.firefly.client.gui.swing.table.ArtistTable;
 import net.firefly.client.gui.swing.table.GenreTable;
 import net.firefly.client.gui.swing.table.SongTable;
+import net.firefly.client.gui.swing.tree.RadioOutline;
 
 public class GlobalContainer extends JPanel {
 	private static final long serialVersionUID = -82889511099152496L;
@@ -49,7 +50,11 @@ public class GlobalContainer extends JPanel {
 	protected Frame rootContainer;
 
 	protected JSplitPane globalSplitPane;
-
+	
+	protected JSplitPane musicSplitPane;
+	
+	protected JScrollPane radioScrollPane;
+	
 	protected JPanel genreArtistAlbumPane;
 
 	protected JScrollPane genreScrollPane;
@@ -75,7 +80,7 @@ public class GlobalContainer extends JPanel {
 		globalSplitPane.setDividerSize(2);
 		globalSplitPane.setBorder(new EmptyBorder(0, 0, 0, 0));
 
-		JSplitPane musicSplitPane = new JSplitPane();
+		musicSplitPane = new JSplitPane();
 		musicSplitPane.setOrientation(JSplitPane.VERTICAL_SPLIT);
 		musicSplitPane.setDividerLocation(250);
 		// musicSplitPane.setOneTouchExpandable(true);
@@ -146,6 +151,11 @@ public class GlobalContainer extends JPanel {
 
 		this.add(generalSplitPane);
 
+	   radioScrollPane = new JScrollPane();
+	   radioScrollPane.setViewportView(new RadioOutline(context));
+	   radioScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+	   radioScrollPane.setBorder(new EmptyBorder(0, 0, 0, 0));
+		
 	}
 
 
@@ -175,6 +185,18 @@ public class GlobalContainer extends JPanel {
 		}
 	}
 
+	public void showMusic() {
+	   int div = globalSplitPane.getDividerLocation();
+	   globalSplitPane.setRightComponent(musicSplitPane);
+	   globalSplitPane.setDividerLocation(div);
+	}
+	
+	public void showRadio() {
+	   int div = globalSplitPane.getDividerLocation();
+	   globalSplitPane.setRightComponent(radioScrollPane);
+	   globalSplitPane.setDividerLocation(div);
+	}
+	
 	private Border rootPaneBorder = new MatteBorder(0, 1, 1, 1, new Color(128, 128, 128));
 
 }

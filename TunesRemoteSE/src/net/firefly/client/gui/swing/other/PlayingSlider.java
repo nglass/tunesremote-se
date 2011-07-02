@@ -34,6 +34,8 @@ public class PlayingSlider extends JSlider implements ContextResetEventListener 
 
 	protected Context context;
 
+	protected boolean supportSeeking = true;
+	
 	protected PlayingSliderUI ui;
 
 	public PlayingSlider(Context context) {
@@ -50,6 +52,7 @@ public class PlayingSlider extends JSlider implements ContextResetEventListener 
 		setPaintLabels(false);
 		setFocusable(false);
 		setPaintTrack(true);
+		setOpaque(false);
 
 		ui = new PlayingSliderUI();
 		setUI(ui);
@@ -70,6 +73,12 @@ public class PlayingSlider extends JSlider implements ContextResetEventListener 
 		if (getUI() != null) {
 			getUI().installUI(this);
 		}
+	}
+	
+	public void setSupportSeeking(boolean supportSeeking) {
+	   this.supportSeeking = supportSeeking;
+	   ui.setSupportSeeking(supportSeeking);
+	   this.repaint();
 	}
 
 	public void onContextReset(ContextResetEvent evt) {

@@ -203,11 +203,11 @@ public class Library {
       }
    }
 
-   public void readPlaylists(PlaylistListener adapter) {
+   public void readPlaylists(PlaylistListener listener) {
       for (Playlist ply : this.session.playlists) {
-         adapter.foundPlaylist(ply);
+         listener.foundPlaylist(ply);
       }
-      adapter.searchDone();
+      listener.searchDone();
    }
 
    public void readPlaylist(String playlistid, TagListener listener) {
@@ -227,16 +227,48 @@ public class Library {
       }
    }
 
+   public void readRadioPlaylists(PlaylistListener listener) {
+      if (this.session.supportsRadio()) {
+         for (Playlist ply : this.session.getRadioGenres()) {
+            listener.foundPlaylist(ply);
+         }
+      }
+      listener.searchDone();
+   }
+
+   public void readRadioPlaylist(String playlistid, TagListener listener) {
+      Log.d(TAG, " in readRadioPlaylist");
+      try {
+         // GET /databases/24691/containers/24699/items?
+         //    meta=dmap.itemname,dmap.itemid,daap.songartist,daap.songalbum,
+         //         dmap.containeritemid,com.apple.itunes.has-video,daap.songdisabled,
+         //         com.apple.itunes.mediakind,daap.songdescription
+         //    &type=music&session-id=345827905
+         byte[] raw = RequestHelper.request(String.format(
+               "%s/databases/%d/containers/%s/items?" +
+               "meta=dmap.itemname,dmap.itemid,daap.songartist,daap.songalbum," +
+               "dmap.containeritemid,com.apple.itunes.has-video,daap.songdisabled," +
+               "com.apple.itunes.mediakind,daap.songdescription" +
+               "&type=music&session-id=%s",
+               session.getRequestBase(), session.radioDatabaseId, playlistid, session.sessionId), false);
+
+         // parse list, passing off events in the process
+         ResponseParser.performSearch(raw, listener, MLIT_PATTERN, false);
+
+      } catch (Exception e) {
+         Log.w(TAG, "readRadioPlaylist Exception:" + e.getMessage());
+      }
+   }
+   
    public boolean readNowPlaying(String albumid, TagListener listener) {
 
       // Try Wilco (Alex W)'s nowplaying extension /ctrl-int/1/items
-
       try {
-         String temp = String
+         String query = String
                   .format("%s/ctrl-int/1/items?session-id=%s&meta=dmap.itemname,dmap.itemid,daap.songartist,daap.songalbum,daap.songalbum,daap.songtime,daap.songuserrating,daap.songtracknumber&type=music&sort=album&query='daap.songalbumid:%s'",
                            session.getRequestBase(), session.sessionId, albumid);
 
-         byte[] raw = RequestHelper.request(temp, false);
+         byte[] raw = RequestHelper.request(query, false);
 
          // parse list, passing off events in the process
          ResponseParser.performSearch(raw, listener, MLIT_PATTERN, false);

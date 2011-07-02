@@ -16,8 +16,11 @@
 				<attribute name="SVN-Repository" value="${repository.url}" />
 			</manifest>
 			<fileset dir="build" />
-			<zipfileset excludes="META-INF/*.SF" src="libs/sqlite-jdbc.jar" />
+			<zipfileset excludes="META-INF/*.SF, native/**" src="libs/sqlite-jdbc.jar" />
 			<zipfileset excludes="META-INF/*.SF" src="libs/jmdns.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="libs/org-netbeans-swing-outline.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="libs/org-openide-awt.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="libs/org-openide-util.jar" />
 		</jar>
 
 		<!-- create zip distribution -->

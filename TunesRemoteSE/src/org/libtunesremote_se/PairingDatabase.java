@@ -32,6 +32,7 @@ public class PairingDatabase {
 		if (connection == null)
 		{
 			try {
+			   System.setProperty("sqlite.purejava", "true");
 				Class.forName("org.sqlite.JDBC");
 
 				// create a database connection

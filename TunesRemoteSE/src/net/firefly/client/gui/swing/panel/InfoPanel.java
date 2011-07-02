@@ -201,7 +201,7 @@ public class InfoPanel extends JPanel implements PlayerStatusChangedEventListene
 			playerTotalTimeLabel.setText("");
 		}
 		
-		playingSlider.setEnabled(context.getPlayer().isSupportSeeking());
+		playingSlider.setSupportSeeking(context.getPlayer().isSupportSeeking());
 		
 		repaint();
 	}
@@ -260,7 +260,7 @@ public class InfoPanel extends JPanel implements PlayerStatusChangedEventListene
 
 	public String getSongTitle(Song s) {
 		if (s != null) {
-			String title = "";
+			String title = " ";
 			if (s.getTitle() != null && s.getTitle().trim().length() > 0) {
 				title = s.getTitle();
 			}

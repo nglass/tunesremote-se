@@ -84,6 +84,10 @@ public class PlaylistList {
 		}
 	}
 
+   public int indexOf(IPlaylist playlist) {
+      return this.playlists.indexOf(playlist);
+   }
+	
 	public IPlaylist selectedPlaylist() {
 		if (this.playlists.size() > 0) {
 			IPlaylist p = this.playlists.get(index);

@@ -19,9 +19,14 @@
  */
 package net.firefly.client.controller.request;
 
+import java.util.List;
 import java.util.regex.Pattern;
 
+import javax.swing.SwingUtilities;
+
 import org.tunesremote.TagListener;
+import org.tunesremote.daap.Library;
+import org.tunesremote.daap.Playlist;
 import org.tunesremote.daap.RequestHelper;
 import org.tunesremote.daap.Response;
 import org.tunesremote.daap.ResponseParser;
@@ -32,6 +37,8 @@ import android.util.Log;
 import net.firefly.client.controller.events.SongListLoadProgressEvent;
 import net.firefly.client.controller.listeners.SongListLoadProgressListener;
 import net.firefly.client.gui.context.Context;
+import net.firefly.client.gui.context.events.SelectedPlaylistChangedEvent;
+import net.firefly.client.model.data.RadioStation;
 import net.firefly.client.model.data.Song;
 import net.firefly.client.model.data.SongContainer;
 import net.firefly.client.model.data.list.SongList;
@@ -40,6 +47,7 @@ import net.firefly.client.model.playlist.ITunesPlaylist;
 import net.firefly.client.model.playlist.PlaylistStatus;
 import net.firefly.client.model.playlist.SmartPlaylist;
 import net.firefly.client.model.playlist.list.PlaylistList;
+import net.firefly.client.model.playlist.list.RadiolistList;
 import net.firefly.client.tools.FireflyClientException;
 
 public class PlaylistRequestManager {
@@ -48,11 +56,13 @@ public class PlaylistRequestManager {
 	public final static Pattern MLIT_PATTERN = Pattern.compile("mlit");
 	
 	Session session;
+	Library library;
 	Context context;
 	
 	public PlaylistRequestManager(Context context, Session session) {
 		this.context = context;
 		this.session = session;
+		this.library = new Library(session);
 	}
 
 	public static boolean supportPlaylistAdvancedManagement(String serverVersion){
@@ -115,7 +125,6 @@ public class PlaylistRequestManager {
 		
 		return playlistList;
 	}
-
 	
 	private class TrackListener implements TagListener {
 		
@@ -136,6 +145,7 @@ public class PlaylistRequestManager {
 					long container_id = resp.getNumberLong("mcti");
 					SongContainer sc = new SongContainer();
 					sc.setContainerId(container_id);
+					sc.setPlaylistId(playlist.getPlaylistId());
 					
 					// Look for song in parent library first
 					SongContainer parent_sc = playlist.getParentLibrarySongList().getSongByDatabaseId(id);
@@ -245,4 +255,92 @@ public class PlaylistRequestManager {
 	public void setUseHttpCompressionWhenPossible(boolean use) {
 		;
 	}
+	
+	
+	// Radio list management
+   public void updateRadiolistList(RadiolistList radiolistList) throws FireflyClientException {
+      radiolistList.setStatus(PlaylistStatus.LOADING);
+      List<Playlist> genres = session.getRadioGenres();
+      
+      for (Playlist genre : genres) {
+         ITunesPlaylist iTunesPlaylist = new ITunesPlaylist(null);
+         
+         iTunesPlaylist.setPlaylistId(genre.getID());
+         iTunesPlaylist.setPlaylistName(genre.getName());         
+         iTunesPlaylist.setPersistentId(genre.getPersistentId());
+         
+         radiolistList.add(iTunesPlaylist);
+      }
+      
+      radiolistList.setStatus(PlaylistStatus.LOADED);
+      
+      context.fireRadiolistListChange(new SelectedPlaylistChangedEvent(null));
+   }
+	
+   private class RadioListener implements TagListener {
+      
+      protected IPlaylist playlist;
+      protected SongListLoadProgressListener listener;
+      protected int loadedStations = 0;
+
+      public RadioListener(IPlaylist playlist, SongListLoadProgressListener listener) {
+         this.playlist = playlist;
+         this.listener = listener;
+      }
+
+      public void foundTag(String tag, Response resp) {
+         // add a found search result to our list
+         if (resp.containsKey("miid")) {
+            try {
+               RadioStation radioStation = new RadioStation();
+               radioStation.setDatabaseItemId(resp.getNumberLong("miid"));
+               radioStation.setTitle(resp.getString("minm"));
+               radioStation.setDescription(resp.getString("ascn"));
+
+               SongContainer sc = new SongContainer();
+               sc.setSong(radioStation);
+               sc.setPlaylistId(playlist.getPlaylistId());
+               
+               playlist.addSong(sc);
+               loadedStations ++;
+               
+               if (this.listener != null) {
+                  listener.onProgressChange(new SongListLoadProgressEvent(loadedStations));
+               }
+               
+            } catch (Exception e) {
+               // TODO Auto-generated catch block
+               e.printStackTrace();
+            }
+         }
+      }
+      
+      public void searchDone() {
+         playlist.setStatus(PlaylistStatus.LOADED);
+         if (playlist.getPlaylistId() == context.getPlayer().getPlayingPlaylistId()) {
+            playlist.getSongList().selectSongIfExists(context.getPlayer().getPlayingSong());
+         }
+      }
+   }
+   
+   public void readRadiolist(long radiolistid, RadioListener listener) {
+      library.readRadioPlaylist(Long.toString(radiolistid), listener);
+   }
+   
+   public void loadRadioListForPlaylist(IPlaylist playlist) throws FireflyClientException {
+      loadRadioListForPlaylist(playlist, null);
+   }
+
+   public void loadRadioListForPlaylist(final IPlaylist playlist, SongListLoadProgressListener listener) throws FireflyClientException {
+      
+      RadioListener radioListener = new RadioListener(playlist, listener);
+      playlist.setStatus(PlaylistStatus.LOADING);
+      readRadiolist(playlist.getPlaylistId(), radioListener);
+      
+      SwingUtilities.invokeLater(new Runnable() {
+         public void run() {
+            context.fireRadiolistListChange(new SelectedPlaylistChangedEvent(playlist));
+         }
+      });
+   }
 }

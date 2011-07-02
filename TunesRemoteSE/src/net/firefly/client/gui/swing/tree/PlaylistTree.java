@@ -65,6 +65,7 @@ import net.firefly.client.model.playlist.IPlaylist;
 import net.firefly.client.model.playlist.PlaylistStatus;
 import net.firefly.client.model.playlist.SmartPlaylist;
 import net.firefly.client.model.playlist.StaticPlaylist;
+import net.firefly.client.model.playlist.list.RadiolistList;
 import net.firefly.client.tools.FireflyClientException;
 
 public class PlaylistTree extends JTree implements TreeModelListener, Autoscroll,
@@ -171,7 +172,7 @@ public class PlaylistTree extends JTree implements TreeModelListener, Autoscroll
 	}
 
 	public void expandAll() {
-		Enumeration e = ((DefaultMutableTreeNode) getModel().getRoot()).depthFirstEnumeration();
+		Enumeration<?> e = ((DefaultMutableTreeNode) getModel().getRoot()).depthFirstEnumeration();
 		for (; e.hasMoreElements();) {
 			TreePath t = new TreePath(((DefaultMutableTreeNode) e.nextElement()).getPath());
 			setExpandedState(t, true);
@@ -208,16 +209,33 @@ public class PlaylistTree extends JTree implements TreeModelListener, Autoscroll
 					PlaylistStatus ps = pl.getStatus();
 					if (ps == PlaylistStatus.NOT_LOADED) {
 						// -- load the playlist
-						Thread t = new Thread(new PlaylistLoader(path, pl), "[PlaylitsLoader]");
+						Thread t = new Thread(new PlaylistLoader(path, pl), "[PlaylistLoader]");
 						t.start();
 					} else if (ps == PlaylistStatus.LOADED) {
 						super.setSelectionPath(path);
+						context.getGlobalContainer().showMusic();
 					} else {
 						// -- the playlist is loading: do nothing
 						;
 					}
+				} else if (o instanceof RadiolistList) {
+               // a playlist is selected
+				   RadiolistList rll = (RadiolistList) o;
+               PlaylistStatus ps = rll.getStatus();
+               if (ps == PlaylistStatus.NOT_LOADED) {
+                  // -- load the radiolist
+                  Thread t = new Thread(new RadiolistLoader(path, rll), "[RadiolistLoader]");
+                  t.start();
+               } else if (ps == PlaylistStatus.LOADED) {
+                  super.setSelectionPath(path);
+                  context.getGlobalContainer().showRadio();
+               } else {
+                  // -- the radiolist is loading: do nothing
+                  ;
+               }
 				} else {
 					super.setSelectionPath(path);
+					context.getGlobalContainer().showMusic();
 				}
 			}
 		}
@@ -307,6 +325,45 @@ public class PlaylistTree extends JTree implements TreeModelListener, Autoscroll
 		}
 	}
 
+   class RadiolistLoader implements Runnable {
+      TreePath path;
+      RadiolistList rll;
+
+      public RadiolistLoader(TreePath path, RadiolistList rll) {
+         this.path = path;
+         this.rll = rll;
+      }
+
+      public void run() {
+         // -- following thread usage avoid to have some strange display
+         // behaviours for nearly instantaneous loads
+         Thread t = new Thread(new Runnable() {
+            public void run() {
+               try {
+                  Thread.sleep(100);
+                  getModel().valueForPathChanged(path, rll);
+               } catch (Exception e) {
+               }
+            }
+         });
+         t.start();
+         try {
+            context.getPlaylistRequestManager().updateRadiolistList(rll);
+            SwingUtilities.invokeLater(new Runnable() {
+               public void run() {
+                  PlaylistTree.this.setSelectionPath(path);
+                  PlaylistTree.this.scrollPathToVisible(path);
+               }
+            });
+         } catch (FireflyClientException ex) {
+            ex.printStackTrace();
+         } finally {
+            getModel().valueForPathChanged(path, rll);
+         }
+
+      }
+   }
+	
 	// -- DRAG AND DROP MANAGEMENT
 	public void dragEnter(DropTargetDragEvent evt) {
 	}
