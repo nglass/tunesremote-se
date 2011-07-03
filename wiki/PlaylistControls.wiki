@@ -34,3 +34,8 @@ medc  --+
                 mcti    4    28773
 }}}
 mcti tells us the new container-item-id of the track in the playlist.
+
+*Remove Single Track*
+
+{{{GET /databases/64/containers/21867/edit?action=remove&edit-params='dmap.containeritemid:21865'&session-id=2057152154}}}
+
