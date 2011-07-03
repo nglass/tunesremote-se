@@ -35,7 +35,23 @@ medc  --+
 }}}
 mcti tells us the new container-item-id of the track in the playlist.
 
+*Add Multiple Tracks*
+
+To add multiple tracks it would appear the remote selects using a standard daap query.
+
+{{{GET /databases/65/containers/21867/edit?action=add&edit-params=(('daap.songartist:Weezer','daap.songalbumartist:Weezer')+('com.apple.itunes.mediakind:1','com.apple.itunes.mediakind:32'))&session-id=1420969565}}}
+
 *Remove Single Track*
 
 {{{GET /databases/64/containers/21867/edit?action=remove&edit-params='dmap.containeritemid:21865'&session-id=2057152154}}}
+
+*Move Track*
+
+{{{GET /databases/65/containers/19071/edit?action=move&edit-params='edit-param.move-pair:24804,24801'&session-id=1860779006}}}
+
+*Genius*
+
+{{{GET /ctrl-int/1/set-genius-seed?database-spec='dmap.persistentid:0xBBD273CF5AE2139E'&item-spec='dmap.itemid:0x2362'&session-id=1860779006}}}
+
+
 
