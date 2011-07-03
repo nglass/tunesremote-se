@@ -53,5 +53,6 @@ To add multiple tracks it would appear the remote selects using a standard daap 
 
 {{{GET /ctrl-int/1/set-genius-seed?database-spec='dmap.persistentid:0xBBD273CF5AE2139E'&item-spec='dmap.itemid:0x2362'&session-id=1860779006}}}
 
+*Refresh*
 
-
+{{{GET /databases/65/containers/19071/edit?action=refresh&session-id=1641444128}}}
