@@ -7,7 +7,7 @@ Playlist controls include:
   * add - add songs to playlist
   * new - create a new genius based on a song selection
   * refresh - regenerate the current genius list 
-  *edit - switches to edit mode to allow reordering, removal of songs and on the main genius list allows you to save the genius list
+  * edit - switches to edit mode to allow reordering, removal of songs and on the main genius list allows you to save the genius list
 
 The type of playlist you are viewing determines the controls available to you:
   * regular playlists can edit/add
