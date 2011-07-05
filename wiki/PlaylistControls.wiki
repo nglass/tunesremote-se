@@ -2,6 +2,21 @@
 
 Here I will be adding information about controlling playlists with DACP.
 
+== Remote ==
+Playlist controls include:
+  * add - add songs to playlist
+  * new - create a new genius based on a song selection
+  * refresh - regenerate the current genius list 
+  *edit - switches to edit mode to allow reordering, removal of songs and on the main genius list allows you to save the genius list
+
+The type of playlist you are viewing determines the controls available to you:
+  * regular playlists can edit/add
+  * smart playlists can edit
+  * main genius list can edit/new/refresh
+  * saved genius lists can edit/refresh
+
+== Protocol == 
+
 *Add Playlist*
 
 {{{GET /databases/64/edit?action=add&edit-params='dmap.itemname:New%20Playlist'&session-id=556874004}}}
