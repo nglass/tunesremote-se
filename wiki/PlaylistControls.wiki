@@ -1,8 +1,8 @@
-= PlaylistControls =
+=PlaylistControls=
 
 Here I will be adding information about controlling playlists with DACP.
 
-== Remote ==
+==Remote==
 Playlist controls include:
   * add - add songs to playlist
   * new - create a new genius based on a song selection
@@ -15,7 +15,7 @@ The type of playlist you are viewing determines the controls available to you:
   * main genius list can edit/new/refresh
   * saved genius lists can edit/refresh
 
-== Protocol == 
+==Protocol== 
 
 *Add Playlist*
 
