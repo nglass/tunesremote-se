@@ -24,6 +24,8 @@
 	<string>TunesRemote.icns</string>
 	<key>Java</key>
 	<dict>
+		<key>VMOptions</key>
+		<string>-Xverify:none -Xms256m -Xmx512m -XX:PermSize=32m -XX:MaxPermSize=192m</string>
 		<key>MainClass</key>
 		<string>org.tunesremote_se.TunesRemoteSE</string>
 		<key>JVMVersion</key>
