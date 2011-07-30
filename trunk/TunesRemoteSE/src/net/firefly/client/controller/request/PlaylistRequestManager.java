@@ -69,8 +69,8 @@ public class PlaylistRequestManager {
 		return true;
 	}
 
-	public PlaylistList getPlaylistList(SongList parentLibrarySongList, boolean sortStaticPlaylists, String host,
-			int port, String proxyHost, String proxyPort, String password) throws FireflyClientException {
+	public PlaylistList getPlaylistList(long databaseId, SongList parentLibrarySongList) 
+	throws FireflyClientException {
 		PlaylistList playlistList = new PlaylistList();
 
 		// fetch playlists to find the overall magic "Music" playlist
@@ -87,35 +87,31 @@ public class PlaylistRequestManager {
 					false);
 
 			for (Response resp : playlists.getNested("aply").getNested("mlcl").findArray("mlit")) {
-				String name = resp.getString("minm");
-				long id = resp.getNumberLong("miid");
+				
+			   // skip base playlist
+            if (resp.containsKey("abpl"))
+               continue;		   
+			   
+			   IPlaylist playlist;
+			   if (resp.containsKey("aeSP")) {
+			      playlist = new SmartPlaylist(parentLibrarySongList);
+			   } else {
+			      playlist = new ITunesPlaylist(parentLibrarySongList);
+			   }
+			   
+			   playlist.setPlaylistId(resp.getNumberLong("miid"));
+			   playlist.setPlaylistName(resp.getString("minm"));
+			   playlist.setPersistentId(resp.getNumberHex("mper"));
+			   playlist.setDatabaseId(databaseId);
+			   playlist.setParentContainer(resp.getNumberLong("mpco"));
+			   playlist.setSpecialPlaylist(resp.getNumberLong("aePS"));
+			   playlist.setSavedGenius(resp.containsKey("aeSG"));
+			   
 				//long itemCount = resp.getNumberLong("mimc");
-				String persistentId = resp.getNumberHex("mper");
-				boolean basePlaylist = resp.containsKey("abpl");
-				boolean isSmartPlaylist = resp.containsKey("aeSP");
-				//boolean savedGenius = resp.containsKey("aeSG");
 				//long editCommands = resp.getNumberLong("meds");
-				//long specialPlaylist = resp.getNumberLong("aePS");
-				//long parentContainer = resp.getNumberLong("mpco");
-				
-				if (basePlaylist)
-					continue;
-				
-				if (isSmartPlaylist) {
-					SmartPlaylist smartPlaylist = new SmartPlaylist(parentLibrarySongList);
-					smartPlaylist.setPlaylistId(id);
-					smartPlaylist.setPlaylistName(name);
-					smartPlaylist.setPersistentId(persistentId);
-					
-					playlistList.add(smartPlaylist);
-				} else {
-					ITunesPlaylist iTunesPlaylist = new ITunesPlaylist(parentLibrarySongList);
-					iTunesPlaylist.setPlaylistId(id);
-					iTunesPlaylist.setPlaylistName(name);
-					iTunesPlaylist.setPersistentId(persistentId);
-					
-					playlistList.add(iTunesPlaylist);
-				}
+			   
+			   playlistList.add(playlist);
+						
 			}
 
 		} catch (Exception e) {
@@ -146,6 +142,7 @@ public class PlaylistRequestManager {
 					SongContainer sc = new SongContainer();
 					sc.setContainerId(container_id);
 					sc.setPlaylistId(playlist.getPlaylistId());
+					sc.setDatabaseId(playlist.getDatabaseId());
 					
 					// Look for song in parent library first
 					SongContainer parent_sc = playlist.getParentLibrarySongList().getSongByDatabaseId(id);
@@ -191,7 +188,7 @@ public class PlaylistRequestManager {
 		}
 	}
 	
-	public void readPlaylist(long playlistid, TagListener listener) {
+	public void readPlaylist(long databaseId, long playlistid, TagListener listener) {
 		Log.d(TAG, " in readPlaylists");
 		try {
 			// http://192.168.254.128:3689/databases/36/containers/1234/items?session-id=2025037772&meta=dmap.itemname,dmap.itemid,daap.songartist,daap.songalbum,dmap.containeritemid,com.apple.tunes.has-video
@@ -200,7 +197,7 @@ public class PlaylistRequestManager {
 	        		"meta=dmap.itemname,dmap.itemid,daap.songartist,daap.songartistid,daap.songalbumid," +
 	        		"daap.songalbum,daap.songtime,dmap.containeritemid,com.apple.tunes.has-video",
 	                session.getRequestBase(),
-	                session.databaseId,
+	                databaseId,
 	                playlistid,
 	                session.sessionId),
 	                false);
@@ -224,7 +221,7 @@ public class PlaylistRequestManager {
 		
 		TrackListener trackListener = new TrackListener(playlist, listener);
 		playlist.setStatus(PlaylistStatus.LOADING);
-		readPlaylist(playlist.getPlaylistId(), trackListener);
+		readPlaylist(playlist.getDatabaseId(), playlist.getPlaylistId(), trackListener);
 	}
 
 	public int addStaticPlaylist(String playlistName, String host, int port, String proxyHost, String proxyPort,
@@ -300,6 +297,7 @@ public class PlaylistRequestManager {
                SongContainer sc = new SongContainer();
                sc.setSong(radioStation);
                sc.setPlaylistId(playlist.getPlaylistId());
+               sc.setDatabaseId(session.radioDatabaseId);
                
                playlist.addSong(sc);
                loadedStations ++;

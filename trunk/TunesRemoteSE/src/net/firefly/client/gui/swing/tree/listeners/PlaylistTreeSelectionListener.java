@@ -21,7 +21,6 @@ package net.firefly.client.gui.swing.tree.listeners;
 
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import net.firefly.client.controller.ListManager;
 import net.firefly.client.gui.context.Context;
@@ -40,25 +39,22 @@ public class PlaylistTreeSelectionListener implements TreeSelectionListener {
 	}
 
 	public void valueChanged(TreeSelectionEvent e) {
-		DefaultMutableTreeNode node = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
-		if (node != null) {
-			Object o = node.getUserObject();
-			if (o instanceof IPlaylist) {
-				// a playlist is selected
-				IPlaylist pl = (IPlaylist)o;
-				context.setFilteredSongList(pl.getSongList());
-				context.setFilteredGenreList(ListManager.extractGenreList(pl.getSongList(), context.getConfig().getLocale()));
-				context.setFilteredArtistList(ListManager.extractArtistList(pl.getSongList(), context.getConfig().getLocale()));
-				context.setFilteredAlbumList(ListManager.extractAlbumList(pl.getSongList(), context.getConfig().getLocale()));
-				context.setSelectedPlaylist(pl);
-			} else {
-				// the library is selected
-				context.setFilteredSongList(context.getGlobalSongList());
-				context.setFilteredGenreList(context.getGlobalGenreList());
-				context.setFilteredArtistList(context.getGlobalArtistList());
-				context.setFilteredAlbumList(context.getGlobalAlbumList());
-				context.setSelectedPlaylist(null);
-			}
+	   Object o = tree.getLastSelectedPathComponent();
+		if (o instanceof IPlaylist) {
+			// a playlist is selected
+			IPlaylist pl = (IPlaylist)o;
+			context.setFilteredSongList(pl.getSongList());
+			context.setFilteredGenreList(ListManager.extractGenreList(pl.getSongList(), context.getConfig().getLocale()));
+			context.setFilteredArtistList(ListManager.extractArtistList(pl.getSongList(), context.getConfig().getLocale()));
+			context.setFilteredAlbumList(ListManager.extractAlbumList(pl.getSongList(), context.getConfig().getLocale()));
+			context.setSelectedPlaylist(pl);
+		} else {
+			// the library is selected
+			context.setFilteredSongList(context.getGlobalSongList());
+			context.setFilteredGenreList(context.getGlobalGenreList());
+			context.setFilteredArtistList(context.getGlobalArtistList());
+			context.setFilteredAlbumList(context.getGlobalAlbumList());
+			context.setSelectedPlaylist(null);
 		}
 	}
 }

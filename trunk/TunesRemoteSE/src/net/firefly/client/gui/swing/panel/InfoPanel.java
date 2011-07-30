@@ -190,12 +190,8 @@ public class InfoPanel extends JPanel implements PlayerStatusChangedEventListene
 		playerStatusLabel.setIcon(getStatusIcon(newPlayerStatus));
 		// playerStatusLabel.setText(getStatusString(newPlayerStatus));
 		playerSongTitleLabel.setText(getSongTitle(context.getPlayer().getPlayingSong().getSong()));
-		if (getStatusString(PlayerStatus.STATUS_STOPPED).equals(playerSongTitleLabel.getText())) {
-			playerSongTitleLabel.setFont(getFont());
-		} else {
-			playerSongTitleLabel.setFont(getFont().deriveFont(Font.BOLD));
-		}
 		playerSongInfoLabel.setText(getSongInfo(context.getPlayer().getPlayingSong().getSong()));
+		
 		if (!newPlayerStatus.equals(PlayerStatus.STATUS_PLAYING)) {
 			playerPlayedTimeLabel.setText("");
 			playerTotalTimeLabel.setText("");
@@ -254,7 +250,7 @@ public class InfoPanel extends JPanel implements PlayerStatusChangedEventListene
 			albumYear = album + year;
 			return artist + " - " + albumYear;
 		} else {
-			return " ";
+			return getStatusString(PlayerStatus.STATUS_STOPPED);
 		}
 	}
 
@@ -266,7 +262,7 @@ public class InfoPanel extends JPanel implements PlayerStatusChangedEventListene
 			}
 			return title;
 		} else {
-			return getStatusString(PlayerStatus.STATUS_STOPPED);
+			return " ";
 		}
 	}
 

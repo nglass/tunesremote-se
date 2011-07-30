@@ -19,6 +19,9 @@
  */
 package net.firefly.client.model.playlist;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+
 import net.firefly.client.model.data.SongContainer;
 import net.firefly.client.model.data.list.SongList;
 import net.firefly.client.model.data.list.SortedSongList;
@@ -29,19 +32,30 @@ public abstract class AbstractPlaylist implements IPlaylist {
 
 	protected SongList songList;
 
+	protected long databaseId;
+	
 	protected long playlistId;
+	
+	protected long parentContainer;
+	
+	protected long specialPlaylist;
+	
+	protected boolean savedGenius;
 
 	protected String playlistName;
 	
 	protected String persistentId;
 	
 	protected PlaylistStatus status;
+	
+	protected ArrayList<IPlaylist> nested;
 
 	public AbstractPlaylist(SongList parentLibrarySongList) {
 		this.parentLibrarySongList = parentLibrarySongList;
 		this.songList = SongList.EMPTY_SONG_LIST;
 		this.status = PlaylistStatus.NOT_LOADED;
 		this.playlistId = -1;
+		this.nested = new ArrayList<IPlaylist>();
 	}
 
 	public SongList getParentLibrarySongList() {
@@ -52,6 +66,14 @@ public abstract class AbstractPlaylist implements IPlaylist {
 		return this.songList;
 	}
 
+   public long getDatabaseId() {
+      return this.databaseId;
+   }
+
+   public void setDatabaseId(long databaseId) {
+      this.databaseId = databaseId;
+   }
+	
 	public long getPlaylistId() {
 		return this.playlistId;
 	}
@@ -59,7 +81,31 @@ public abstract class AbstractPlaylist implements IPlaylist {
 	public void setPlaylistId(long playlistId) {
 		this.playlistId = playlistId;
 	}
+	
+	public long getParentContainer() {
+	   return this.parentContainer;
+	}
+	
+	public void setParentContainer(long parentContainer) {
+	   this.parentContainer = parentContainer;
+	}
 
+	public long getSpecialPlaylist() {
+	   return this.specialPlaylist;
+	}
+	
+	public void setSpecialPlaylist(long specialPlaylist) {
+	   this.specialPlaylist = specialPlaylist;
+	}
+	
+	public boolean isSavedGenius() {
+	   return this.savedGenius;
+	}
+	
+	public void setSavedGenius(boolean savedGenius) {
+	   this.savedGenius = savedGenius;
+	}
+	
 	public String getPlaylistName() {
 		return this.playlistName;
 	}
@@ -115,4 +161,30 @@ public abstract class AbstractPlaylist implements IPlaylist {
 	public String toString(){
 		return this.playlistName;
 	}
+
+   // Nested playlists
+   public int nestedSize() {
+      return this.nested.size();
+   }
+
+   public IPlaylist getNested(int i) {
+      return this.nested.get(i);
+   }
+   
+   public Iterator<IPlaylist> nestedIterator() {
+      return this.nested.iterator();
+   }
+
+   public int nestedIndexOf(IPlaylist playlist) {
+      return this.nested.indexOf(playlist);
+   }
+   
+   public void addNested(IPlaylist playlist) {
+      this.nested.add(playlist);
+   }
+   
+   public void removeNested(IPlaylist playlist) {
+      this.nested.remove(playlist);
+   }
+	
 }

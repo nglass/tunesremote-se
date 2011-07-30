@@ -59,6 +59,7 @@ public class TunesService extends Thread implements ServiceListener, Closeable {
 			zeroConf.registerService(pairservice);
 
 		} catch ( java.io.IOException e) {
+		   e.printStackTrace();
 		}
 	}
 	

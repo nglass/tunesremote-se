@@ -42,7 +42,7 @@ public class Session {
    public long databaseId, radioDatabaseId, musicId, libraryId;
    public String databasePersistentId, radioPersistentId;
    public final List<Playlist> playlists = new LinkedList<Playlist>();
-   
+
    public String radioDatabaseName = null;
    private List<Playlist> radioGenres = null;
 
@@ -60,27 +60,23 @@ public class Session {
       Response databases = RequestHelper.requestParsed(String.format("%s/databases?session-id=%s", this.getRequestBase(), this.sessionId), false);
       for (Response resp : databases.getNested("avdb").getNested("mlcl").findArray("mlit")) {
          // Local DB - mdbk = 1?
-         if (resp.getNumberLong("mdbk") == 1) {
+         if (resp.getNumberLong("mdbk") == 1 || !resp.containsKey("mdbk")) {
             this.databaseId = resp.getNumberLong("miid");
             this.databasePersistentId = resp.getNumberHex("mper");
             Log.d(TAG, String.format("found database-id=%s", this.databaseId));
-
-         // Radio DB - mdbk = 100?
          } else if (resp.getNumberLong("mdbk") == 100) {
+            // Radio DB - mdbk = 100?
             this.radioDatabaseName = resp.getString("minm");
             this.radioDatabaseId = resp.getNumberLong("miid");
             this.radioPersistentId = resp.getNumberHex("mper");
             Log.d(TAG, String.format("found radio-database-id=%s", this.radioDatabaseId));
-
-         // Other DB 
-         // mdbk = 2 = shared db?
          } else {
-            // We have found another database
-            // I've seen shared libraries appear here
+            // Other DB (mdbk = 2 = shared db?)
+            // We have found another database I've seen shared libraries appear here
             Log.d(TAG, "found other-database = " + resp.getString("minm"));
          }
       }
-      
+
       // fetch playlists to find the overall magic "Music" playlist
       Response playlists = RequestHelper
                .requestParsed(
@@ -160,10 +156,15 @@ public class Session {
       this.fireAction(String.format("%s/logout?session-id=%s", this.getRequestBase(), this.sessionId), false);
    }
 
-   public void controlPlayPause() {
-      // http://192.168.254.128:3689/ctrl-int/1/playpause?session-id=130883770
-      this.fireAction(String.format("%s/ctrl-int/1/playpause?session-id=%s", this.getRequestBase(), this.sessionId), true);
+   public void controlPause() {
+      // http://192.168.254.128:3689/ctrl-int/1/pause?session-id=130883770
+      this.fireAction(String.format("%s/ctrl-int/1/pause?session-id=%s", this.getRequestBase(), this.sessionId), true);
    }
+   
+   public void controlPlay() {
+	      // http://192.168.254.128:3689/ctrl-int/1/playpause?session-id=130883770
+	      this.fireAction(String.format("%s/ctrl-int/1/playpause?session-id=%s", this.getRequestBase(), this.sessionId), true);
+	   }
 
    public void controlNext() {
       // http://192.168.254.128:3689/ctrl-int/1/nextitem?session-id=130883770
@@ -343,17 +344,17 @@ public class Session {
          }
       });
    }
-   
+
    public void controlVisualiser(boolean enabled) {
-	   // GET /ctrl-int/1/setproperty?dacp.visualizer=1&session-id=283658916
-	   this.fireAction(String.format("%s/ctrl-int/1/setproperty?dacp.visualizer=%d&session-id=%s", this.getRequestBase(), enabled?1:0, this.sessionId), true);
+      // GET /ctrl-int/1/setproperty?dacp.visualizer=1&session-id=283658916
+      this.fireAction(String.format("%s/ctrl-int/1/setproperty?dacp.visualizer=%d&session-id=%s", this.getRequestBase(), enabled ? 1 : 0, this.sessionId), true);
    }
 
    public void controlFullscreen(boolean enabled) {
-	   // GET /ctrl-int/1/setproperty?dacp.fullscreen=1&session-id=283658916
-	   this.fireAction(String.format("%s/ctrl-int/1/setproperty?dacp.fullscreen=%d&session-id=%s", this.getRequestBase(), enabled?1:0, this.sessionId), true);
+      // GET /ctrl-int/1/setproperty?dacp.fullscreen=1&session-id=283658916
+      this.fireAction(String.format("%s/ctrl-int/1/setproperty?dacp.fullscreen=%d&session-id=%s", this.getRequestBase(), enabled ? 1 : 0, this.sessionId), true);
    }
-   
+
    // Query the media server about the content codes it handles
    // print to stderr as a csv file
    public void listContentCodes() {
@@ -368,8 +369,7 @@ public class Session {
          e.printStackTrace();
       }
    }
-   
-   
+
    // Radio commands
    public boolean supportsRadio() {
       return radioDatabaseName != null;
@@ -386,10 +386,10 @@ public class Session {
          try {
             // fetch radio playlists
             Response playlists = RequestHelper
-            .requestParsed(
-                  String.format(
-                        "%s/databases/%d/containers?session-id=%s&meta=dmap.itemname,dmap.itemcount,dmap.itemid,dmap.persistentid,daap.baseplaylist,com.apple.itunes.special-playlist,com.apple.itunes.smart-playlist,com.apple.itunes.saved-genius,dmap.parentcontainerid,dmap.editcommandssupported",
-                        this.getRequestBase(), this.radioDatabaseId, this.sessionId), false);
+                     .requestParsed(
+                              String.format(
+                                       "%s/databases/%d/containers?session-id=%s&meta=dmap.itemname,dmap.itemcount,dmap.itemid,dmap.persistentid,daap.baseplaylist,com.apple.itunes.special-playlist,com.apple.itunes.smart-playlist,com.apple.itunes.saved-genius,dmap.parentcontainerid,dmap.editcommandssupported",
+                                       this.getRequestBase(), this.radioDatabaseId, this.sessionId), false);
 
             for (Response resp : playlists.getNested("aply").getNested("mlcl").findArray("mlit")) {
                String name = resp.getString("minm");
@@ -402,23 +402,19 @@ public class Session {
       }
       return radioGenres;
    }
-   
+
    public void playSpec(final long databaseId, final long containerId, final long itemId) {
-      //GET /ctrl-int/1/playspec?database-spec='dmap.itemid:0x6073'&container-spec='dmap.itemid:0x607B'&item-spec='dmap.itemid:0x7cbe'&session-id=345827905
+      // GET
+      // /ctrl-int/1/playspec?database-spec='dmap.itemid:0x6073'&container-spec='dmap.itemid:0x607B'&item-spec='dmap.itemid:0x7cbe'&session-id=345827905
       ThreadExecutor.runTask(new Runnable() {
          public void run() {
-            RequestHelper.attemptRequest(String
-                     .format("%s/ctrl-int/1/playspec?" +
-                     		"database-spec='dmap.itemid:0x%x'" +
-                     		"&container-spec='dmap.itemid:0x%x'" +
-                     		"&item-spec='dmap.itemid:0x%x'" +
-                     		"&session-id=%s",
-                           getRequestBase(), databaseId, containerId, itemId, sessionId));
+            RequestHelper.attemptRequest(String.format("%s/ctrl-int/1/playspec?" + "database-spec='dmap.itemid:0x%x'" + "&container-spec='dmap.itemid:0x%x'"
+                     + "&item-spec='dmap.itemid:0x%x'" + "&session-id=%s", getRequestBase(), databaseId, containerId, itemId, sessionId));
             notifyStatus();
          }
       });
    }
-   
+
    public void controlPlayRadio(final long genreId, final long itemId) {
       playSpec(radioDatabaseId, genreId, itemId);
    }
