@@ -36,7 +36,6 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.Enumeration;
 
 import javax.swing.JPanel;
 import javax.swing.JTree;
@@ -54,13 +53,14 @@ import net.firefly.client.controller.request.PlaylistRequestManager;
 import net.firefly.client.gui.context.Context;
 import net.firefly.client.gui.swing.dialog.ErrorDialog;
 import net.firefly.client.gui.swing.table.dnd.SongTransferable;
-import net.firefly.client.gui.swing.tree.editor.PlaylistTreeCellEditor;
+//import net.firefly.client.gui.swing.tree.editor.PlaylistTreeCellEditor;
 import net.firefly.client.gui.swing.tree.listeners.PlaylistTreeSelectionListener;
 import net.firefly.client.gui.swing.tree.menu.PlaylistContextMenu;
 import net.firefly.client.gui.swing.tree.model.PlaylistTreeModel;
 import net.firefly.client.gui.swing.tree.renderer.PlaylistTreeCellRenderer;
 import net.firefly.client.gui.swing.tree.ui.PlaylistTreeUI;
 import net.firefly.client.model.data.SongContainer;
+import net.firefly.client.model.library.LibraryInfo;
 import net.firefly.client.model.playlist.IPlaylist;
 import net.firefly.client.model.playlist.PlaylistStatus;
 import net.firefly.client.model.playlist.SmartPlaylist;
@@ -68,8 +68,7 @@ import net.firefly.client.model.playlist.StaticPlaylist;
 import net.firefly.client.model.playlist.list.RadiolistList;
 import net.firefly.client.tools.FireflyClientException;
 
-public class PlaylistTree extends JTree implements TreeModelListener, Autoscroll,
-		DropTargetListener {
+public class PlaylistTree extends JTree implements TreeModelListener, Autoscroll, DropTargetListener {
 
 	private static final long serialVersionUID = -2387433539948894006L;
 
@@ -89,7 +88,6 @@ public class PlaylistTree extends JTree implements TreeModelListener, Autoscroll
 	
 	public PlaylistTree(Context context, JPanel container, Frame rootContainer) {
 		super(new PlaylistTreeModel(context, rootContainer));
-		((PlaylistTreeModel) (getModel())).setTree(this);
 		this.context = context;
 		this.container = container;
 		this.rootContainer = rootContainer;
@@ -97,8 +95,9 @@ public class PlaylistTree extends JTree implements TreeModelListener, Autoscroll
 	}
 
 	public void initialize() {
-		getModel().addTreeModelListener(this);
 
+	   getModel().addTreeModelListener(this);
+	   
 		// -- set selection model
 		TreeSelectionModel treeSelectionModel = new DefaultTreeSelectionModel();
 		treeSelectionModel.setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
@@ -112,15 +111,15 @@ public class PlaylistTree extends JTree implements TreeModelListener, Autoscroll
 		setCellRenderer(renderer);
 
 		// -- set cell editor for pure static playlists
-		setEditable(true);
-		setCellEditor(new PlaylistTreeCellEditor(rootContainer, this, renderer, context));
+		//setEditable(true);
+		//setCellEditor(new PlaylistTreeCellEditor(rootContainer, this, renderer, context));
 
 		setRowHeight(0);
 
 		super.setUI(new PlaylistTreeUI());
 
-		setShowsRootHandles(false);
-		setToggleClickCount(0);
+		//setShowsRootHandles(false);
+		//setToggleClickCount(0);
 
 		addTreeSelectionListener(new PlaylistTreeSelectionListener(this, context));
 
@@ -141,7 +140,7 @@ public class PlaylistTree extends JTree implements TreeModelListener, Autoscroll
 
 		// -- add right click management
 
-		contextMenu = new PlaylistContextMenu(context, this, rootContainer);
+		//contextMenu = new PlaylistContextMenu(context, this, rootContainer);
 
 		addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent evt) {
@@ -149,8 +148,7 @@ public class PlaylistTree extends JTree implements TreeModelListener, Autoscroll
 					JTree tree = (JTree) evt.getSource();
 					TreePath path = tree.getPathForLocation(evt.getX(), evt.getY());
 					if (path != null) {
-						DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
-						Object value = node.getUserObject();
+						Object value = path.getLastPathComponent();
 						if (value instanceof IPlaylist) {
 							IPlaylist p = (IPlaylist) value;
 							setSelectionPath(path);
@@ -168,41 +166,62 @@ public class PlaylistTree extends JTree implements TreeModelListener, Autoscroll
 		});
 
 		// -- add droppable behaviour
-		dropTarget = new DropTarget(this, this);
+		//dropTarget = new DropTarget(this, this);
 	}
 
-	public void expandAll() {
-		Enumeration<?> e = ((DefaultMutableTreeNode) getModel().getRoot()).depthFirstEnumeration();
-		for (; e.hasMoreElements();) {
-			TreePath t = new TreePath(((DefaultMutableTreeNode) e.nextElement()).getPath());
-			setExpandedState(t, true);
-		}
+   protected void setExpandedState(TreePath path, boolean state) {
+      if (state || path.getPathCount() > 2) {
+         super.setExpandedState(path, state);
+      }
+   }
+	
+	public void expandRoot() {
+	   Object[] path = new Object[2];
+	   Object root = getModel().getRoot();
+	   path[0] = root;
+	   for (int i=0; i<getModel().getChildCount(root); i++) {
+	      path[1] = getModel().getChild(root, i);
+	      TreePath t = new TreePath(path);
+	      setExpandedState(t, true);
+	   }
 	}
 
 	// -- TreeModelListener
 	public void treeStructureChanged(TreeModelEvent treemodelevent) {
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
-				expandAll();
-				// set the library selected by default
-				setSelectionPath(getPathForRow(1));
+			   expandRoot();
 			}
 		});
 	}
 
+	public String convertValueToText(Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) {
+	   if (value instanceof String) {
+	      return (String) value;
+	   } else if (value instanceof IPlaylist) {
+	      IPlaylist pl = (IPlaylist) value;
+	      return pl.getPlaylistName();
+	   } else if (value instanceof RadiolistList) {
+	      return context.getSession().radioDatabaseName;
+	   } else if (value instanceof LibraryInfo) {
+	      return context.getLibraryInfo().getLibraryName();
+	   }
+	   
+	   return value.toString();
+	}
+	
 	// -- ensure that only library/playlist is selected
 	// -- moreover: manage playlist lazy load
 	public void setSelectionPath(TreePath path) {
-		int depth = 0;
+	   int depth = 0;
 		if (path != null) {
 			depth = path.getPathCount() - 1;
 		} else {
 			depth = 0;
 		}
 		if (depth > 1) {
-			DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
-			if (node != null) {
-				Object o = node.getUserObject();
+			Object o = path.getLastPathComponent();
+			if (o != null) {
 				if (o instanceof IPlaylist) {
 					// a playlist is selected
 					IPlaylist pl = (IPlaylist) o;
@@ -253,15 +272,15 @@ public class PlaylistTree extends JTree implements TreeModelListener, Autoscroll
 		}
 	}
 
-	public void treeNodesChanged(TreeModelEvent treemodelevent) {
-	}
+   public void treeNodesChanged(TreeModelEvent treemodelevent) {
+   }
 
-	public void treeNodesInserted(TreeModelEvent treemodelevent) {
-	}
+   public void treeNodesInserted(TreeModelEvent treemodelevent) {
+   }
 
-	public void treeNodesRemoved(TreeModelEvent treemodelevent) {
-	}
-
+   public void treeNodesRemoved(TreeModelEvent treemodelevent) {
+   }
+	
 	// -- ensures that there is no automatic horizontal scrolls that cannot be
 	// scrolled back (no horizontal scrollbar)
 	public boolean getScrollableTracksViewportWidth() {

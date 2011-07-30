@@ -333,8 +333,7 @@ public class DatabaseDialog extends JDialog implements PropertyChangeListener, S
 							context.setFilteredAlbumList((AlbumList) context.getGlobalAlbumList().clone());
 							
 							// 4 - get playlist list
-							PlaylistList playlists = playlistRequestManager.getPlaylistList(songList, false, context.getLibraryInfo().getHost(), context
-									.getLibraryInfo().getPort(), "","", context.getLibraryInfo().getPassword());
+							PlaylistList playlists = playlistRequestManager.getPlaylistList(context.getSession().databaseId, songList);
 							context.setPlaylists(playlists);
 							
 							// 5 - auto save updated library
@@ -448,8 +447,7 @@ public class DatabaseDialog extends JDialog implements PropertyChangeListener, S
 							context.setFilteredAlbumList((AlbumList) context.getGlobalAlbumList().clone());
 
 							// 3- get playlist list
-							PlaylistList playlists = playlistRequestManager.getPlaylistList(songList, false, context.getLibraryInfo().getHost(), context
-									.getLibraryInfo().getPort(), "","", context.getLibraryInfo().getPassword());
+							PlaylistList playlists = playlistRequestManager.getPlaylistList(context.getSession().databaseId, songList);
 							context.setPlaylists(playlists);
 							
 							// 4 - auto save newly loaded library

@@ -19,6 +19,8 @@
  */
 package net.firefly.client.model.playlist;
 
+import java.util.Iterator;
+
 import net.firefly.client.model.data.SongContainer;
 import net.firefly.client.model.data.list.SongList;
 
@@ -31,11 +33,27 @@ public interface IPlaylist {
 	public String getPersistentId();
 	
 	public void setPersistentId(String persistentId);
+
+	public long getDatabaseId();
+	
+	public void setDatabaseId(long id);
 	
 	public long getPlaylistId();
 
 	public void setPlaylistId(long id);
 
+	public long getParentContainer();
+	
+	public void setParentContainer(long parentContainer);
+	
+	public long getSpecialPlaylist();
+	
+	public void setSpecialPlaylist(long specialPlaylist);
+	
+	public boolean isSavedGenius();
+	
+	public void setSavedGenius(boolean savedGenius);
+	
 	public String getPlaylistName();
 
 	public void setPlaylistName(String playlistName);
@@ -47,4 +65,17 @@ public interface IPlaylist {
 	public PlaylistStatus getStatus();
 	
 	public void setStatus(PlaylistStatus status);
+	
+	// Nested playlists
+   public int nestedSize();
+
+   public IPlaylist getNested(int i);
+   
+   public Iterator<IPlaylist> nestedIterator();
+
+   public int nestedIndexOf(IPlaylist playlist);
+   
+   public void addNested(IPlaylist playlist);
+   
+   public void removeNested(IPlaylist playlist);
 }

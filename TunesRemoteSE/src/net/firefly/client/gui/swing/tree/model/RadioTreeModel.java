@@ -57,7 +57,7 @@ public class RadioTreeModel implements TreeModel, RadiolistListChangedEventListe
    public Object getChild(Object parent, int index) {
       if (parent instanceof RadiolistList) {
          RadiolistList rll = (RadiolistList) parent;
-         return rll.get(index);
+         return rll.getPlaylist(index);
       } else if (parent instanceof IPlaylist) {
          IPlaylist pl = (IPlaylist) parent;
          return pl.getSongList().get(index);
@@ -70,7 +70,7 @@ public class RadioTreeModel implements TreeModel, RadiolistListChangedEventListe
    public int getChildCount(Object parent) {
       if (parent instanceof RadiolistList) {
          RadiolistList rll = (RadiolistList) parent;
-         return rll.size();
+         return rll.playlistsSize();
       } else if (parent instanceof IPlaylist) {
          final IPlaylist pl = (IPlaylist) parent;
          
@@ -100,7 +100,7 @@ public class RadioTreeModel implements TreeModel, RadiolistListChangedEventListe
       if (parent instanceof RadiolistList && child instanceof IPlaylist) {
          RadiolistList rll = (RadiolistList) parent;
          IPlaylist pl = (IPlaylist) child;
-         return rll.indexOf(pl);
+         return rll.indexOfPlaylist(pl);
       } else if (parent instanceof IPlaylist && child instanceof SongContainer) {
          IPlaylist pl = (IPlaylist) parent;
          SongContainer sc = (SongContainer) child;

@@ -37,7 +37,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.table.TableColumn;
 
 import net.firefly.client.gui.context.Context;
-import net.firefly.client.gui.swing.table.dnd.SongTranferHandler;
+//import net.firefly.client.gui.swing.table.dnd.SongTranferHandler;
 import net.firefly.client.gui.swing.table.menu.PlaylistContextMenu;
 import net.firefly.client.gui.swing.table.model.SongTableModel;
 import net.firefly.client.gui.swing.table.model.TableSorter;
@@ -215,8 +215,9 @@ public class SongTable extends JTable implements SongChangedEventListener {
 			}
 		});
 
-		setTransferHandler(new SongTranferHandler(context));
-		setDragEnabled(true);
+		// TODO: reenable drag when you get playlists going
+		//setTransferHandler(new SongTranferHandler(context));
+		//setDragEnabled(true);
 
 		context.getPlayer().addSongChangedEventListener(this);
 	}

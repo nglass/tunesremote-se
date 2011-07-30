@@ -31,8 +31,8 @@ import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.MatteBorder;
-import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
+import javax.swing.tree.TreePath;
 
 import net.firefly.client.controller.ResourceManager;
 import net.firefly.client.gui.swing.other.CellAnimator;
@@ -78,7 +78,7 @@ public class PlaylistTreeCellRenderer extends DefaultTreeCellRenderer {
 	public static ImageIcon LIBRARY_ICON = new ImageIcon(ResourceManager.class
 			.getResource("/net/firefly/client/resources/images/library.png"));
 
-	private boolean expanded;
+	private boolean title;
 
 	public PlaylistTreeCellRenderer() {
 		super();
@@ -88,7 +88,9 @@ public class PlaylistTreeCellRenderer extends DefaultTreeCellRenderer {
 			int row, boolean hasFocus) {
 		String stringValue = tree.convertValueToText(value, sel, expanded, leaf, row, hasFocus);
 
-		this.expanded = expanded;
+		TreePath path = tree.getPathForRow(row);
+		
+		this.title = value instanceof String;		
 		this.hasFocus = hasFocus;
 		this.selected = sel;
 		this.row = row;
@@ -101,7 +103,7 @@ public class PlaylistTreeCellRenderer extends DefaultTreeCellRenderer {
 
 		setText(stringValue);
 
-		if (sel && !expanded) { // selected and not a title
+		if (sel && !title) { // selected and not a title
 			setForeground(getTextSelectionColor());
 		} else {
 			setForeground(getTextNonSelectionColor());
@@ -109,45 +111,45 @@ public class PlaylistTreeCellRenderer extends DefaultTreeCellRenderer {
 		// There needs to be a way to specify disabled icons.
 		if (!tree.isEnabled()) {
 			setEnabled(false);
-			if (leaf) {
-				setDisabledIcon(getLeafIcon());
+			if (title) {
+			   setDisabledIcon(null);
 			} else if (expanded) {
-				setDisabledIcon(getOpenIcon());
+			   setDisabledIcon(getOpenIcon());
+			} else if (!leaf) {
+			   setDisabledIcon(getClosedIcon());
 			} else {
-				setDisabledIcon(getClosedIcon());
+			   setDisabledIcon(getLeafIcon());
 			}
+			
 		} else {
 			setEnabled(true);
-			if (leaf) {
-				setIcon(getLeafIcon());
-			} else if (expanded) {
-				setIcon(getOpenIcon());
+         if (title) {
+            setIcon(null);
+         } else if (expanded) {
+            setIcon(getOpenIcon());
+         } else if (!leaf) {
+            setIcon(getClosedIcon());
 			} else {
-				setIcon(getClosedIcon());
+			   setIcon(getLeafIcon());
 			}
 		}
 		setComponentOrientation(tree.getComponentOrientation());
 
-		// -- remove icon for titles
-		setOpenIcon(null);
-		setClosedIcon(null);
-
-		if (!expanded) { // not a title
+		if (!title) { // not a title
 			if (sel) {
 				setForeground(UIManager.getColor("Tree.selectionForeground"));
 				setFont(SELECTED_PLAYLIST_FONT);
 			} else {
 				setForeground(UIManager.getColor("Tree.foreground"));
-				Object o = ((DefaultMutableTreeNode) value).getUserObject();
-				if (o instanceof IPlaylist) {
-					PlaylistStatus ps = ((IPlaylist) o).getStatus();
+				if (value instanceof IPlaylist) {
+					PlaylistStatus ps = ((IPlaylist) value).getStatus();
 					if (ps == PlaylistStatus.LOADED) {
 						setFont(PLAYLIST_FONT);
 					} else {
 						setFont(NOT_LOADED_PLAYLIST_FONT);
 					}
-				} else if (o instanceof RadiolistList) {
-               PlaylistStatus ps = ((RadiolistList) o).getStatus();
+				} else if (value instanceof RadiolistList) {
+               PlaylistStatus ps = ((RadiolistList) value).getStatus();
                if (ps == PlaylistStatus.LOADED) {
                   setFont(PLAYLIST_FONT);
                } else {
@@ -164,7 +166,7 @@ public class PlaylistTreeCellRenderer extends DefaultTreeCellRenderer {
 			setBorder(TITLE_BORDER);
 		}
 
-		if (!expanded) { // not a title
+		if (!title) { // not a title
 			if (row == ((PlaylistTree) tree).getHighlightRow()) {
 				setBorder(DROP_TARGET_BORDER);
 			} else {
@@ -173,12 +175,12 @@ public class PlaylistTreeCellRenderer extends DefaultTreeCellRenderer {
 		} else {
 			setBorder(TITLE_BORDER);
 		}
-		CellAnimator.animate(tree, this, tree.getPathForRow(row));
+		CellAnimator.animate(tree, this, path);
 		return this;
 	}
 
 	public Icon getLeafIcon() {
-		Object o = ((DefaultMutableTreeNode) value).getUserObject();
+		Object o = value;
 		if (row == 1) {
 			return LIBRARY_ICON;
 
@@ -231,7 +233,7 @@ public class PlaylistTreeCellRenderer extends DefaultTreeCellRenderer {
 	// -- override to workaround text clipping with bold font
 	public Dimension getPreferredSize() {
 		Dimension d = super.getPreferredSize();
-		return new Dimension((int) (d.width * 1.4), (!expanded) ? 18 : 28);
+		return new Dimension((int) (d.width * 1.4), (!title) ? 18 : 28);
 	}
 
 	public void updateUI() {

@@ -21,6 +21,7 @@ package net.firefly.client.model.data;
 
 public class SongContainer implements Cloneable {
 
+   protected long databaseId = 0;
    protected long playlistId = 0;
 	protected long containerId = 0;
 	protected Song song = null;
@@ -41,6 +42,14 @@ public class SongContainer implements Cloneable {
 	   this.playlistId = playlistId;
 	}
 
+   public long getDatabaseId() {
+      return databaseId;
+   }
+   
+   public void setDatabaseId(long databaseId) {
+      this.databaseId = databaseId;
+   }
+	
 	public Song getSong() {
 		return song;
 	}
@@ -66,6 +75,7 @@ public class SongContainer implements Cloneable {
 		
 		if (this.containerId == that.containerId &&
 		    this.playlistId == that.playlistId &&
+		    this.databaseId == that.databaseId &&
 		    (this.song == that.song || 
 			 (this.song != null && that.song != null &&
 			  this.song.getDatabaseItemId() == that.song.getDatabaseItemId()))) {
@@ -76,17 +86,12 @@ public class SongContainer implements Cloneable {
 	
 	public String toString() {
 	   return this.song.getTitle();
-	   
-		//StringBuffer sb = new StringBuffer();
-		//sb.append("------------------------ song-container---------------------\n");
-		//sb.append("song-container-id     : ").append(this.containerId).append("\n");
-		//sb.append("song                  :\n").append(this.song.toString());
-		//sb.append("-------------------------------------------------------\n");
-		//return sb.toString();
 	}
 	
-	public Object clone(){
+	public Object clone() {
 		SongContainer sc = new SongContainer();
+		sc.databaseId = databaseId;
+		sc.playlistId = playlistId;
 		sc.containerId = containerId;
 		sc.song = (Song) song.clone();
 

@@ -244,7 +244,7 @@ public class Status {
       // update now playing info
       byte[] canp = resp.getRaw("canp");
       if (canp != null)
-    	  extractNowPlaying(canp);
+         extractNowPlaying(canp);
 
       int playStatus = (int) resp.getNumberLong("caps");
       int shuffleStatus = (int) resp.getNumberLong("cash");
@@ -434,6 +434,7 @@ public class Status {
             speaker.setName(mdcl.getString("minm"));
             long id = mdcl.getNumberLong("msma");
             speaker.setId(id);
+            Log.d(TAG, "Speaker = " + speaker.getName());
             int relativeVolume = (int) mdcl.getNumberLong("cmvo");
             boolean isActive = mdcl.containsKey("caia");
             speaker.setActive(isActive);
@@ -595,9 +596,9 @@ public class Status {
    public String getTrackGenre() {
       return this.trackGenre;
    }
-   
+
    public long getContainerItemId() {
-	  return this.containerItemId;
+      return this.containerItemId;
    }
 
    public long getDatabaseId() {
@@ -605,9 +606,9 @@ public class Status {
    }
    
    public long getPlaylistId() {
-	  return this.playlistId;
+      return this.playlistId;
    }
-   
+
    public long getRating() {
       return this.rating;
    }

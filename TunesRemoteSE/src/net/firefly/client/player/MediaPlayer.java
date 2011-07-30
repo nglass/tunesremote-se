@@ -94,8 +94,6 @@ public class MediaPlayer implements android.os.Handler {
 		this.status = this.session.singletonStatus(this);
 		
 		this.playingSong = new SongContainer();
-		Song s = new Song();
-		this.playingSong.setSong(s);
 		
 		this.listenerList = new EventListenerList();
 		this.playerStatus = PlayerStatus.STATUS_STOPPED;
@@ -465,14 +463,14 @@ public class MediaPlayer implements android.os.Handler {
 			}
 		} else {
 			if (playerStatus != PlayerStatus.STATUS_PLAYING) {
-				session.controlPlayPause();	
+				session.controlPlay();	
 			}
 		}
 	}
 
 	public void pause() {
 		if (playerStatus == PlayerStatus.STATUS_PLAYING) {
-			session.controlPlayPause();	
+			session.controlPause();	
 		}
 	}
 
@@ -625,6 +623,7 @@ public class MediaPlayer implements android.os.Handler {
 			
 			sc.setContainerId(status.getContainerItemId());
 			sc.setPlaylistId(status.getPlaylistId());
+			sc.setDatabaseId(status.getDatabaseId());
 			sc.setSong(s);	
 		}
 		
