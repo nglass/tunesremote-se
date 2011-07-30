@@ -4,6 +4,10 @@
 
 [http://tunesremote-se.googlecode.com/svn/wiki/screenshot.png]
 
+==Radio Browser==
+
+[http://tunesremote-se.googlecode.com/svn/wiki/radio.png]
+
 ==Preferences==
 
 [http://tunesremote-se.googlecode.com/svn/wiki/prefs.png]
