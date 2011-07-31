@@ -10,8 +10,6 @@ import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
@@ -144,15 +142,7 @@ public class LibrarySelector extends JDialog implements ListDataListener {
 		frame.pack();
 		CloseOnLastWindow.registerWindow();
 		
-		// -- center dialog when shown / manage field selection
-		addComponentListener(new ComponentAdapter() {
-			public void componentShown(ComponentEvent ce) {
-				try {
-					setUndecorated(false);
-				} catch (Throwable ignore){}
-				center();
-			}
-		});
+		center();
 	}
 	
 	// -- center the dialog
