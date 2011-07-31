@@ -139,7 +139,8 @@ public class RequestHelper {
       connection.connect();
 
       if (connection.getResponseCode() >= HttpURLConnection.HTTP_UNAUTHORIZED)
-         throw new Exception("HTTP Error Response Code: " + connection.getResponseCode());
+         throw new RequestException("HTTP Error Response Code: " + connection.getResponseCode(),
+                                    connection.getResponseCode());
 
       // obtain the encoding returned by the server
       String encoding = connection.getContentEncoding();
@@ -181,14 +182,34 @@ public class RequestHelper {
 
    public static Bitmap requestThumbnail(Session session, int itemid, String type) throws Exception {
       // http://192.168.254.128:3689/databases/38/items/2854/extra_data/artwork?session-id=788509571&revision-number=196&mw=55&mh=55
-      byte[] raw = request(String.format("%s/databases/%d/items/%d/extra_data/artwork?session-id=%s&mw=55&mh=55%s",
-               session.getRequestBase(), session.databaseId, itemid, session.sessionId, type), false);
-      return BitmapFactory.decodeByteArray(raw, 0, raw.length);
+      try {
+         byte[] raw = request(String.format("%s/databases/%d/items/%d/extra_data/artwork?session-id=%s&mw=55&mh=55%s",
+                  session.getRequestBase(), session.databaseId, itemid, session.sessionId, type), false);
+         return BitmapFactory.decodeByteArray(raw, 0, raw.length);
+      } catch (RequestException e) {
+         int code = e.getResponseCode();
+         // test for not found and server error response codes
+         if (code == 404 || code == 500) {
+            return null;
+         } else {
+            throw e;
+         }
+      }
    }
 
    public static Bitmap requestBitmap(String remote) throws Exception {
-      byte[] raw = request(remote, false);
-      return BitmapFactory.decodeByteArray(raw, 0, raw.length);
+      try {
+         byte[] raw = request(remote, false);
+         return BitmapFactory.decodeByteArray(raw, 0, raw.length);
+      } catch (RequestException e) {
+         int code = e.getResponseCode();
+         // test for not found and server error response codes
+         if (code == 404 || code == 500) {
+            return null;
+         } else {
+            throw e;
+         }
+      }
    }
 
 }

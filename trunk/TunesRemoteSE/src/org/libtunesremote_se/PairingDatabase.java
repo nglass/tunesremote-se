@@ -17,6 +17,7 @@ public class PairingDatabase {
 	private final static String FIELD_PAIR_GUID = "guid";
 	private final static String KEY_PAIRING_CODE = "pair";
 	private final static String KEY_SERVICE_GUID = "serviceguid";
+	private final static String KEY_LAST_SESSION = "lastsession";
 	
 	protected final static byte[] CHAR_TABLE = new byte[] { (byte) '0',
 		(byte) '1', (byte) '2', (byte) '3', (byte) '4', (byte) '5',
@@ -133,6 +134,14 @@ public class PairingDatabase {
 	
 	public String getServiceGuid() {
 		return findCode(KEY_SERVICE_GUID);
+	}
+	
+	public String getLastSession() {
+	   return findCode(KEY_LAST_SESSION);
+	}
+	
+	public void setLastSession(String serviceName) {
+	   updateCode(KEY_LAST_SESSION, serviceName);
 	}
 	
 	public static String toHex(byte[] code) {

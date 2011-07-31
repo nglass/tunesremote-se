@@ -19,6 +19,9 @@
  */
 package net.firefly.client.gui.swing.tree;
 
+import java.awt.Color;
+import java.awt.Dimension;
+
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
@@ -58,9 +61,14 @@ public class RadioOutline extends Outline {
       setRootVisible(false);
       setColumnHidingAllowed(false);
       
+      // -- show vertical lines only
       setShowGrid(false);
       setShowHorizontalLines(false);
-      setShowVerticalLines(false);
+      setShowVerticalLines(true);
+      setGridColor(new Color(217, 217, 217)); // -- vertical lines colors
+      setIntercellSpacing(new Dimension(1, 0)); // -- space needed by
+      
+      setRowHeight(18);
       
       TableColumn firstColumn = getColumnModel().getColumn(0);
       firstColumn.setCellRenderer(new RadiolistTreeCellRenderer(JLabel.LEFT, true));
