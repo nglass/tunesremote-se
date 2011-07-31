@@ -15,6 +15,7 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
+import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JList;
@@ -22,10 +23,12 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
+import javax.swing.event.ListDataEvent;
+import javax.swing.event.ListDataListener;
 
 import org.tunesremote.daap.Session;
 
-public class LibrarySelector extends JDialog {
+public class LibrarySelector extends JDialog implements ListDataListener {
 
 	private static final long serialVersionUID = 2893337391529305727L;
 	private JList addressList;
@@ -36,6 +39,10 @@ public class LibrarySelector extends JDialog {
 	protected int height;
 	
 	protected Frame rootContainer;
+	
+	protected DefaultListModel model;
+	
+	protected String lastSession;
 	
 	private void close() {
 		this.setVisible(false);
@@ -54,12 +61,17 @@ public class LibrarySelector extends JDialog {
 		this.height = 200;
 		
 		pairingDatabase = new PairingDatabase(TunesService.getConfigDirectory());
-
-		addressList = new JList(TunesService.getServiceList());	   
+		lastSession = pairingDatabase.getLastSession();
+		
+		model = TunesService.getServiceList();
+		model.addListDataListener(this);
+		
+		addressList = new JList(model);	   
 		addressList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		addressList.setSelectedIndex(0);
+		addressList.setSelectedIndex(-1);
 		addressList.setVisibleRowCount(5);
 		JScrollPane listScrollPane = new JScrollPane(addressList);
+		initSelection();
 
 		JPanel buttonPane = new JPanel();
 		buttonPane.setLayout(new FlowLayout(FlowLayout.CENTER));
@@ -91,6 +103,7 @@ public class LibrarySelector extends JDialog {
 						if (session != null) {
 							frame.setVisible(false);
 							callback.newSession(l, session);
+							pairingDatabase.setLastSession(l.getServiceName());
 							close();
 						}
 						
@@ -154,4 +167,32 @@ public class LibrarySelector extends JDialog {
 		}
 		validate();
 	}
+
+	public void initSelection() {
+	   // If user has not modified selection then
+      // Automatically highlight last Session if found
+      if (addressList.getSelectedIndex() == -1 && lastSession != null) {
+         for (int i = 0; i < model.size(); i++) {
+            Object o = model.get(i);
+            if (o instanceof LibraryDetails) {
+               LibraryDetails l = (LibraryDetails) o;
+               if (l.getServiceName().equals(lastSession)) {
+                  addressList.setSelectedIndex(i);
+                  break;
+               }
+            }
+         }
+      }
+	}
+	
+   @Override
+   public void contentsChanged(ListDataEvent arg0) {
+      initSelection();
+   }
+
+   @Override
+   public void intervalAdded(ListDataEvent arg0) {}
+
+   @Override
+   public void intervalRemoved(ListDataEvent arg0) {}
 }

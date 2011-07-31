@@ -1,3 +1,22 @@
+/*
+ * This file is part of TunesRemote SE.
+ *
+ * TunesRemote SE is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * any later version.
+ *
+ * TunesRemote SE is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with TunesRemote SE; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ * 
+ * Copyright 2011 Nick Glass
+ */
 package org.tunesremote_se;
 
 import javax.swing.ImageIcon;
@@ -26,17 +45,32 @@ public class TunesRemoteSE {
 	
 	private static String configRootDirectory;
 	
-    public static boolean MAC_OS_X = (System.getProperty("os.name").toLowerCase().startsWith("mac os x"));
+   public static boolean MAC_OS_X = (System.getProperty("os.name").toLowerCase().startsWith("mac os x"));
 	
-    protected AboutDialog aboutDialog = null;
+   protected AboutDialog aboutDialog = null;
   
-    Configuration config = null;
+   Configuration config = null;
     
-    Image icon;
-
+   Image icon;
+    
 	public static void main (String [] args) throws ClassNotFoundException {
 		System.out.println("Launching " + Version.getLongApplicationName() + " ...");
 
+		for (int i = 0; i < args.length - 1; i+=2) {
+		   String arg   = args[i];
+		   String value = args[i+1];
+		   
+		   if (arg.equals("-loglevel")) {
+		      try {
+		         int level = Integer.parseInt(value);
+		         System.out.println("Setting -loglevel to " + value);
+		         android.util.Log.setLogLevel(level); 
+		      } catch (NumberFormatException e) {
+		         System.err.println("Illegal value for -loglevel : " + value);
+		      }
+		   }
+		}
+		
 	   UIManager.put("Tree.expandedIcon", 
 	         new ImageIcon(TunesRemoteSE.class.getResource("/net/firefly/client/resources/images/tree-down.png")));
 		

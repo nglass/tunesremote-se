@@ -38,7 +38,7 @@ public class TunesService extends Thread implements ServiceListener, Closeable {
 		try {
 			zeroConf = JmDNS.create();
 			zeroConf.addServiceListener(TOUCH_ABLE_TYPE, this);
-			zeroConf.addServiceListener(DACP_TYPE, this);
+			//zeroConf.addServiceListener(DACP_TYPE, this);
 
 			// Start the pairing server
 			pairingServer = new PairingServer(configDirectory);
@@ -77,7 +77,7 @@ public class TunesService extends Thread implements ServiceListener, Closeable {
 	}
 
 	public void updateService(String serviceName, ServiceInfo serviceInfo) {
-		final String libraryName = serviceInfo.getPropertyString("CtlN");
+	   final String libraryName = serviceInfo.getPropertyString("CtlN");
 		final String address = serviceInfo.getHostAddress();
 		final String library = serviceInfo.getPropertyString("DbId");
 		final int port = serviceInfo.getPort();
