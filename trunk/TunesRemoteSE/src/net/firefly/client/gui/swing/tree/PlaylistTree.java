@@ -42,7 +42,6 @@ import javax.swing.JTree;
 import javax.swing.SwingUtilities;
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
-import javax.swing.plaf.TreeUI;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeSelectionModel;
 import javax.swing.tree.TreePath;
@@ -258,10 +257,6 @@ public class PlaylistTree extends JTree implements TreeModelListener, Autoscroll
 				}
 			}
 		}
-	}
-
-	public void setUI(TreeUI ui) {
-		;
 	}
 
 	public Color getBackground() {

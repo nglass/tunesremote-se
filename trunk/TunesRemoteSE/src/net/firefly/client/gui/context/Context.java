@@ -19,6 +19,7 @@
  */
 package net.firefly.client.gui.context;
 
+import javax.swing.SwingUtilities;
 import javax.swing.event.EventListenerList;
 
 import org.tunesremote.daap.Session;
@@ -388,9 +389,15 @@ public class Context {
 	   return radiolists;
 	}
 
-	public void setPlaylists(PlaylistList playlists) {
-		this.playlists = playlists;
-		firePlaylistListChange(new PlaylistListChangedEvent(playlists));
+	public void setPlaylists(final PlaylistList playlists) {
+		final Context c = this;
+
+      SwingUtilities.invokeLater(new Runnable() {
+         public void run() {
+            c.playlists = playlists;
+            firePlaylistListChange(new PlaylistListChangedEvent(playlists));
+         }
+      });
 	}
 
 	public IPlaylist getSelectedPlaylist() {

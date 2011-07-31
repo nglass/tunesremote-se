@@ -21,7 +21,6 @@ package net.firefly.client.gui.swing.dialog;
 
 import java.awt.Component;
 import java.awt.Cursor;
-import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -29,22 +28,15 @@ import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 
 import javax.swing.Box;
-import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 
 import net.firefly.client.controller.LibraryManager;
@@ -62,10 +54,11 @@ import net.firefly.client.model.data.list.ArtistList;
 import net.firefly.client.model.data.list.GenreList;
 import net.firefly.client.model.data.list.SongList;
 import net.firefly.client.model.library.Library;
+import net.firefly.client.model.library.LibraryInfo;
 import net.firefly.client.model.playlist.list.PlaylistList;
 import net.firefly.client.tools.FireflyClientException;
 
-public class DatabaseDialog extends JDialog implements PropertyChangeListener, SongListLoadProgressListener {
+public class DatabaseDialog extends JDialog implements SongListLoadProgressListener {
 
 	private static final long serialVersionUID = -3947598961831559192L;
 
@@ -77,10 +70,6 @@ public class DatabaseDialog extends JDialog implements PropertyChangeListener, S
 	protected Frame rootContainer;
 
 	protected int cachedSongCount;
-
-	protected JButton loadRemoteVersionButton;
-
-	protected JButton cancelButton;
 
 	protected IRequestManager requestManager;
 	
@@ -143,17 +132,6 @@ public class DatabaseDialog extends JDialog implements PropertyChangeListener, S
 					+ ResourceManager.getLabel("dialog.library.load.up.to.date", context.getConfig().getLocale()));
 		}
 
-		// -- buttons
-		loadRemoteVersionButton = new JButton(ResourceManager.getLabel("dialog.library.load.button.load.remote",
-				context.getConfig().getLocale()));
-		// loadRemoteVersionButton.setFocusPainted(false);
-		loadRemoteVersionButton.addActionListener(new LoadRemoteSongListButtonActionListener(this));
-
-		cancelButton = new JButton(ResourceManager.getLabel("dialog.library.load.button.cancel", context.getConfig()
-				.getLocale()));
-		// cancelButton.setFocusPainted(false);
-		cancelButton.addActionListener(new CancelButtonActionListener(this));
-
 		// -- add elements in the layout
 		int margin = 15;
 		
@@ -177,14 +155,6 @@ public class DatabaseDialog extends JDialog implements PropertyChangeListener, S
 		GridBagConstraints progressBarGBC = new GridBagConstraints(0, 4, 2, 1, 0, 0, GridBagConstraints.CENTER,
 				GridBagConstraints.BOTH, new Insets(15, margin, 2, margin), 1, 1);
 
-		GridBagConstraints buttonPanelGBC = new GridBagConstraints(0, 5, 2, 1, 0, 0, GridBagConstraints.CENTER,
-				GridBagConstraints.HORIZONTAL, new Insets(15, margin, margin, margin), 1, 1);
-
-		// -- buttons
-		JPanel buttonPanel = new JPanel(new FlowLayout());
-		buttonPanel.add(cancelButton);
-		buttonPanel.add(loadRemoteVersionButton);
-		
 		getContentPane().setLayout(new GridBagLayout());
 		getContentPane().add(libraryNameLabel, libraryNameLabelGBC);
 		getContentPane().add(libraryNameLabelValue, libraryNameLabelValueGBC);
@@ -198,33 +168,22 @@ public class DatabaseDialog extends JDialog implements PropertyChangeListener, S
 		}
 		getContentPane().add(progressBar, progressBarGBC);
 
-		getContentPane().add(buttonPanel, buttonPanelGBC);
-
 		// -- close/submission behaviour
 		setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 		addKeyListener(new EscapeKeyListener());
-		loadRemoteVersionButton.addKeyListener(new EscapeKeyListener());
-		cancelButton.addKeyListener(new EscapeKeyListener());
 
 		// -- center dialog when shown / manage field selection
-		addComponentListener(new ComponentAdapter() {
-			public void componentShown(ComponentEvent ce) {
-				SplashScreen.close();
-				try {
-					setUndecorated(false);
-				} catch (Throwable ignore){}
-				center();
-				// -- manage default button
-				getRootPane().setDefaultButton(loadRemoteVersionButton);
-				loadRemoteVersionButton.requestFocus();
-				// -- library autoloading
-				if (context.isAutoload()){
-					getRootPane().getDefaultButton().doClick();
-				}
-			}
-		});
-		
-		UIManager.addPropertyChangeListener(this);
+      SplashScreen.close();
+      try {
+         setUndecorated(false);
+      } catch (Throwable ignore){}
+      center();
+
+      SwingUtilities.invokeLater(new Runnable() {
+         public void run() {
+            loadRemoteSongList();
+         }
+      });
 	}
 
 	// -- center the dialog
@@ -234,13 +193,6 @@ public class DatabaseDialog extends JDialog implements PropertyChangeListener, S
 		int x = rcRect.x + (rcRect.width / 2) - (getWidth() / 2), y = rcRect.y + (rcRect.height / 2) - (getHeight() / 2);
 		setBounds(x, y, getWidth(), getHeight());
 		validate();
-	}
-
-	public void propertyChange(PropertyChangeEvent e) {
-		if (e.getPropertyName().equals("lookAndFeel")) {
-			SwingUtilities.updateComponentTreeUI(this);
-			return;
-		}
 	}
 
 	protected void enableDialog(boolean enable) {
@@ -254,8 +206,6 @@ public class DatabaseDialog extends JDialog implements PropertyChangeListener, S
 			setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 			// setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 		}
-		loadRemoteVersionButton.setEnabled(enable);
-		cancelButton.setEnabled(enable);
 	}
 
 	// -- INNER CLASS(ES)
@@ -393,123 +343,120 @@ public class DatabaseDialog extends JDialog implements PropertyChangeListener, S
 		}
 	}
 
-	class LoadRemoteSongListButtonActionListener implements ActionListener {
-		protected DatabaseDialog dialog;
+	public void loadRemoteSongList() {
+	   final DatabaseDialog dialog = this;
+	   
+      // -- action thread
+      Thread t = new Thread(new Runnable() {
+         public void run() {
+            try {
+               // 0 - ask confirmation if it seems to be up-to-date
+               if (cachedSongCount == context.getLibraryInfo().getSongCount()) {
+                  int confirm = JOptionPane.showConfirmDialog(rootContainer, ResourceManager.getLabel(
+                        "dialog.library.full.reload.confirm.message", context.getConfig().getLocale()),
+                        ResourceManager.getLabel("dialog.library.full.reload.confirm.title", context
+                              .getConfig().getLocale()), JOptionPane.YES_NO_OPTION);
+                  if (confirm != JOptionPane.YES_OPTION) {
+                     dialog.enableDialog(true);
+                     progressBar.setIndeterminate(false);
+                     progressBar.setValue(0);
+                     return;
+                  }
+               }
 
-		public LoadRemoteSongListButtonActionListener(DatabaseDialog dialog) {
-			this.dialog = dialog;
-		}
+               // 1 - Get the remote song list
+               if (progressBar != null) {
+                  progressBar.setMaximum(context.getLibraryInfo().getSongCount());
+               }
+               SongList songList = null;
 
-		public void actionPerformed(ActionEvent e) {
-			// -- action thread
-			Thread t = new Thread(new Runnable() {
-				public void run() {
-					try {
-						// 0 - ask confirmation if it seems to be up-to-date
-						if (cachedSongCount == context.getLibraryInfo().getSongCount()) {
-							int confirm = JOptionPane.showConfirmDialog(rootContainer, ResourceManager.getLabel(
-									"dialog.library.full.reload.confirm.message", context.getConfig().getLocale()),
-									ResourceManager.getLabel("dialog.library.full.reload.confirm.title", context
-											.getConfig().getLocale()), JOptionPane.YES_NO_OPTION);
-							if (confirm != JOptionPane.YES_OPTION) {
-								dialog.enableDialog(true);
-								progressBar.setIndeterminate(false);
-								progressBar.setValue(0);
-								return;
-							}
-						}
+               try {
+                  progressBar.setAdditionalLabel(ResourceManager.getLabel(
+                        "dialog.library.progress.loading.remote", context.getConfig().getLocale()));
+                  songList = requestManager.getSongList(context.getLibraryInfo().getHost(), context
+                        .getLibraryInfo().getPort(), "","", context.getLibraryInfo().getPassword(), dialog);
+                  
+                  // 2 - update the context
+                  context.setMasterSongList(songList);
+                  context.setGlobalSongList(songList);
+                  context.setGlobalGenreList(ListManager.extractGenreList(context.getGlobalSongList(), context
+                        .getConfig().getLocale()));
+                  context.setGlobalArtistList(ListManager.extractArtistList(context.getGlobalSongList(), context
+                        .getConfig().getLocale()));
+                  context.setGlobalAlbumList(ListManager.extractAlbumList(context.getGlobalSongList(), context
+                        .getConfig().getLocale()));
 
-						// 1 - Get the remote song list
-						if (progressBar != null) {
-							progressBar.setMaximum(context.getLibraryInfo().getSongCount());
-						}
-						SongList songList = null;
+                  context.setFilteredGenreList((GenreList) context.getGlobalGenreList().clone());
+                  context.setFilteredArtistList((ArtistList) context.getGlobalArtistList().clone());
+                  context.setFilteredSongList((SongList) context.getGlobalSongList().clone());
+                  context.setFilteredAlbumList((AlbumList) context.getGlobalAlbumList().clone());
 
-						try {
-							progressBar.setAdditionalLabel(ResourceManager.getLabel(
-									"dialog.library.progress.loading.remote", context.getConfig().getLocale()));
-							songList = requestManager.getSongList(context.getLibraryInfo().getHost(), context
-									.getLibraryInfo().getPort(), "","", context.getLibraryInfo().getPassword(), dialog);
-							
-							// 2 - update the context
-							context.setMasterSongList(songList);
-							context.setGlobalSongList(songList);
-							context.setGlobalGenreList(ListManager.extractGenreList(context.getGlobalSongList(), context
-									.getConfig().getLocale()));
-							context.setGlobalArtistList(ListManager.extractArtistList(context.getGlobalSongList(), context
-									.getConfig().getLocale()));
-							context.setGlobalAlbumList(ListManager.extractAlbumList(context.getGlobalSongList(), context
-									.getConfig().getLocale()));
+                  // 3- get playlist list
+                  PlaylistList playlists = playlistRequestManager.getPlaylistList(context.getSession().databaseId, songList);
+                  context.setPlaylists(playlists);
+                  
+                  // 4 - auto save newly loaded library
+                  Thread t = new Thread(new Runnable(){
+                     public void run() {
+                        Library library = new Library();
+                        LibraryInfo li = context.getLibraryInfo();
+                        if (li == null) return;
+                        library.setLibraryInfo(li);
+                        library.setSongList(context.getMasterSongList());
+                        try {
+                           LibraryManager.saveLibrary(context.getConfig().getConfigRootDirectory(), library, true);
+                        } catch (FireflyClientException ex) {
+                           ErrorDialog.showDialog(rootContainer, ResourceManager.getLabel("dialog.save.library.error.message", context
+                                 .getConfig().getLocale(), new String[] { ex.getMessage() }), ResourceManager.getLabel(
+                                 "dialog.save.library.error.title", context.getConfig().getLocale()), ex, context.getConfig()
+                                 .getLocale());
+                           return;
+                        }
+                     }
+                  });
+                  t.start();
+                  
+               } catch (FireflyClientException ex) {
+                  dialog.enableDialog(true);
+                  ErrorDialog.showDialog(rootContainer, ResourceManager.getLabel(
+                        "dialog.library.load.error.message", context.getConfig().getLocale(),
+                        new String[] { ex.getMessage() }), ResourceManager.getLabel(
+                        "dialog.library.load.error.title", context.getConfig().getLocale()), ex, context
+                        .getConfig().getLocale());
+                  progressBar.setIndeterminate(false);
+                  progressBar.setValue(0);
+                  return;
+               }
+               // 4 - restore dialog title / hide dialog
+               dialog.enableDialog(true);
+               dialog.setVisible(false);
+               
+            } catch (Throwable t) {
+               dialog.enableDialog(true);
+               ErrorDialog.showDialog(rootContainer, ResourceManager.getLabel(
+                     "dialog.library.load.unexpected.error.message", context.getConfig().getLocale(),
+                     new String[] { ((t.getMessage() != null) ? " (" + t.getMessage() + ")." : ".") }),
+                     ResourceManager.getLabel("dialog.library.load.unexpected.error.title", context
+                           .getConfig().getLocale()), t, context.getConfig().getLocale());
+               progressBar.setIndeterminate(false);
+               progressBar.setValue(0);
+               return;
+            } finally {
+               context.setAutoload(false);
+            }
+         }
+      });
+      // 1 - Change dialog appearance
+      progressBar.setIndeterminate(true);
+      dialog.enableDialog(false);
+      t.start();
 
-							context.setFilteredGenreList((GenreList) context.getGlobalGenreList().clone());
-							context.setFilteredArtistList((ArtistList) context.getGlobalArtistList().clone());
-							context.setFilteredSongList((SongList) context.getGlobalSongList().clone());
-							context.setFilteredAlbumList((AlbumList) context.getGlobalAlbumList().clone());
-
-							// 3- get playlist list
-							PlaylistList playlists = playlistRequestManager.getPlaylistList(context.getSession().databaseId, songList);
-							context.setPlaylists(playlists);
-							
-							// 4 - auto save newly loaded library
-							Thread t = new Thread(new Runnable(){
-								public void run() {
-									Library library = new Library();
-									library.setLibraryInfo(context.getLibraryInfo());
-									library.setSongList(context.getMasterSongList());
-									try {
-										LibraryManager.saveLibrary(context.getConfig().getConfigRootDirectory(), library, true);
-									} catch (FireflyClientException ex) {
-										ErrorDialog.showDialog(rootContainer, ResourceManager.getLabel("dialog.save.library.error.message", context
-												.getConfig().getLocale(), new String[] { ex.getMessage() }), ResourceManager.getLabel(
-												"dialog.save.library.error.title", context.getConfig().getLocale()), ex, context.getConfig()
-												.getLocale());
-										return;
-									}
-								}
-							});
-							t.start();
-							
-						} catch (FireflyClientException ex) {
-							dialog.enableDialog(true);
-							ErrorDialog.showDialog(rootContainer, ResourceManager.getLabel(
-									"dialog.library.load.error.message", context.getConfig().getLocale(),
-									new String[] { ex.getMessage() }), ResourceManager.getLabel(
-									"dialog.library.load.error.title", context.getConfig().getLocale()), ex, context
-									.getConfig().getLocale());
-							progressBar.setIndeterminate(false);
-							progressBar.setValue(0);
-							return;
-						}
-						// 4 - restore dialog title / hide dialog
-						dialog.enableDialog(true);
-						dialog.setVisible(false);
-						
-					} catch (Throwable t) {
-						dialog.enableDialog(true);
-						ErrorDialog.showDialog(rootContainer, ResourceManager.getLabel(
-								"dialog.library.load.unexpected.error.message", context.getConfig().getLocale(),
-								new String[] { ((t.getMessage() != null) ? " (" + t.getMessage() + ")." : ".") }),
-								ResourceManager.getLabel("dialog.library.load.unexpected.error.title", context
-										.getConfig().getLocale()), t, context.getConfig().getLocale());
-						progressBar.setIndeterminate(false);
-						progressBar.setValue(0);
-						return;
-					} finally {
-						context.setAutoload(false);
-					}
-				}
-			});
-			// 1 - Change dialog appearance
-			progressBar.setIndeterminate(true);
-			dialog.enableDialog(false);
-			t.start();
-
-		}
-	}
+   }
 	
 	public void processWindowEvent(WindowEvent e) {
 		if (e.getID() == WindowEvent.WINDOW_CLOSING) {
 			context.setLibraryInfo(null);
+			context.setPlaylists(null);
 		}
 		super.processWindowEvent(e);
 	}
