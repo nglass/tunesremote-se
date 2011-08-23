@@ -137,11 +137,16 @@ public class PairingServer extends Thread {
 					final BufferedReader br = new BufferedReader(
 							new InputStreamReader(socket.getInputStream()));
 					while (br.ready()) {
-						String line = br.readLine();
+						String line = br.readLine();					
 						if (line.contains("servicename=")) {
-							int index = line.indexOf("servicename=");
-							serviceName = line.substring(index + 12,
-									index + 12 + 16);
+						   String[] tokens = line.split("[ &?=]");
+						   
+						   for (int i=0; i<tokens.length - 1; i++) {
+						      if (tokens[i].equals("servicename")) {
+						         serviceName = tokens[i+1];
+						         break;
+						      }
+						   }
 						}
 
 						Log.d(TAG, line);
@@ -168,8 +173,8 @@ public class PairingServer extends Thread {
 					if (serviceName != null) {
 						// add this to the pairing db
 						Log.i(TAG, "address = " + address);
-						Log.i(TAG, "servicename = " + serviceName);
-						Log.i(TAG, "niceCode = " + niceCode);
+						Log.i(TAG, "servicename = \"" + serviceName + "\"");
+						Log.i(TAG, "niceCode = \"" + niceCode + "\"");
 
 						pairingDatabase.updateCode(serviceName, niceCode);
 					}
