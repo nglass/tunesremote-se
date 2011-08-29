@@ -28,7 +28,6 @@ import javax.swing.TransferHandler;
 
 import net.firefly.client.gui.context.Context;
 import net.firefly.client.gui.swing.table.SongTable;
-import net.firefly.client.gui.swing.table.model.TableSorter;
 import net.firefly.client.model.data.Song;
 import net.firefly.client.model.data.SongContainer;
 
@@ -80,10 +79,10 @@ public class SongTranferHandler extends TransferHandler {
 			}
 
 			List<SongContainer> songs = new ArrayList<SongContainer>();
-			TableSorter ts = (TableSorter)table.getModel();
+			//TableSorter ts = (TableSorter)table.getModel();
 			for (int row = 0; row < rows.length; row++) {
-				int modelIndex = ts.modelIndex(rows[row]);
-				SongContainer sc = context.getFilteredSongList().get(modelIndex);
+				//int modelIndex = ts.modelIndex(rows[row]);
+				SongContainer sc = context.getFilteredSongList().get(rows[row]);
 				if (sc != null) {
 					songs.add(sc);
 				}

@@ -26,34 +26,28 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.text.Collator;
-import java.util.Locale;
+//import java.text.Collator;
+//import java.util.Locale;
 
-import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.JViewport;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
-import javax.swing.table.TableColumn;
+
+import org.netbeans.swing.etable.ETable;
 
 import net.firefly.client.gui.context.Context;
 //import net.firefly.client.gui.swing.table.dnd.SongTranferHandler;
 import net.firefly.client.gui.swing.table.menu.PlaylistContextMenu;
+import net.firefly.client.gui.swing.table.model.SongTableColumnModel;
 import net.firefly.client.gui.swing.table.model.SongTableModel;
-import net.firefly.client.gui.swing.table.model.TableSorter;
-import net.firefly.client.gui.swing.table.renderer.AlbumCellRenderer;
-import net.firefly.client.gui.swing.table.renderer.ArtistCellRenderer;
-import net.firefly.client.gui.swing.table.renderer.ColumnZeroRenderer;
-import net.firefly.client.gui.swing.table.renderer.DefaultCellRenderer;
-import net.firefly.client.gui.swing.table.renderer.NumberCellRenderer;
-import net.firefly.client.gui.swing.table.renderer.TimeCellRenderer;
 import net.firefly.client.model.data.SongContainer;
 import net.firefly.client.model.playlist.IPlaylist;
 import net.firefly.client.model.playlist.StaticPlaylist;
 import net.firefly.client.player.events.SongChangedEvent;
 import net.firefly.client.player.listeners.SongChangedEventListener;
 
-public class SongTable extends JTable implements SongChangedEventListener {
+public class SongTable extends ETable implements SongChangedEventListener {
 
 	private static final long serialVersionUID = -4037076767371823099L;
 
@@ -70,10 +64,11 @@ public class SongTable extends JTable implements SongChangedEventListener {
 	}
 
 	public void playSong() {
-		final int selectedRowIndex = getSelectedRow();
-		final int modelIndex = ((TableSorter)getModel()).modelIndex(selectedRowIndex);
-		if (modelIndex != -1) {
-			context.getFilteredSongList().selectSong(modelIndex);
+	   final int selectedRowIndex = getSelectedRow();
+		final int selectedModelIndex = convertRowIndexToModel(selectedRowIndex);
+		
+		if (selectedRowIndex != -1) {
+			context.getFilteredSongList().selectSong(selectedModelIndex);
 			context.getPlayer().stopPlayback();
 			context.getPlayer().play();
 			SwingUtilities.invokeLater(new Runnable() {
@@ -85,13 +80,7 @@ public class SongTable extends JTable implements SongChangedEventListener {
 	}
 	
 	private void initialize() {
-		// -- table model
-		TableSorter tableSorter = new TableSorter(new SongTableModel(rootContainer, context), context);
-		tableSorter.setColumnComparator(String.class, Collator.getInstance(Locale.FRANCE));
-		tableSorter.setSortingDirectives(context.getConfig().getSongListSortingCriteria());
-		setModel(tableSorter);
-		
-		context.setTableSorter(tableSorter);
+		setModel(new SongTableModel(rootContainer, context));
 
 		// -- show vertical lines only
 		setShowGrid(false);
@@ -109,62 +98,8 @@ public class SongTable extends JTable implements SongChangedEventListener {
 		// SongSelectionChangedListener listener = new
 		// SongSelectionChangedListener(this, context);
 		// getSelectionModel().addListSelectionListener(listener);
-
-		// -- fixed columns (bo reordering
-		getTableHeader().setReorderingAllowed(false);
-
-		// column size
-		// setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
-		setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
-
-		TableColumn iconColumn = getColumnModel().getColumn(0);
-		iconColumn.setPreferredWidth(26);
-		iconColumn.setMaxWidth(26);
-		iconColumn.setMinWidth(26);
-		iconColumn.setCellRenderer(new ColumnZeroRenderer(JLabel.CENTER, true));
-
-		TableColumn titleColumn = getColumnModel().getColumn(1);
-		titleColumn.setPreferredWidth(255);
-		titleColumn.setCellRenderer(new DefaultCellRenderer(JLabel.LEFT, true));
-
-		TableColumn timeColumn = getColumnModel().getColumn(2);
-		timeColumn.setPreferredWidth(53);
-		timeColumn.setMaxWidth(53);
-		timeColumn.setMinWidth(53);
-		timeColumn.setCellRenderer(new TimeCellRenderer(JLabel.RIGHT, true, context));
-
-		TableColumn artistColumn = getColumnModel().getColumn(3);
-		artistColumn.setPreferredWidth(185);
-		artistColumn.setCellRenderer(new ArtistCellRenderer(JLabel.LEFT, true, context));
-
-		TableColumn albumColumn = getColumnModel().getColumn(4);
-		albumColumn.setPreferredWidth(185);
-		albumColumn.setCellRenderer(new AlbumCellRenderer(JLabel.LEFT, true, context));
-
-		TableColumn yearColumn = getColumnModel().getColumn(5);
-		yearColumn.setPreferredWidth(52);
-		yearColumn.setMaxWidth(52);
-		yearColumn.setMinWidth(52);
-		yearColumn.setCellRenderer(new NumberCellRenderer(JLabel.RIGHT, true, context));
-
-		TableColumn trackNumberColumn = getColumnModel().getColumn(6);
-		trackNumberColumn.setPreferredWidth(30);
-		trackNumberColumn.setMaxWidth(30);
-		trackNumberColumn.setMinWidth(30);
-		trackNumberColumn.setCellRenderer(new NumberCellRenderer(JLabel.RIGHT, true, context));
-
-		TableColumn discNumberColumn = getColumnModel().getColumn(7);
-		discNumberColumn.setPreferredWidth(37);
-		discNumberColumn.setMaxWidth(37);
-		discNumberColumn.setMinWidth(37);
-		discNumberColumn.setCellRenderer(new NumberCellRenderer(JLabel.RIGHT, true, context));
-
-		TableColumn lastColumn = getColumnModel().getColumn(8);
-		lastColumn.setMinWidth(0);
-		lastColumn.setMaxWidth(2000);
-		lastColumn.setCellRenderer(new DefaultCellRenderer(JLabel.LEFT, true));
-
-		tableSorter.setTableHeader(getTableHeader());
+		
+		setColumnModel(new SongTableColumnModel(this, context));
 		
 		contextMenu = new PlaylistContextMenu(context, this, rootContainer);
 		
@@ -208,7 +143,7 @@ public class SongTable extends JTable implements SongChangedEventListener {
 							for (int i=0; i<selectedRows.length; i++){
 								songs[i] = p.getSongList().get(selectedRows[i]);
 							}
-							((SongTableModel)((TableSorter)getModel()).getTableModel()).removeSongs(songs);
+							((SongTableModel)getModel()).removeSongs(songs);
 						}
 					}
 				}
@@ -226,8 +161,10 @@ public class SongTable extends JTable implements SongChangedEventListener {
 		if (!(table.getParent() instanceof JViewport)) {
 			return;
 		}
+		
+		int viewIndex = this.convertRowIndexToView(rowIndex);
 		JViewport viewport = (JViewport) table.getParent();
-		Rectangle rect = table.getCellRect(rowIndex, 0, true);
+		Rectangle rect = table.getCellRect(viewIndex, 0, true);
 		Point pt = viewport.getViewPosition();
 		rect.setLocation(rect.x - pt.x, rect.y - pt.y);
 		viewport.scrollRectToVisible(rect);
@@ -239,8 +176,7 @@ public class SongTable extends JTable implements SongChangedEventListener {
 			int index = context.getFilteredSongList().getSelectedIndex();
 			if (index > -1 && index < context.getFilteredSongList().size()) {
 				// -- scroll the current played song row into view
-				int viewIndex = ((TableSorter)getModel()).viewIndex(index);
-				scrollToVisible(this, viewIndex);
+				scrollToVisible(this, index);
 				repaint();
 			}
 		}

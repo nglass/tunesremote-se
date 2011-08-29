@@ -50,7 +50,6 @@ import net.firefly.client.gui.context.listeners.SavedLibraryListChangedEventList
 import net.firefly.client.gui.context.listeners.SelectedPlaylistChangedEventListener;
 import net.firefly.client.gui.context.listeners.StaticPlaylistCreationEventListener;
 import net.firefly.client.gui.swing.panel.GlobalContainer;
-import net.firefly.client.gui.swing.table.model.TableSorter;
 import net.firefly.client.model.configuration.Configuration;
 import net.firefly.client.model.data.Album;
 import net.firefly.client.model.data.Artist;
@@ -119,8 +118,6 @@ public class Context {
 
 	protected String serverVersion;
 
-	protected TableSorter tableSorter;
-
 	protected GlobalContainer globalContainer;
 
 	protected boolean isApplet = false;
@@ -185,14 +182,6 @@ public class Context {
 
 	public void setGlobalContainer(GlobalContainer globalContainer) {
 		this.globalContainer = globalContainer;
-	}
-
-	public TableSorter getTableSorter() {
-		return tableSorter;
-	}
-
-	public void setTableSorter(TableSorter tableSorter) {
-		this.tableSorter = tableSorter;
 	}
 
 	public String getServerVersion() {

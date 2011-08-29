@@ -267,7 +267,6 @@ public class DatabaseDialog extends JDialog implements SongListLoadProgressListe
 									.getLibraryInfo().getPort(), "", "", context.getLibraryInfo().getPassword(), songList.getMaxDatabaseId(), dialog);
 							
 							// 3 - update the context
-							songList.sort();
 							context.setMasterSongList(songList);
 							context.setGlobalSongList(songList);
 							context.setGlobalGenreList(ListManager.extractGenreList(context.getGlobalSongList(), context

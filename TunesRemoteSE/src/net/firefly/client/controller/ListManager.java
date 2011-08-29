@@ -84,8 +84,7 @@ public class ListManager {
 			Song s = sc.getSong();
 			if (s != null && s.getArtist() != null) {
 				if (!s.isPartOfACompilation()) {
-					Artist a = new Artist(s.getArtist(), s.getSortArtist(), s.getArtistId());
-					artistSet.add(a);
+					artistSet.add(s.getArtist());
 				} else {
 					artistList.addCompilation();
 				}
@@ -110,8 +109,8 @@ public class ListManager {
 		while (scit.hasNext()) {
 			SongContainer sc = scit.next();
 			Song s = sc.getSong();
-			if (s != null && s.getAlbum() != null) {
-				albumSet.add(new Album(s.getAlbum(), s.getSortAlbum(), s.getAlbumId()));
+			if (s != null && s.getAlbum() != null && s.getAlbum().toString() != null) {
+				albumSet.add(s.getAlbum());
 			}
 		}
 		// -- sorting with costly Album comparison (collator based) with reduced extracted album list
@@ -151,7 +150,7 @@ public class ListManager {
 			if (((flags & FLG_SEARCH_ARTIST) > 0) && (s.getArtist() != null)) {
 				boolean matches_artist = true;
 				for (int i = 0; i < patterns.length; i++) {
-					Matcher aMatcher = patterns[i].matcher(s.getArtist());
+					Matcher aMatcher = patterns[i].matcher(s.getArtist().toString());
 					matches_artist = matches_artist && aMatcher.find();
 				}
 				matches = matches || matches_artist;
@@ -159,7 +158,7 @@ public class ListManager {
 			if (((flags & FLG_SEARCH_ALBUM) > 0) && (s.getAlbum() != null)) {
 				boolean matches_album = true;
 				for (int i = 0; i < patterns.length; i++) {
-					Matcher aMatcher = patterns[i].matcher(s.getAlbum());
+					Matcher aMatcher = patterns[i].matcher(s.getAlbum().toString());
 					matches_album = matches_album && aMatcher.find();
 				}
 				matches = matches || matches_album;
@@ -207,7 +206,8 @@ public class ListManager {
 					matchesAlbum = true;
 				} else {
 					for (int i = 0; i < albums.length; i++) {
-						if (s.getAlbum() != null && s.getAlbum().equalsIgnoreCase(albums[i].getAlbum())) {
+						if (s.getAlbum() != null && s.getAlbum().toString() != null &&
+						    s.getAlbum().toString().equalsIgnoreCase(albums[i].toString())) {
 							matchesAlbum = true;
 							break;
 						}
@@ -228,7 +228,8 @@ public class ListManager {
 							matchesArtistOrCompilation = true;
 						} else {
 							for (int i = 0; i < artists.length; i++) {
-								if (s.getArtist() != null && s.getArtist().equalsIgnoreCase(artists[i].getArtist())) {
+								if (s.getArtist() != null && s.getArtist().toString() != null &&
+								    s.getArtist().toString().equalsIgnoreCase(artists[i].toString())) {
 									matchesArtistOrCompilation = true;
 									break;
 								}

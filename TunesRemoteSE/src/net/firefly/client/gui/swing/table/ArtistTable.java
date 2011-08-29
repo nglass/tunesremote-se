@@ -38,7 +38,6 @@ import net.firefly.client.controller.ListManager;
 import net.firefly.client.gui.context.Context;
 import net.firefly.client.gui.swing.table.listeners.ArtistSelectionChangedListener;
 import net.firefly.client.gui.swing.table.model.ArtistTableModel;
-import net.firefly.client.gui.swing.table.model.TableSorter;
 import net.firefly.client.gui.swing.table.renderer.ArtistCellRenderer;
 import net.firefly.client.model.data.list.SongList;
 
@@ -63,13 +62,7 @@ public class ArtistTable extends JTable {
 		context.getPlayer().stopPlayback();
 		SongList sl = context.getFilteredSongList();
 		if (sl != null){
-			TableSorter ts = context.getTableSorter();
-			if (ts != null){
-				int modelIndex = ts.modelIndex(0);
-				if (modelIndex != -1) {
-					context.getFilteredSongList().selectSong(modelIndex);
-				}
-			}
+		   sl.selectSong(0);
 		}
 		context.getPlayer().play();
 	}

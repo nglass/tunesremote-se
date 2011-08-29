@@ -20,7 +20,6 @@
 package net.firefly.client.model.data.list;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Random;
@@ -31,8 +30,6 @@ import java.util.TreeMap;
 
 import net.firefly.client.gui.context.Context;
 import net.firefly.client.model.data.SongContainer;
-import net.firefly.client.model.data.sorting.song.ArtistAlbumComparator;
-import net.firefly.client.player.PlayerMode;
 
 public class SongList implements Cloneable {
 
@@ -75,10 +72,6 @@ public class SongList implements Cloneable {
 		index = newSelectedIndex;
 	}
 
-	public void sort() {
-		Collections.sort(this.songs, ArtistAlbumComparator.getInstance());
-	}
-
 	public SongContainer get(int i) {
 		return this.songs.get(i);
 	}
@@ -115,11 +108,6 @@ public class SongList implements Cloneable {
    }
 	
 	public SongContainer selectedSong(Context context) {
-		if (context.getPlayer() != null) {
-			if (PlayerMode.MODE_SHUFFLE == context.getPlayer().getPlayerMode() && index == 0) {
-				return nextRandomizedSong();
-			}
-		}
 		if (this.songs.size() > 0) {
 			try {
 				SongContainer s = this.songs.get(index);
@@ -138,68 +126,6 @@ public class SongList implements Cloneable {
 			}
 		} else {
 			return null;
-		}
-	}
-
-	// -- navigation
-	public SongContainer nextSong(Context context) {
-		int viewIndex = context.getTableSorter().viewIndex(index);
-		if (viewIndex < this.songs.size() - 1) {
-			viewIndex++;
-			index = context.getTableSorter().modelIndex(viewIndex);
-			SongContainer s = this.songs.get(index);
-			playedSongsIndexesSet.add(new Integer(index));
-			if (playedSongsStack.empty()) {
-				playedSongsStack.push(s);
-			} else {
-				SongContainer lastSong = playedSongsStack.peek();
-				if (!lastSong.equals(s)) {
-					playedSongsStack.push(s);
-				}
-			}
-			return s;
-			
-		} else {
-			return null;
-		}
-	}
-
-	public SongContainer nextRandomizedSong() {
-		if (playedSongsIndexesSet.size() == songs.size()){
-			// -- all songs have already been played once;
-			playedSongsIndexesSet.clear();
-		}
-		int newIndex = generator.nextInt(this.songs.size());
-		if (songs.size() > 1) {
-			while (playedSongsIndexesSet.contains(new Integer(newIndex)) || newIndex == index) {
-				newIndex = generator.nextInt(this.songs.size());
-			}
-		}
-		index = newIndex;
-		playedSongsIndexesSet.add(new Integer(index));
-		SongContainer s = this.songs.get(index);
-		playedSongsStack.push(s);
-		return s;
-	}
-
-	public SongContainer previousSong(Context context) {
-		if (playedSongsStack.size() < 2) {
-			if (!playedSongsStack.empty()){
-				playedSongsStack.pop(); // -- remove last song
-			}
-			int viewIndex = context.getTableSorter().viewIndex(index);
-			if (viewIndex > 0) {
-				viewIndex--;
-				index =  context.getTableSorter().modelIndex(viewIndex);
-				return this.songs.get(index);
-			} else {
-				return null;
-			}
-		} else {
-			playedSongsStack.pop(); // -- remove current song
-			SongContainer s = playedSongsStack.pop();
-			index = songs.indexOf(s);
-			return s;
 		}
 	}
 
