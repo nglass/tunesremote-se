@@ -76,6 +76,12 @@ public class TunesRemoteSE {
 		
 	   UIManager.put("Tree.collapsedIcon", 
             new ImageIcon(TunesRemoteSE.class.getResource("/net/firefly/client/resources/images/tree-right.png")));
+
+	   try {
+	      UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+	   } catch (Exception ex) {
+	      System.err.println("Look and Feel Error : " + ex.getMessage());
+	   }
 	   
 		if (MAC_OS_X) {
 			// ensure property is set to place menus at top of screen
