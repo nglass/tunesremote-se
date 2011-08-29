@@ -20,17 +20,12 @@
 package net.firefly.client.model.playlist;
 
 import net.firefly.client.model.data.list.SongList;
-import net.firefly.client.model.data.list.SortedSongList;
 
 public class M3UPlaylist extends AbstractPlaylist {
 
-	public M3UPlaylist(SongList parentLibrarySongList, boolean sort) {
+	public M3UPlaylist(SongList parentLibrarySongList) {
 		super(parentLibrarySongList);
-		if (sort){
-			this.songList = new SortedSongList();
-		} else {
-			this.songList = new SongList();
-		}
+		this.songList = new SongList();
 	}
 
 	public String getPlaylistSpec() {

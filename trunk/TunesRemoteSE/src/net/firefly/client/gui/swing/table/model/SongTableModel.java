@@ -31,6 +31,8 @@ import net.firefly.client.gui.context.Context;
 import net.firefly.client.gui.context.events.FilteredSongListChangedEvent;
 import net.firefly.client.gui.context.listeners.FilteredSongListChangedEventListener;
 import net.firefly.client.gui.swing.dialog.ErrorDialog;
+import net.firefly.client.model.data.Album;
+import net.firefly.client.model.data.Artist;
 import net.firefly.client.model.data.ColumnZero;
 import net.firefly.client.model.data.Song;
 import net.firefly.client.model.data.SongContainer;
@@ -73,7 +75,7 @@ public class SongTableModel extends AbstractTableModel implements FilteredSongLi
 	}
 
 	public int getColumnCount() {
-		return 9;
+		return 8;
 	}
 
 	public int getRowCount() {
@@ -95,12 +97,12 @@ public class SongTableModel extends AbstractTableModel implements FilteredSongLi
 					return new ColumnZero(row, null);
 				}
 			case 1:
-				return s.getTitle();
+				return s;
 			case 2:
 				return new Date(s.getTime());
-			case 3: // TODO return an artist object so that we can use artist comparator
+			case 3:
 				return s.getArtist();
-			case 4: // TODO return an album object so that we can use artist comparator
+			case 4:
 				return s.getAlbum();
 			case 5:
 				int year = 0;
@@ -123,8 +125,6 @@ public class SongTableModel extends AbstractTableModel implements FilteredSongLi
 				} catch (Exception e){
 				}
 				return new Integer(dn);
-			case 8:
-				return " ";
 			default:
 				return " ";
 			}
@@ -150,8 +150,6 @@ public class SongTableModel extends AbstractTableModel implements FilteredSongLi
 			return this.trackNumberColumnName;
 		case 7:
 			return this.discNumberColumnName;
-		case 8:
-			return " ";
 		default:
 			return "";
 		}
@@ -163,21 +161,19 @@ public class SongTableModel extends AbstractTableModel implements FilteredSongLi
 		case 0:
 			return ColumnZero.class;
 		case 1:
-			return String.class;
+			return Song.class;
 		case 2:
 			return Date.class;
 		case 3:
-			return String.class;
+			return Artist.class;
 		case 4:
-			return String.class;
+			return Album.class;
 		case 5:
 			return Integer.class;
 		case 6:
 			return Integer.class;
 		case 7:
 			return Integer.class;
-		case 8:
-			return String.class;
 		default:
 			return String.class;
 		}

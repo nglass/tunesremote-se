@@ -611,15 +611,21 @@ public class MediaPlayer implements android.os.Handler {
 		// If we really cant find the song in the database then
 		// Make a new song based on now playing information
 		if (sc == null) {			
-		    sc = new SongContainer();
-		    Song s = new Song();
+		   sc = new SongContainer();
+		   Song s = new Song();
 			
-			s.setAlbum(status.getTrackAlbum());
-			s.setArtist(status.getTrackArtist());
 			s.setTitle(status.getTrackName());
 			s.setTime(status.getProgressTotal() * 1000);
 			s.setGenre(status.getTrackGenre());
 			s.setDatabaseItemId(status.getTrackId());
+			
+			String artistName = status.getTrackArtist();
+			Artist artist = new Artist(artistName, artistName, "");
+			s.setArtist(artist);
+			
+			String albumName = status.getTrackAlbum();
+			Album album = new Album(albumName, albumName, "");
+         s.setAlbum(album);
 			
 			sc.setContainerId(status.getContainerItemId());
 			sc.setPlaylistId(status.getPlaylistId());

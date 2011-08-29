@@ -20,8 +20,9 @@
 package net.firefly.client.model.data;
 
 import java.io.Serializable;
+import java.text.Collator;
 
-public class Song implements Cloneable, Serializable {
+public class Song implements Comparable<Song>, Cloneable, Serializable {
 
 	private static final long serialVersionUID = 5882214037382735970L;
 
@@ -32,22 +33,16 @@ public class Song implements Cloneable, Serializable {
 	protected String genre;
 	
 	protected String artistAlbum;
+	
+	protected Artist artist;
 
-	protected String sortArtist;
-	
-	protected String artist;
-	
-	protected String artistId;
-
-	protected String album;
-	
-	protected String sortAlbum;
-	
-	protected String albumId;
+	protected Album album;
 
 	protected String year;
 
 	protected String title;
+	
+	protected String sortTitle;
 
 	protected String discNumber;
 
@@ -58,31 +53,19 @@ public class Song implements Cloneable, Serializable {
 	protected long time;
 	
 	protected String type;
+
+   private static Collator collator = Collator.getInstance();
+   
+   static {
+      collator.setStrength(Collator.PRIMARY);
+   }
 	
 	public Song() {
 		this.partOfACompilation = false;
 	}
 
 	public String toString() {
-		StringBuffer sb = new StringBuffer();
-		sb.append("------------------------ song ------------------------\n");
-		sb.append("database-item-id      : ").append(this.databaseItemId).append("\n");
-		sb.append("part-of-a-compilation : ").append(this.partOfACompilation).append("\n");
-		sb.append("genre                 : ").append(this.genre).append("\n");
-		sb.append("artist-album          : ").append(this.artistAlbum).append("\n");
-		sb.append("artist                : ").append(this.artist).append("\n");
-		sb.append("sort-artist           : ").append(this.sortArtist).append("\n");
-		sb.append("album                 : ").append(this.album).append("\n");
-		sb.append("sort-album            : ").append(this.sortAlbum).append("\n");
-		sb.append("year                  : ").append(this.year).append("\n");
-		sb.append("title                 : ").append(this.title).append("\n");
-		sb.append("disc-number           : ").append(this.discNumber).append("\n");
-		sb.append("track-number          : ").append(this.trackNumber).append("\n");
-		sb.append("size                  : ").append(this.size).append("\n");
-		sb.append("time                  : ").append(this.time).append("\n");
-		sb.append("type                  : ").append(this.type).append("\n");
-		sb.append("-------------------------------------------------------\n");
-		return sb.toString();
+		return title;
 	}
 
 	public boolean equals(Object o) {
@@ -99,11 +82,7 @@ public class Song implements Cloneable, Serializable {
 				&& this.partOfACompilation == s.isPartOfACompilation()
 				&& ((this.genre != null && this.genre.equals(s.getGenre())) || (this.genre == null && s.getGenre() == null))
 				&& ((this.artist != null && this.artist.equals(s.getArtist())) || (this.artist == null && s.getArtist() == null))
-				&& ((this.artistId != null && this.artist.equals(s.getArtistId())) || (this.artistId == null && s.getArtistId() == null))
-				&& ((this.sortArtist != null && this.sortArtist.equals(s.getSortArtist())) || (this.sortArtist == null && s.getSortArtist() == null))
 				&& ((this.album != null && this.album.equals(s.getAlbum())) || (this.album == null && s.getAlbum() == null))
-				&& ((this.albumId != null && this.albumId.equals(s.getAlbumId())) || (this.albumId == null && s.getAlbumId() == null))
-				&& ((this.sortAlbum != null && this.sortAlbum.equals(s.getSortAlbum())) || (this.sortAlbum == null && s.getSortAlbum() == null))
 				&& ((this.year != null && this.year.equals(s.getYear())) || (this.year == null && s.getYear() == null))
 				&& ((this.title != null && this.title.equals(s.getTitle())) || (this.title == null && s.getTitle() == null))
 				&& ((this.type != null && this.type.equals(s.getType())) || (this.type == null && s.getType() == null))
@@ -120,7 +99,7 @@ public class Song implements Cloneable, Serializable {
 	/**
 	 * @return Returns the album.
 	 */
-	public String getAlbum() {
+	public Album getAlbum() {
 		return album;
 	}
 
@@ -128,30 +107,14 @@ public class Song implements Cloneable, Serializable {
 	 * @param album
 	 *            The album to set.
 	 */
-	public void setAlbum(String album) {
+	public void setAlbum(Album album) {
 		this.album = album;
-	}
-
-	public String getSortAlbum() {
-		return sortAlbum;
-	}
-
-	public void setSortAlbum(String sortAlbum) {
-		this.sortAlbum = sortAlbum;
-	}
-	
-	public String getAlbumId() {
-		return albumId;
-	}
-
-	public void setAlbumId(String albumId) {
-		this.albumId = albumId;
 	}
 	
 	/**
 	 * @return Returns the artist.
 	 */
-	public String getArtist() {
+	public Artist getArtist() {
 		return artist;
 	}
 
@@ -159,38 +122,8 @@ public class Song implements Cloneable, Serializable {
 	 * @param artist
 	 *            The artist to set.
 	 */
-	public void setArtist(String artist) {
+	public void setArtist(Artist artist) {
 		this.artist = artist;
-	}
-
-	/**
-	 * @return Returns the artist.
-	 */
-	public String getArtistId() {
-		return artistId;
-	}
-
-	/**
-	 * @param artist
-	 *            The artist to set.
-	 */
-	public void setArtistId(String artistId) {
-		this.artistId = artistId;
-	}
-	
-	/**
-	 * @return Returns the artist.
-	 */
-	public String getSortArtist() {
-		return sortArtist;
-	}
-
-	/**
-	 * @param artist
-	 *            The artist to set.
-	 */
-	public void setSortArtist(String sortArtist) {
-		this.sortArtist = sortArtist;
 	}
 	
 	/**
@@ -281,6 +214,24 @@ public class Song implements Cloneable, Serializable {
 	 */
 	public void setTitle(String title) {
 		this.title = title;
+		if (this.sortTitle == null) {
+		   this.sortTitle = title;
+		}
+	}
+
+   /**
+    * @return Returns the sortTitle.
+    */
+   public String getSortTitle() {
+      return sortTitle;
+   }
+	
+   /**
+    * @param sortTitle
+    *            The sortTitle to set.
+    */
+	public void setSortTitle(String sortTitle) {
+	   this.sortTitle = sortTitle;
 	}
 
 	/**
@@ -365,10 +316,8 @@ public class Song implements Cloneable, Serializable {
 	public Object clone(){
 		Song s = new Song();
 		s.album = album;
-		s.sortAlbum = sortAlbum;
 		s.artist = artist;
 		s.artistAlbum = artistAlbum;
-		s.sortArtist = sortArtist;
 		s.databaseItemId = databaseItemId;
 		s.discNumber = discNumber;
 		s.genre = genre;
@@ -379,4 +328,9 @@ public class Song implements Cloneable, Serializable {
 		s.type = type;
 		return s;
 	}
+
+   @Override
+   public int compareTo(Song a) {
+      return collator.compare(this.sortTitle, a.getSortTitle());
+   }
 }

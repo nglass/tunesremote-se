@@ -342,7 +342,10 @@ public class ClientFrame extends JFrame implements PlayerErrorOccuredEventListen
 		SongContainer sc = evt.getSongPlayed();
 		Song s = sc.getSong();
 		if (s != null){
-			String artist = s.getArtist();
+			String artist = null;
+			if (s.getArtist() != null) {
+			   artist = s.getArtist().toString();
+			}
 			if (artist == null || artist.trim().length() == 0 ){
 				artist = ResourceManager.getLabel("table.unknown.artist", context.getConfig().getLocale()); 
 			}

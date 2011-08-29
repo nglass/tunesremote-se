@@ -30,7 +30,6 @@ import net.firefly.client.controller.ResourceManager;
 import net.firefly.client.gui.context.Context;
 import net.firefly.client.gui.swing.table.SongTable;
 import net.firefly.client.gui.swing.table.model.SongTableModel;
-import net.firefly.client.gui.swing.table.model.TableSorter;
 import net.firefly.client.model.data.SongContainer;
 import net.firefly.client.model.playlist.IPlaylist;
 import net.firefly.client.model.playlist.StaticPlaylist;
@@ -75,7 +74,7 @@ public class PlaylistContextMenu extends JPopupMenu {
 					for (int i=0; i<selectedRows.length; i++){
 						songs[i] = p.getSongList().get(selectedRows[i]);
 					}
-					((SongTableModel)((TableSorter)songTable.getModel()).getTableModel()).removeSongs(songs);
+					((SongTableModel)songTable.getModel()).removeSongs(songs);
 				}
 			}
 		}

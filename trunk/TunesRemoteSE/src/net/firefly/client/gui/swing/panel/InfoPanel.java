@@ -230,20 +230,25 @@ public class InfoPanel extends JPanel implements PlayerStatusChangedEventListene
 
 	public String getSongInfo(Song s) {
 		if (s != null) {
-			String artist = "";
-			String album = "";
+			String artist = null;
+			String album = null;
 			String year = "";
 			String albumYear = "";
-			if (s.getArtist() != null && s.getArtist().trim().length() > 0) {
-				artist = s.getArtist();
-			} else {
+			
+			if (s.getArtist() != null) {
+			   artist = s.getArtist().toString();
+			}
+			if (artist == null || artist.trim().length() == 0) {
 				artist = ResourceManager.getLabel("table.unknown.artist", context.getConfig().getLocale());
 			}
-			if (s.getAlbum() != null && s.getAlbum().trim().length() > 0) {
-				album = s.getAlbum();
-			} else {
-				album = ResourceManager.getLabel("table.unknown.album", context.getConfig().getLocale());
-			}
+
+	      if (s.getAlbum() != null) {
+	         album = s.getAlbum().toString();
+	      }
+	      if (s.getAlbum() == null || album.trim().length() == 0) {
+	         album = ResourceManager.getLabel("table.unknown.album", context.getConfig().getLocale());
+	      }
+			
 			if (s.getYear() != null && s.getYear().trim().length() > 0 && !"0".equals(s.getYear().trim())) {
 				year = " (" + s.getYear() + ") ";
 			}

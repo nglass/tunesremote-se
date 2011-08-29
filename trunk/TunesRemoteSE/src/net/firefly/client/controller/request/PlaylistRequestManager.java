@@ -38,6 +38,8 @@ import net.firefly.client.controller.events.SongListLoadProgressEvent;
 import net.firefly.client.controller.listeners.SongListLoadProgressListener;
 import net.firefly.client.gui.context.Context;
 import net.firefly.client.gui.context.events.SelectedPlaylistChangedEvent;
+import net.firefly.client.model.data.Album;
+import net.firefly.client.model.data.Artist;
 import net.firefly.client.model.data.RadioStation;
 import net.firefly.client.model.data.Song;
 import net.firefly.client.model.data.SongContainer;
@@ -164,16 +166,21 @@ public class PlaylistRequestManager {
 						
 						song.setDatabaseItemId(resp.getNumberLong("miid"));
 						song.setTitle(resp.getString("minm"));
-						song.setArtist(resp.getString("asar"));
-						song.setAlbum(resp.getString("asal"));
 						song.setGenre(resp.getString("asgn"));
 						song.setTime(resp.getNumberLong("astm"));
-						song.setAlbumId(resp.getNumberString("asai"));
-						song.setArtistId(resp.getNumberString("asri"));
 						
-						song.setSortArtist(song.getArtist());
-						song.setSortAlbum(song.getAlbum());
+						String artistName = resp.getString("asar");
+						String artistId = resp.getNumberString("asri");
+						String sortArtist = artistName;
+						Artist artist = new Artist(artistName, sortArtist, artistId);
+						song.setArtist(artist);
 						
+						String albumName = resp.getString("asal");
+						String albumId = resp.getNumberString("asai");
+						String sortAlbum = albumName;
+						Album album = new Album(albumName, sortAlbum, albumId);
+						song.setAlbum(album);
+									
 						sc.setSong(song);
 					}
 					

@@ -24,7 +24,6 @@ import java.util.Iterator;
 
 import net.firefly.client.model.data.SongContainer;
 import net.firefly.client.model.data.list.SongList;
-import net.firefly.client.model.data.list.SortedSongList;
 
 public abstract class AbstractPlaylist implements IPlaylist {
 
@@ -154,7 +153,7 @@ public abstract class AbstractPlaylist implements IPlaylist {
 	public void setStatus(PlaylistStatus status) {
 		this.status = status;
 		if (PlaylistStatus.NOT_LOADED.equals(status)) {
-			this.songList = new SortedSongList();
+			this.songList = new SongList();
 		}
 	}
 	

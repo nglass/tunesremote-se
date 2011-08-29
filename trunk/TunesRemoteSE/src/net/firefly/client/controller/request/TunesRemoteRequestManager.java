@@ -32,6 +32,8 @@ import android.util.Log;
 
 import net.firefly.client.controller.events.SongListLoadProgressEvent;
 import net.firefly.client.controller.listeners.SongListLoadProgressListener;
+import net.firefly.client.model.data.Album;
+import net.firefly.client.model.data.Artist;
 import net.firefly.client.model.data.Database;
 import net.firefly.client.model.data.Song;
 import net.firefly.client.model.data.SongContainer;
@@ -54,7 +56,7 @@ public class TunesRemoteRequestManager implements IRequestManager {
 					"%s/databases/%d/containers/%s/items?session-id=%s&meta=dmap.itemname," +
 					"dmap.itemid,daap.songartist,daap.songartistid,daap.songalbumid,daap.songalbum," +
 					"daap.songgenre,daap.songtime,daap.songyear,daap.songtracknumber,daap.songdiscnumber," +
-					"dmap.containeritemid,daap.sortartist,daap.sortalbum,daap.songcompilation," +
+					"dmap.containeritemid,daap.sortname,daap.sortartist,daap.sortalbum,daap.songcompilation," +
 					"&query=('com.apple.itunes.mediakind:1','com.apple.itunes.mediakind:32')",
 					session.getRequestBase(), 
 					session.databaseId, 
@@ -146,30 +148,36 @@ public class TunesRemoteRequestManager implements IRequestManager {
 					
 					song.setDatabaseItemId(resp.getNumberLong("miid"));
 					song.setTitle(resp.getString("minm"));
-					song.setArtist(resp.getString("asar"));
-					song.setAlbum(resp.getString("asal"));
+					
+					String sortTitle = resp.getString("assn");
+					if (sortTitle != null && sortTitle.length() > 0) {
+					   song.setSortTitle(sortTitle);
+					}
+					
 					song.setGenre(resp.getString("asgn"));
 					song.setTime(resp.getNumberLong("astm"));
 					song.setYear(resp.getNumberString("asyr"));
 					song.setDiscNumber(resp.getNumberString("asdn"));
 					song.setPartOfACompilation(resp.getNumberLong("asco") != 0);
 					song.setTrackNumber(resp.getNumberString("astn"));
-					song.setAlbumId(resp.getNumberString("asai"));
-					song.setArtistId(resp.getNumberString("asri"));
-									
+					
+					String artistName = resp.getString("asar");
+					String artistId = resp.getNumberString("asri");		
 					String sortArtist = resp.getString("assa");
-					if (sortArtist.length() > 0) {
-						song.setSortArtist(sortArtist);
-					} else {
-						song.setSortArtist(song.getArtist());
-					}
-							
+					if (sortArtist == null || sortArtist.length() == 0) {
+					   sortArtist = artistName;
+					}	
+					Artist artist = new Artist(artistName, sortArtist, artistId);
+					song.setArtist(artist);
+					
+					String albumName = resp.getString("asal");
+					String albumId = resp.getNumberString("asai");
 					String sortAlbum = resp.getString("assu");
-					if (sortAlbum.length() > 0) {
-						song.setSortAlbum(sortAlbum);
-					} else {
-						song.setSortAlbum(song.getAlbum());
+					if (sortAlbum == null || sortAlbum.length() == 0) {
+						sortAlbum = albumName;
 					}
+					Album album = new Album(albumName, sortAlbum, albumId);
+					song.setAlbum(album);
 					
 					sc.setSong(song);
 					
