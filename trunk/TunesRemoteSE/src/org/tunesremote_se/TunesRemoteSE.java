@@ -71,6 +71,8 @@ public class TunesRemoteSE {
 		   }
 		}
 		
+		System.setProperty("http.agent", TunesRemoteSE.class.getSimpleName());
+		
 	   UIManager.put("Tree.expandedIcon", 
 	         new ImageIcon(TunesRemoteSE.class.getResource("/net/firefly/client/resources/images/tree-down.png")));
 		
