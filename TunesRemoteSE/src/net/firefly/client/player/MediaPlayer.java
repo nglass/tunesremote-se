@@ -130,6 +130,9 @@ public class MediaPlayer implements android.os.Handler {
 		case Status.UPDATE_RATING:
 			//System.out.println("UPDATE_RATING");
 			break;
+		case Status.UPDATE_REVISION:
+		   //System.out.println("UPDATE_REVISION");
+		   break;
 		default:
 			System.err.println("Error: handleTunesRemoteMessage " + what);
 			break;

@@ -112,7 +112,7 @@ public class PlaylistRequestManager {
 				//long itemCount = resp.getNumberLong("mimc");
 				//long editCommands = resp.getNumberLong("meds");
 			   
-			   Log.i(TAG, String.format(
+			   Log.d(TAG, String.format(
 			         "read playlist %d - %s, per %s, db %s, parent %d, smart %b, special %d, sg %b",
 			         playlist.getPlaylistId(),
 			         playlist.getPlaylistName(),
