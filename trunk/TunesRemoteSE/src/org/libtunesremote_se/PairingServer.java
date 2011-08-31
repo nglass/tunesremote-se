@@ -131,25 +131,27 @@ public class PairingServer extends Thread {
 
 				try {
 					String serviceName = null;
+					String pairingcode = null;
 					output = socket.getOutputStream();
 
 					// output the contents for debugging
 					final BufferedReader br = new BufferedReader(
 							new InputStreamReader(socket.getInputStream()));
 					while (br.ready()) {
-						String line = br.readLine();					
+						String line = br.readLine();
+						Log.d(TAG, line);
 						if (line.contains("servicename=")) {
 						   String[] tokens = line.split("[ &?=]");
 						   
 						   for (int i=0; i<tokens.length - 1; i++) {
+						      if (tokens[i].equals("pairingcode")) {
+						         pairingcode = tokens[i+1];
+						      }
 						      if (tokens[i].equals("servicename")) {
 						         serviceName = tokens[i+1];
-						         break;
 						      }
 						   }
 						}
-
-						Log.d(TAG, line);
 					}
 
 					// edit our local PAIRING_RAW to return the correct guid
@@ -169,12 +171,13 @@ public class PairingServer extends Thread {
 
 					output.write(reply);
 
-					Log.i(TAG, "someone paired with me!");
-					if (serviceName != null) {
+					Log.i(TAG, "Received pairing command");
+					if (serviceName != null && pairingcode != null) {
 						// add this to the pairing db
 						Log.i(TAG, "address = " + address);
 						Log.i(TAG, "servicename = \"" + serviceName + "\"");
-						Log.i(TAG, "niceCode = \"" + niceCode + "\"");
+						Log.i(TAG, "pairingcode = \"" + pairingcode + "\"");
+						Log.d(TAG, "niceCode = \"" + niceCode + "\"");
 
 						pairingDatabase.updateCode(serviceName, niceCode);
 					}

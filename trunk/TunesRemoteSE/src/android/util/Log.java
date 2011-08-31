@@ -328,7 +328,7 @@ public final class Log {
     /** @hide */ public static final int LOG_ID_SYSTEM = 3;
 
     
-    private static int logLevel = WARN;
+    private static int logLevel = INFO;
     
     public static void setLogLevel(int level) {
     	logLevel = level;  	
