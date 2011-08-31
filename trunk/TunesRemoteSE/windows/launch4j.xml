@@ -1,0 +1,38 @@
+<launch4jConfig>
+  <dontWrapJar>false</dontWrapJar>
+  <headerType>gui</headerType>
+  <jar>../dist/TunesRemoteSE.jar</jar>
+  <outfile>../dist/TunesRemoteSE.exe</outfile>
+  <errTitle>TunesRemoteSE</errTitle>
+  <cmdLine></cmdLine>
+  <chdir></chdir>
+  <priority>normal</priority>
+  <downloadUrl>http://java.com/download</downloadUrl>
+  <supportUrl>http://code.google.com/p/tunesremote-se/</supportUrl>
+  <customProcName>false</customProcName>
+  <stayAlive>false</stayAlive>
+  <manifest></manifest>
+  <icon>tunesremote.ico</icon>
+  <singleInstance>
+    <mutexName>TunesRemoteSE</mutexName>
+    <windowTitle>TunesRemoteSE</windowTitle>
+  </singleInstance>
+  <jre>
+    <path></path>
+    <minVersion>1.6.0</minVersion>
+    <maxVersion></maxVersion>
+    <jdkPreference>preferJre</jdkPreference>
+  </jre>
+  <versionInfo>
+    <fileVersion>1.0.0.0</fileVersion>
+    <txtFileVersion>1.0.0.0</txtFileVersion>
+    <fileDescription>TunesRemote SE helps you remote control your DACP-compatible media player from another computer</fileDescription>
+    <copyright>2011 Nick Glass</copyright>
+    <productVersion>1.0.0.0</productVersion>
+    <txtProductVersion>1.0.0.0</txtProductVersion>
+    <productName>TunesRemoteSE</productName>
+    <companyName>Nick Glass</companyName>
+    <internalName>TunesRemoteSE</internalName>
+    <originalFilename>TunesRemoteSE.exe</originalFilename>
+  </versionInfo>
+</launch4jConfig>
