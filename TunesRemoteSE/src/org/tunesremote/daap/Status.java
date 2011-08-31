@@ -59,6 +59,7 @@ public class Status {
    public final static int UPDATE_TRACK = 4;
    public final static int UPDATE_COVER = 5;
    public final static int UPDATE_RATING = 6;
+   public final static int UPDATE_REVISION = 7;
    private final static int MAX_FAILURES = 10;
 
    /**
@@ -78,31 +79,32 @@ public class Status {
    private String trackName = "", trackArtist = "", trackAlbum = "", trackGenre = "";
    private long progressTotal = 0, progressRemain = 0;
    private final Session session;
-   private Handler update = null;
+   private Handler handler = null;
    private AtomicInteger failures = new AtomicInteger(0);
    private long revision = 1;
+   private long playStatusRevision = 1;
 
    /**
     * Constructor accepts a Session and UI Handler to update the UI.
     * @param session
     * @param update
     */
-   public Status(Session session, Handler update) {
+   public Status(Session session, Handler handler) {
       this.session = session;
-      this.update = update;
+      this.handler = handler;
 
       // create two threads, one for backend keep-alive updates
       // and a second one to update running time and fire gui events
-
+      this.update.start();
       this.progress.start();
-      this.keepalive.start();
+      this.playStatusUpdate.start();
 
       // keep our status updated with server however we need to
       // end thread when getting any 404 responses, etc
    }
 
    public void updateHandler(Handler handler) {
-      this.update = handler;
+      this.handler = handler;
    }
 
    protected final Thread progress = new Thread(new Runnable() {
@@ -129,8 +131,8 @@ public class Status {
 
                // update progress and gui
                progressRemain -= (System.currentTimeMillis() - anchor);
-               if (update != null)
-                  update.sendEmptyMessage(UPDATE_PROGRESS);
+               if (handler != null)
+                  handler.sendEmptyMessage(UPDATE_PROGRESS);
 
                // trigger a forced update if we seem to gone past end of
                // song
@@ -170,7 +172,34 @@ public class Status {
       }
    });
 
-   protected final Thread keepalive = new Thread(new Runnable() {
+   protected final Thread update = new Thread(new Runnable() {
+      public void run() {
+         while (true) {
+            try {
+               // sleep a few seconds to make sure we dont kill stuff
+               Thread.sleep(1000);
+               if (destroyThread.get())
+                  break;
+
+               // try fetching next revision update using socket keepalive
+               // approach
+               // using the next revision-number will make itunes keepalive
+               // until something happens
+               // GET /update?revision-number=1&daap-no-disconnect=1&session-id=1250589827
+               parseUpdate(RequestHelper.requestParsed(
+                        String.format("%s/update?revision-number=%d&daap-no-disconnect=1&session-id=%s", session.getRequestBase(), revision, session.sessionId),
+                        true));
+            } catch (Exception e) {
+               Log.d(TAG, String.format("Exception in update thread, so killing try# %d", failures.get()), e);
+               if (failures.incrementAndGet() > MAX_FAILURES)
+                  destroy();
+            }
+         }
+         Log.w(TAG, "Status update Thread Killed!");
+      }
+   });
+   
+   protected final Thread playStatusUpdate = new Thread(new Runnable() {
       public void run() {
          while (true) {
             try {
@@ -184,8 +213,8 @@ public class Status {
                // using the next revision-number will make itunes keepalive
                // until something happens
                // http://192.168.254.128:3689/ctrl-int/1/playstatusupdate?revision-number=1&session-id=1034286700
-               parseUpdate(RequestHelper.requestParsed(
-                        String.format("%s/ctrl-int/1/playstatusupdate?revision-number=%d&session-id=%s", session.getRequestBase(), revision, session.sessionId),
+               parsePlayStatusUpdate(RequestHelper.requestParsed(
+                        String.format("%s/ctrl-int/1/playstatusupdate?revision-number=%d&session-id=%s", session.getRequestBase(), playStatusRevision, session.sessionId),
                         true));
             } catch (Exception e) {
                Log.d(TAG, String.format("Exception in keepalive thread, so killing try# %d", failures.get()), e);
@@ -203,8 +232,9 @@ public class Status {
       if (this.destroyThread.get())
          return;
       this.destroyThread.set(true);
+      this.update.interrupt();
       this.progress.interrupt();
-      this.keepalive.interrupt();
+      this.playStatusUpdate.interrupt();
    }
 
    public void fetchUpdate() {
@@ -216,7 +246,7 @@ public class Status {
                // using revision-number=1 will make sure we return
                // instantly
                // http://192.168.254.128:3689/ctrl-int/1/playstatusupdate?revision-number=1&session-id=1034286700
-               parseUpdate(RequestHelper.requestParsed(
+               parsePlayStatusUpdate(RequestHelper.requestParsed(
                         String.format("%s/ctrl-int/1/playstatusupdate?revision-number=%d&session-id=%s", session.getRequestBase(), 1, session.sessionId), false));
             } catch (Exception e) {
                Log.w(TAG, e);
@@ -229,11 +259,22 @@ public class Status {
    }
 
    protected void parseUpdate(Response resp) throws Exception {
+      resp = resp.getNested("mupd");
+      long newrevision = resp.getNumberLong("musr");
+      
+      this.revision = newrevision;
+      
+      // send off updated event to gui
+      if (handler != null)
+         this.handler.sendEmptyMessage(UPDATE_REVISION);
+   }
+   
+   protected void parsePlayStatusUpdate(Response resp) throws Exception {
       // keep track of the worst update that could happen
       int updateType = UPDATE_PROGRESS;
 
       resp = resp.getNested("cmst");
-      this.revision = resp.getNumberLong("cmsr");
+      this.playStatusRevision = resp.getNumberLong("cmsr");
       
       // store now playing info
       long databaseId = this.databaseId;
@@ -310,8 +351,8 @@ public class Status {
       this.progressTotal = resp.getNumberLong("cast");
 
       // send off updated event to gui
-      if (update != null)
-         this.update.sendEmptyMessage(updateType);
+      if (handler != null)
+         this.handler.sendEmptyMessage(updateType);
    }
 
    public void fetchCover() {
@@ -327,8 +368,8 @@ public class Status {
                   e.printStackTrace();
                }
                coverEmpty = (coverCache == null);
-               if (update != null)
-                  update.sendEmptyMessage(UPDATE_COVER);
+               if (handler != null)
+                  handler.sendEmptyMessage(UPDATE_COVER);
             }
          });
       }
@@ -371,14 +412,14 @@ public class Status {
                         String.format("%s/databases/%d/items?session-id=%s&meta=daap.songuserrating&type=music&query='dmap.itemid:%d'",
                                  session.getRequestBase(), databaseId, session.sessionId, trackId), false);
 
-               if (update != null) {
+               if (handler != null) {
                   // 2 different responses possible!
                   Response entry = resp.getNested("adbs"); // iTunes style
                   if (entry == null) {
                      entry = resp.getNested("apso"); // MonkeyTunes style
                   }
                   rating = entry.getNested("mlcl").getNested("mlit").getNumberLong("asur");
-                  update.sendEmptyMessage(UPDATE_RATING);
+                  handler.sendEmptyMessage(UPDATE_RATING);
                }
 
             } catch (Exception e) {
