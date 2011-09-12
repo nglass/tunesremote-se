@@ -35,27 +35,101 @@ import net.firefly.client.gui.swing.dialog.ConfigLocationDialog;
 import net.firefly.client.model.configuration.Configuration;
 import net.firefly.client.tools.FireflyClientException;
 
+import java.io.File;
 import java.lang.reflect.*;
 import java.awt.Image;
 import java.awt.Toolkit;
 
+import android.util.Log;
 import apple.dts.samplecode.osxadapter.OSXAdapter;
 
 public class TunesRemoteSE {
 	
+   public final static String TAG = TunesRemoteSE.class.toString();
+   
 	private static String configRootDirectory;
 	
    public static boolean MAC_OS_X = (System.getProperty("os.name").toLowerCase().startsWith("mac os x"));
 	
    protected AboutDialog aboutDialog = null;
   
-   Configuration config = null;
+   private static Configuration config = null;
     
-   Image icon;
+   private static Image icon;
     
 	public static void main (String [] args) throws ClassNotFoundException {
-		System.out.println("Launching " + Version.getLongApplicationName() + " ...");
+		Log.version(TAG, "Launching " + Version.getLongApplicationName() + " ...");
 
+      try {
+         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+      } catch (Exception ex) {
+         Log.e(TAG, "Look and Feel Error : " + ex.getMessage());
+      }
+      
+      if (MAC_OS_X) {
+         // ensure property is set to place menus at top of screen
+         System.setProperty("com.apple.mrj.application.apple.menu.about.name", "TunesRemote SE");
+         System.setProperty("apple.laf.useScreenMenuBar", "true");
+         
+         // try setting dock icon on mac
+         try {
+            icon = Toolkit.getDefaultToolkit().getImage(TunesRemoteSE.class.getResource("/net/firefly/client/resources/images/app.png"));
+            Class<?> applicationClass = Class.forName("com.apple.eawt.Application");
+            Object macOSXApplication = applicationClass.getConstructor((Class[])null).newInstance((Object[])null);
+            Method setDockIconImage = applicationClass.getDeclaredMethod("setDockIconImage", java.awt.Image.class);
+            setDockIconImage.invoke(macOSXApplication, icon);
+         } catch (ClassNotFoundException cnfe) {
+            Log.e(TAG, "This version of Mac OS X does not support the Apple EAWT. (" + cnfe + ")");
+         } catch (Exception ex) {  // Likely a NoSuchMethodException or an IllegalAccessException loading/invoking eawt.Application methods
+            Log.e(TAG, "Mac OS X Adapter could not talk to EAWT:", ex);
+         }
+      }
+		
+      // Set up config directory
+      ConfigurationManager.loadDefaultConfiguration();
+      final boolean configAlreadyExists;
+      if (ConfigurationManager.isConfigurationDirectoryValid(ConfigurationManager.getConfigRootDirectoryApp())){
+         configRootDirectory = ConfigurationManager.getConfigRootDirectoryApp();
+         configAlreadyExists = true;
+      } else if (ConfigurationManager.isConfigurationDirectoryValid(ConfigurationManager.getConfigRootDirectoryUser())){
+         configRootDirectory = ConfigurationManager.getConfigRootDirectoryUser();
+         configAlreadyExists = true;
+      } else {
+         configAlreadyExists = false;
+         Context temporaryContext = new Context(Configuration.getInstance()); 
+         ConfigLocationDialog cld = new ConfigLocationDialog(temporaryContext, null);
+         cld.setVisible(true);
+         configRootDirectory = cld.getConfigRootDirectory();
+         if (configRootDirectory == null){
+            System.exit(0);
+         }
+      }  
+
+      boolean configValid = ConfigurationManager.isConfigurationDirectoryValid(configRootDirectory);
+      if (!configValid) {
+         try {
+            ConfigurationManager.createConfigurationDirectory(configRootDirectory);
+         } catch (FireflyClientException e) {
+            Log.e(TAG, "Error creating config directory", e);
+         }
+      }
+      
+      // Start logging to file
+      Log.setLogFile(configRootDirectory + File.separator + "Session.log");
+      
+      if (configAlreadyExists) {
+         try {
+            config = ConfigurationManager.loadSavedConfiguration(configRootDirectory);
+         } catch (FireflyClientException e) {
+            // throws exception if not found
+            config = Configuration.getInstance();
+         }
+      } else {
+         // - loads default config
+         config = Configuration.getInstance();
+      }
+      config.setConfigRootDirectory(configRootDirectory);
+      
 		for (int i = 0; i < args.length - 1; i+=2) {
 		   String arg   = args[i];
 		   String value = args[i+1];
@@ -63,10 +137,10 @@ public class TunesRemoteSE {
 		   if (arg.equals("-loglevel")) {
 		      try {
 		         int level = Integer.parseInt(value);
-		         System.out.println("Setting -loglevel to " + value);
+		         Log.i(TAG, "Setting -loglevel to " + value);
 		         android.util.Log.setLogLevel(level); 
 		      } catch (NumberFormatException e) {
-		         System.err.println("Illegal value for -loglevel : " + value);
+		         Log.e(TAG, "Illegal value for -loglevel : " + value);
 		      }
 		   }
 		}
@@ -78,88 +152,16 @@ public class TunesRemoteSE {
 		
 	   UIManager.put("Tree.collapsedIcon", 
             new ImageIcon(TunesRemoteSE.class.getResource("/net/firefly/client/resources/images/tree-right.png")));
-
-	   try {
-	      UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-	   } catch (Exception ex) {
-	      System.err.println("Look and Feel Error : " + ex.getMessage());
-	   }
-	   
-		if (MAC_OS_X) {
-			// ensure property is set to place menus at top of screen
-			System.setProperty("com.apple.mrj.application.apple.menu.about.name", "TunesRemote SE");
-			System.setProperty("apple.laf.useScreenMenuBar", "true");	
-		}
 		
 		new TunesRemoteSE();
 	}
     
 	private TunesRemoteSE() {
 		
-		icon = Toolkit.getDefaultToolkit().getImage(getClass().getResource("/net/firefly/client/resources/images/app.png"));
-
-		// try setting dock icon on mac
-		if (MAC_OS_X) {
-			try {
-				Class<?> applicationClass = Class.forName("com.apple.eawt.Application");
-				Object macOSXApplication = applicationClass.getConstructor((Class[])null).newInstance((Object[])null);
-				Method setDockIconImage = applicationClass.getDeclaredMethod("setDockIconImage", java.awt.Image.class);
-				setDockIconImage.invoke(macOSXApplication, icon);
-			} catch (ClassNotFoundException cnfe) {
-				System.err.println("This version of Mac OS X does not support the Apple EAWT. (" + cnfe + ")");
-			} catch (Exception ex) {  // Likely a NoSuchMethodException or an IllegalAccessException loading/invoking eawt.Application methods
-				System.err.println("Mac OS X Adapter could not talk to EAWT:");
-				ex.printStackTrace();
-			}
-		}
-		
 		//final SplashScreen splashScreen = new SplashScreen();
 		//splashScreen.splash();
 		
-		// Set up config directory
-		ConfigurationManager.loadDefaultConfiguration();
-		final boolean configAlreadyExists;
-		if (ConfigurationManager.isConfigurationDirectoryValid(ConfigurationManager.getConfigRootDirectoryApp())){
-			configRootDirectory = ConfigurationManager.getConfigRootDirectoryApp();
-			configAlreadyExists = true;
-		} else if (ConfigurationManager.isConfigurationDirectoryValid(ConfigurationManager.getConfigRootDirectoryUser())){
-			configRootDirectory = ConfigurationManager.getConfigRootDirectoryUser();
-			configAlreadyExists = true;
-		} else {
-			configAlreadyExists = false;
-			Context temporaryContext = new Context(Configuration.getInstance());	
-			ConfigLocationDialog cld = new ConfigLocationDialog(temporaryContext, null);
-			cld.setVisible(true);
-			configRootDirectory = cld.getConfigRootDirectory();
-			if (configRootDirectory == null){
-				System.exit(0);
-			}
-		}	
-
-		boolean configValid = ConfigurationManager.isConfigurationDirectoryValid(configRootDirectory);
-		if (!configValid) {
-			try {
-				ConfigurationManager.createConfigurationDirectory(configRootDirectory);
-			} catch (FireflyClientException e) {
-				e.printStackTrace();
-			}
-		}
-		if (configAlreadyExists) {
-			try {
-				config = ConfigurationManager.loadSavedConfiguration(configRootDirectory);
-			} catch (FireflyClientException e) {
-				// throws exception if not found
-				config = Configuration.getInstance();
-			}
-		} else {
-			// - loads default config
-			config = Configuration.getInstance();
-		}
-		config.setConfigRootDirectory(configRootDirectory);
-		
-		if (MAC_OS_X) {
-			this.aboutDialog = new AboutDialog(config, null);
-			
+		if (MAC_OS_X) {			
             try {
                 // Generate and register the OSXAdapter, passing it a hash of all the methods we wish to
                 // use as delegates for various com.apple.eawt.ApplicationListener methods
@@ -167,8 +169,7 @@ public class TunesRemoteSE {
                 OSXAdapter.setAboutHandler(this, getClass().getDeclaredMethod("about", (Class[])null));
                 //OSXAdapter.setPreferencesHandler(this, getClass().getDeclaredMethod("preferences", (Class[])null));
             } catch (Exception e) {
-                System.err.println("Error while loading the OSXAdapter:");
-                e.printStackTrace();
+                Log.e(TAG, "Error while loading the OSXAdapter:", e);
             }		
 		}
 		
@@ -187,30 +188,34 @@ public class TunesRemoteSE {
 	///////////////////////////////////////////////////////////////////////////
 	// Mac Callbacks
 	//
-    public boolean quit() {
-    	
-    	try {
-    		if (config != null) {
-    			ConfigurationManager.saveConfiguration(config);
-    		}
-		} catch (FireflyClientException e) {
-			e.printStackTrace();
-		}
-		
-	    System.exit(0);
-	    return true;
-    }
-    
-    public boolean about() {
-    	if (this.aboutDialog != null) {
-    		aboutDialog.setVisible(true);
-    	}
-    	return true;
-    }
-    
-    // TODO
-    public boolean preferences() {
-    	return false;
-    }
+	public boolean quit() {
+
+	   try {
+	      if (config != null) {
+	         ConfigurationManager.saveConfiguration(config);
+	      }
+	   } catch (FireflyClientException e) {
+	      Log.e(TAG, "Error saving configuration", e);
+	   }
+
+	   System.exit(0);
+	   return true;
+	}
+
+	public boolean about() {
+	   if (aboutDialog == null) {
+	      aboutDialog = new AboutDialog(config, null); 
+	   }
+	   
+	   if (aboutDialog != null) {
+	      aboutDialog.setVisible(true);
+	   }
+	   return true;
+	}
+
+	// TODO
+	public boolean preferences() {
+	   return false;
+	}
 
 }
