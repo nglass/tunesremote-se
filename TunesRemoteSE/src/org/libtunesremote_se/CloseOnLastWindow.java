@@ -4,8 +4,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.swing.SwingUtilities;
 
+import android.util.Log;
+
 public class CloseOnLastWindow {
-	// count open windows. exit when last is closed
+   public final static String TAG = CloseOnLastWindow.class.toString();
+   
+   // count open windows. exit when last is closed
 	private static AtomicInteger OPEN_WINDOWS = new AtomicInteger(0);
 
 	public static void registerWindow() {
@@ -16,7 +20,7 @@ public class CloseOnLastWindow {
 		int windows = OPEN_WINDOWS.decrementAndGet();
 
 		if (windows <= 0) {
-			System.out.println("Last window closed exiting...");
+			Log.i(TAG, "Last window closed exiting...");
 			SwingUtilities.invokeLater(new Runnable() {
 				public void run() {
 					System.exit(0);

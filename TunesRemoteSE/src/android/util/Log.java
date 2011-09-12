@@ -16,6 +16,9 @@
 
 package android.util;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
@@ -327,20 +330,45 @@ public final class Log {
     /** @hide */ public static final int LOG_ID_EVENTS = 2;
     /** @hide */ public static final int LOG_ID_SYSTEM = 3;
 
-    
     private static int logLevel = INFO;
+    private static String versionString = null;
+    private static PrintStream outfile = null;
     
     public static void setLogLevel(int level) {
-    	logLevel = level;  	
+    	  logLevel = level;  	
+    }
+    
+    public static int version (String tag, String msg) {
+       versionString = tag + ": " + msg;
+       return println_native(LOG_ID_MAIN, INFO, tag, msg);
+    }
+    
+    public static void setLogFile(String filename) {
+       try {
+          FileOutputStream os = new FileOutputStream(filename);
+          PrintStream ps = new PrintStream(os);
+          System.out.println("Logging Session in " + filename);
+          outfile = ps;
+          
+          if (versionString != null) {
+             outfile.println(versionString);
+          }
+       } catch (FileNotFoundException e) {
+          e.printStackTrace();
+       }
     }
     
     /** @hide */ 
-    public static int println_native(int bufID, int priority, String tag, String msg) {
+    synchronized public static int println_native(int bufID, int priority, String tag, String msg) {
     	if (priority >= logLevel) {
     		if (priority >= WARN) {
     			System.err.println(tag + ": " + msg);
     		} else {
     			System.out.println(tag + ": " + msg);
+    		}
+    		
+    		if (outfile != null) {
+    		   outfile.println(tag + ": " + msg);
     		}
     	}
     	return 0;
