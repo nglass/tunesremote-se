@@ -13,11 +13,12 @@ Ubuntu instructions can be found here:
 https://help.ubuntu.com/community/Java
 
 == Downloads ==
-Mac users should download the latest Mac OSX release of TunesRemote-SE.
-Everyone else should get the regular download.
+There are three download files to choose from - Mac, Windows and Other.  Pick the one relevant to your operating system.
 
 == Windows ==
-Unpack the zip file.  Double clicking on the included TunesRemoteSE.jar file should launch the application.  The first time you run TunesRemote-SE you will be asked where you want it to store files.
+Unpack the zip file.  Double clicking on the included TunesRemoteSE.exe file should launch the application.  The first time you run TunesRemote-SE you will be asked where you want it to store files.
+
+If you have problems with the application starting, you may also try using the generic Java download.  Unpack the zip file and double clicking on the included TunesRemoteSE.jar file should launch the app.
 
 == Mac OSX ==
 Mac users unpack the zip file and drag the TunesRemote-SE application to your Applications folder.  Double clicking the application will launch TunesRemote-SE.  The first time you run TunesRemote-SE you will be asked where you want it to store files.
