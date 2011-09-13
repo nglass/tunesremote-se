@@ -60,6 +60,9 @@ public class TunesRemoteSE {
 	public static void main (String [] args) throws ClassNotFoundException {
 		Log.version(TAG, "Launching " + Version.getLongApplicationName() + " ...");
 
+		icon = Toolkit.getDefaultToolkit().getImage
+		   (TunesRemoteSE.class.getResource("/net/firefly/client/resources/images/app.png"));
+		
       try {
          UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
       } catch (Exception ex) {
@@ -73,7 +76,6 @@ public class TunesRemoteSE {
          
          // try setting dock icon on mac
          try {
-            icon = Toolkit.getDefaultToolkit().getImage(TunesRemoteSE.class.getResource("/net/firefly/client/resources/images/app.png"));
             Class<?> applicationClass = Class.forName("com.apple.eawt.Application");
             Object macOSXApplication = applicationClass.getConstructor((Class[])null).newInstance((Object[])null);
             Method setDockIconImage = applicationClass.getDeclaredMethod("setDockIconImage", java.awt.Image.class);
