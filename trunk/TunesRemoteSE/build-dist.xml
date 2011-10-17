@@ -14,8 +14,9 @@
 			<include name="**/*.jar"/>
 		</fileset>
 	</path>
+	
 
-	<typedef resource="org/tigris/subversion/svnant/svnantlib.xml" />
+	<typedef resource="org/tigris/subversion/svnant/svnantlib.xml" classpathref="svnant.classpath" />
 	<taskdef name="launch4j" classname="net.sf.launch4j.ant.Launch4jTask"  classpath="${launch4j.dir}/launch4j.jar:${launch4j.dir}/lib/xstream.jar" />
 
 	<!--this file was created by Eclipse Runnable JAR Export Wizard-->
@@ -47,7 +48,8 @@
 		</zip>
 
 		<!-- create OSX app bundle -->
-		<svn>
+		<svnSetting id="svn" javahl="false" /> 
+		<svn refid="svn">
 			<export srcPath="osx" destPath="dist/TunesRemoteSE.app" force="true" />
 		</svn>
 
@@ -79,7 +81,8 @@
 		</target>
 
 		<target name="version">
-			<svn>
+			<svnSetting id="svn" javahl="false" /> 
+			<svn refid="svn">
 				<wcVersion path="." />
 			</svn>
 			<echo message="Revision Information:" />
