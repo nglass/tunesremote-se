@@ -131,8 +131,8 @@ public class RequestHelper {
       connection.setRequestProperty("Accept-Encoding", "gzip, deflate");
 
       if (!keepalive) {
-         connection.setConnectTimeout(10000);
-         connection.setReadTimeout(10000);
+         connection.setConnectTimeout(1200000);
+         connection.setReadTimeout(1200000);
       } else {
          connection.setReadTimeout(0);
       }
