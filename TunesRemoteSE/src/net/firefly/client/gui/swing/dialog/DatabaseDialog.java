@@ -389,7 +389,8 @@ public class DatabaseDialog extends JDialog implements SongListLoadProgressListe
                   context.setFilteredArtistList((ArtistList) context.getGlobalArtistList().clone());
                   context.setFilteredSongList((SongList) context.getGlobalSongList().clone());
                   context.setFilteredAlbumList((AlbumList) context.getGlobalAlbumList().clone());
-
+                  context.setSelectedPlaylist(null);
+                  
                   // 3- get playlist list
                   PlaylistList playlists = playlistRequestManager.getPlaylistList(context.getSession().databaseId, songList);
                   context.setPlaylists(playlists);
