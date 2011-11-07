@@ -70,7 +70,7 @@ public class ResponseParser {
    }
 
    private static int search(DataInputStream raw, TagListener listener, Pattern listenFor, int handle, boolean haltmlit) throws IOException {
-      int progress = 0;
+
       int hits = 0;
 
       // loop until done with the section we have been assigned
@@ -84,7 +84,6 @@ public class ResponseParser {
             return hits;
          }
          handle -= 8 + length;
-         progress += 8 + length;
 
          // check if we need to handle mlit special-case where it doesnt branch
          if (haltmlit && key.equals("mlit")) {

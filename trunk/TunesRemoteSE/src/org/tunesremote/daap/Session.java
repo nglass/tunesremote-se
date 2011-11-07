@@ -36,7 +36,10 @@ import android.util.Log;
 public class Session {
    public final static String TAG = Session.class.toString();
 
+   public final static int DEFAULT_PORT = 3689;
+   
    private final String host;
+   private final int port;
    private Status singleton = null;
    public String sessionId;
    public long databaseId, radioDatabaseId, musicId, libraryId;
@@ -47,8 +50,13 @@ public class Session {
    private List<Playlist> radioGenres = null;
 
    public Session(String host, String pairingGuid) throws Exception {
+      this(host, pairingGuid, DEFAULT_PORT);
+   }
+   
+   public Session(String host, String pairingGuid, int port) throws Exception {
       // start a session with the itunes server
       this.host = host;
+      this.port = port;
 
       // http://192.168.254.128:3689/login?pairing-guid=0x0000000000000001
       Log.d(TAG, String.format("trying login for host=%s and guid=%s", host, pairingGuid));
@@ -118,7 +126,7 @@ public class Session {
    }
 
    public String getRequestBase() {
-      return String.format("http://%s:3689", host);
+      return String.format("http://%s:%d", host, port);
    }
 
    public void purgeAllStatus() {

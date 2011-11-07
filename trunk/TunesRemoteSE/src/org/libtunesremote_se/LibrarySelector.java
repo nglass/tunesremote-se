@@ -89,7 +89,7 @@ public class LibrarySelector extends JDialog implements ListDataListener {
 						// Log into session
 						Session session = null;
 						try {
-							session = new Session(l.getAddress(), code);
+							session = new Session(l.getAddress(), code, l.getPort());
 						} catch (Exception exception) {
 							JOptionPane.showMessageDialog
 								(frame, "Error: Could not start session", "Error", JOptionPane.ERROR_MESSAGE);
