@@ -33,6 +33,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.URLDecoder;
 import java.util.Random;
 import android.util.Log;
 
@@ -141,6 +142,9 @@ public class PairingServer extends Thread {
 						String line = br.readLine();
 						Log.d(TAG, line);
 						if (line.contains("servicename=")) {
+						   // Decode the input URL
+						   line = URLDecoder.decode(line, "UTF-8");
+						   
 						   String[] tokens = line.split("[ &?=]");
 						   
 						   for (int i=0; i<tokens.length - 1; i++) {
