@@ -1,11 +1,29 @@
+/*
+ * This file is part of TunesRemote SE.
+ *
+ * TunesRemote SE is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * any later version.
+ *
+ * TunesRemote SE is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with TunesRemote SE; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ * 
+ * Copyright 2011 Nick Glass
+ */
+
 package org.libtunesremote_se;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.jmdns.JmDNS;
 import javax.jmdns.JmmDNS;
@@ -27,7 +45,7 @@ public class TunesService extends Thread implements ServiceListener, NetworkTopo
    public final static String REMOTE_TYPE = "_touch-remote._tcp.local.";
 
    private final String applicationName;
-   private ServiceInfo pairservice;
+
    private volatile PairingServer pairingServer;
 
    private JmmDNS jmmdns = null;
@@ -38,14 +56,14 @@ public class TunesService extends Thread implements ServiceListener, NetworkTopo
 
    private static String configDirectory = null;
 
-   private Hashtable<String, String> serviceValues;
+   private String pairCode = null;
 
-   private final Map<InetAddress, JmDNS> mdnsMap;
-
+   private AtomicInteger servicecount;
+   
    private TunesService(String applicationName) {
       this.applicationName = applicationName;
-
-      this.mdnsMap = new HashMap<InetAddress, JmDNS>();
+      
+      servicecount = new AtomicInteger(0);
    }
 
    @Override
@@ -53,18 +71,7 @@ public class TunesService extends Thread implements ServiceListener, NetworkTopo
       // Start the pairing server
       pairingServer = new PairingServer(configDirectory);
       pairingServer.start();
-
-      // Register the Pairing Service
-      serviceValues = new Hashtable<String, String>();
-      serviceValues.put("DvNm", applicationName);
-      serviceValues.put("RemV", "10000");
-      serviceValues.put("DvTy", "iPod");
-      serviceValues.put("RemN", "Remote");
-      serviceValues.put("txtvers", "1");
-      serviceValues.put("Pair", pairingServer.getPairCode());
-
-      // NOTE: this "Pair" above is *not* the guid--we generate and return that in PairingServer
-      pairservice = ServiceInfo.create(REMOTE_TYPE, pairingServer.getServiceGuid(), pairingServer.getPortNumber(), 0, 0, serviceValues);
+      pairCode = pairingServer.getPairCode();
 
       jmmdns = JmmDNS.Factory.getInstance();
       jmmdns.addNetworkTopologyListener(this);
@@ -108,12 +115,14 @@ public class TunesService extends Thread implements ServiceListener, NetworkTopo
       final String serviceName = event.getName();
       final ServiceInfo info = event.getDNS().getServiceInfo(event.getType(), event.getName());
 
-      SwingUtilities.invokeLater(new Runnable() {
-         @Override
-         public void run() {
-            updateService(serviceName, info);
-         }
-      });
+      if (info != null) {
+         SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+               updateService(serviceName, info);
+            }
+         });
+      }
    }
 
    @Override
@@ -168,7 +177,7 @@ public class TunesService extends Thread implements ServiceListener, NetworkTopo
       }
       return new DefaultListModel();
    }
-
+   
    @Override
    public void inetAddressAdded(NetworkTopologyEvent event) {
       Log.i(TAG, "inetAddressAdded(event=" + event.toString() + ")");
@@ -177,18 +186,29 @@ public class TunesService extends Thread implements ServiceListener, NetworkTopo
       // Start listening for DACP servers on this interface
       mdns.addServiceListener(TOUCH_ABLE_TYPE, this);
 
-      // and register the pair service
+      // and re-register the pair service
       try {
-         mdns.registerService(pairservice);
+         String name = event.getInetAddress().getHostName();
+         
+         Hashtable<String, String> serviceValues;
+         // Register the Pairing Service
+         serviceValues = new Hashtable<String, String>();
+         serviceValues.put("DvNm", applicationName + "@" + name);
+         serviceValues.put("RemV", "10000");
+         serviceValues.put("DvTy", "iPod");
+         serviceValues.put("RemN", "Remote");
+         serviceValues.put("txtvers", "1");
+         serviceValues.put("Pair", pairCode);
+         
+         ServiceInfo newpairservice = ServiceInfo.create(REMOTE_TYPE, pairingServer.getServiceGuid() + servicecount.incrementAndGet(), pairingServer.getPortNumber(), 0, 0, serviceValues);
+         mdns.registerService(newpairservice);
       } catch (IOException e) {
          Log.e(TAG, "Error registering service on " + event.getInetAddress(), e);
       }
-      mdnsMap.put(event.getInetAddress(), mdns);
    }
 
    @Override
    public void inetAddressRemoved(NetworkTopologyEvent event) {
       Log.i(TAG, "inetAddressRemoved(event=" + event.toString() + ")");
-      mdnsMap.remove(event.getInetAddress());
    }
 }
