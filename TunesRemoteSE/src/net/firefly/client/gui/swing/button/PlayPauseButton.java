@@ -78,7 +78,7 @@ public class PlayPauseButton extends JLabel implements PlayerStatusChangedEventL
 			public void mouseClicked(java.awt.event.MouseEvent e) {
 				PlayerStatus playerStatus = context.getPlayer().getPlayerStatus();
 				if (playerStatus.equals(PlayerStatus.STATUS_STOPPED)) {
-					context.getPlayer().play();
+					context.getPlayer().resume();
 				} else {
 					context.getPlayer().pause();
 				}

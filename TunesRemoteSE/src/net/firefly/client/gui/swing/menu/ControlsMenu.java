@@ -92,7 +92,7 @@ public class ControlsMenu extends JMenu implements PlayerModeChangedEventListene
 			public void actionPerformed(ActionEvent evt) {
 				PlayerStatus playerStatus = context.getPlayer().getPlayerStatus();
 				if (playerStatus.equals(PlayerStatus.STATUS_STOPPED)) {
-					context.getPlayer().play();
+					context.getPlayer().resume();
 				} else {
 					context.getPlayer().pause();
 				}

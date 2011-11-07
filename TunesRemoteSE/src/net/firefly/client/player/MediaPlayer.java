@@ -471,6 +471,12 @@ public class MediaPlayer implements android.os.Handler {
 		}
 	}
 
+	public void resume() {
+      if (playerStatus != PlayerStatus.STATUS_PLAYING) {
+         session.controlPlay();
+      }
+	}
+	
 	public void pause() {
 		if (playerStatus == PlayerStatus.STATUS_PLAYING) {
 			session.controlPause();	
