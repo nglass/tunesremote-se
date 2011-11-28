@@ -27,6 +27,8 @@ import javax.swing.event.EventListenerList;
 
 import net.firefly.client.controller.ListManager;
 import net.firefly.client.gui.context.Context;
+import net.firefly.client.gui.context.events.MasterVolumeChangedEvent;
+import net.firefly.client.gui.context.listeners.MasterVolumeChangedEventListener;
 import net.firefly.client.model.data.Album;
 import net.firefly.client.model.data.Artist;
 import net.firefly.client.model.data.Genre;
@@ -489,14 +491,26 @@ public class MediaPlayer implements android.os.Handler {
 		
 	}
 	
-	// newGain 0.0 .. 1.0
-	public void setGain(float newGain) {
-		session.controlVolume((int)(newGain * 100.0));
+	public void setVolume(double newVolume) {
+		session.controlVolume((long)newVolume);
+		fireMasterVolumeChanged(new MasterVolumeChangedEvent(newVolume));
 	}
 	
-	public float getInitialGain() {
-		return ((float)initialVolume) / 100.0f;
+	public double getInitialVolume() {
+		return initialVolume;
 	}
+	
+   public void increaseVolume() {
+      long volume = status.getVolume();
+      volume = Math.min(100, volume + 5);
+      setVolume(volume);  
+   }
+   
+   public void decreaseVolume() {
+      long volume = status.getVolume();
+      volume = Math.max(0, volume - 5);
+      setVolume(volume);  
+   }
 	
 	public void setPlayerMode(PlayerMode mode) {
 		if (mode == PlayerMode.MODE_NORMAL) {
@@ -816,4 +830,21 @@ public class MediaPlayer implements android.os.Handler {
 			}
 		}
 	}
+   
+   public void addMasterVolumeChangedEventListener(MasterVolumeChangedEventListener listener) {
+      listenerList.add(MasterVolumeChangedEventListener.class, listener);
+   }
+
+   public void removeMasterVolumeChangedEventListener(MasterVolumeChangedEventListener listener) {
+      listenerList.remove(MasterVolumeChangedEventListener.class, listener);
+   }
+
+   public void fireMasterVolumeChanged(MasterVolumeChangedEvent e) {
+      Object[] listeners = listenerList.getListenerList();
+      for (int i = 0; i < listeners.length; i += 2) {
+         if (listeners[i] == MasterVolumeChangedEventListener.class) {
+            ((MasterVolumeChangedEventListener) listeners[i + 1]).onMasterVolumeChange(e);
+         }
+      }
+   }
 }

@@ -43,8 +43,6 @@ import net.firefly.client.tools.FireflyClientException;
 public class PlaylistTreeModel implements TreeModel, PlaylistListChangedEventListener,
 		StaticPlaylistCreationEventListener {
 
-	private static final long serialVersionUID = 7602180983197714855L;
-
 	public String LibraryNode;
 	public String GeniusNode;
 	public String PlaylistNode;

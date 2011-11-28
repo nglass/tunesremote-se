@@ -28,6 +28,7 @@ import java.awt.Rectangle;
 
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
+import javax.swing.JSlider;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.basic.BasicSliderUI;
 
@@ -37,13 +38,16 @@ public class VolumeSliderUI extends BasicSliderUI {
 	protected static Color trackColor;
 
 	protected static ImageIcon thumbIcon;
+	
+	protected JSlider slider;
 
 	public static ComponentUI createUI(JComponent c) {
-		return new VolumeSliderUI();
+		return new VolumeSliderUI((JSlider)c);
 	}
 
-	public VolumeSliderUI() {
-		super(null);
+	public VolumeSliderUI(JSlider slider) {
+	   super(slider);
+	   this.slider = slider;
 	}
 
 	public void installUI(JComponent c) {
@@ -55,10 +59,12 @@ public class VolumeSliderUI extends BasicSliderUI {
 	}
 
 	public void paintThumb(Graphics g) {
-		Rectangle knobBounds = thumbRect;
-		g.translate(knobBounds.x, knobBounds.y);
-		thumbIcon.paintIcon(slider, g, 0, 1);
-		g.translate(-knobBounds.x, -knobBounds.y);
+	   if (slider.isEnabled()) {
+   		Rectangle knobBounds = thumbRect;
+   		g.translate(knobBounds.x, knobBounds.y);
+   		thumbIcon.paintIcon(slider, g, 0, 1);
+   		g.translate(-knobBounds.x, -knobBounds.y);
+	   }
 	}
 
 	public void paintTrack(Graphics g) {
