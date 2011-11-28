@@ -56,6 +56,7 @@ import net.firefly.client.gui.context.listeners.FilteredSongListChangedEventList
 import net.firefly.client.gui.context.listeners.GlobalSongListChangedEventListener;
 import net.firefly.client.gui.swing.button.RepeatButton;
 import net.firefly.client.gui.swing.button.ShuffleButton;
+import net.firefly.client.gui.swing.button.SpeakerButton;
 import net.firefly.client.gui.swing.dialog.ErrorDialog;
 import net.firefly.client.gui.swing.menu.ClientMenuBar;
 import net.firefly.client.gui.swing.other.NotificationWindow;
@@ -121,7 +122,7 @@ public class ClientFrame extends JFrame implements PlayerErrorOccuredEventListen
 
 		// -- status bar
 		JPanel statusBar = new JPanel(new GridBagLayout());
-		GridBagConstraints separatorGBC = new GridBagConstraints(0, 0, 3, 1, 300, 0, GridBagConstraints.CENTER,
+		GridBagConstraints separatorGBC = new GridBagConstraints(0, 0, 4, 1, 300, 0, GridBagConstraints.CENTER,
 				GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 1, 1);
 		GridBagConstraints shuffleButtonGBC = new GridBagConstraints(0, 1, 1, 1, 0, 0, GridBagConstraints.WEST,
 				GridBagConstraints.NONE, new Insets(0, 2, 0, 0), 1, 1);
@@ -129,6 +130,8 @@ public class ClientFrame extends JFrame implements PlayerErrorOccuredEventListen
 				GridBagConstraints.NONE, new Insets(0, 2, 0, 0), 1, 1);
 		GridBagConstraints statusLabelGBC = new GridBagConstraints(2, 1, 1, 1, 300, 0, GridBagConstraints.CENTER,
 				GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 1, 1);
+		GridBagConstraints speakerButtonGBC = new GridBagConstraints(3, 1, 1, 1, 0, 0, GridBagConstraints.EAST,
+            GridBagConstraints.NONE, new Insets(0, 2, 0, 0), 1, 1);
 
 		statusBarLabel = new JLabel(" ");
 		statusBarLabel.setFont(statusBarLabel.getFont().deriveFont(Font.PLAIN));
@@ -136,6 +139,7 @@ public class ClientFrame extends JFrame implements PlayerErrorOccuredEventListen
 		statusBar.add(new ShuffleButton(context), shuffleButtonGBC);
 		statusBar.add(new RepeatButton(context), repeatButtonGBC);
 		statusBar.add(statusBarLabel, statusLabelGBC);
+		statusBar.add(new SpeakerButton(context, this), speakerButtonGBC);
 
 		getContentPane().add(statusBar, BorderLayout.SOUTH);
 

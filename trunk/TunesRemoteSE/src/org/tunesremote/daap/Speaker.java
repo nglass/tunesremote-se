@@ -47,18 +47,42 @@ public class Speaker {
     * <code>caia</code>
     */
    private boolean active;
+   
+   /**
+    * Initially this is the value returned from itunes
+    */
+   private double relativeVolume;
+   
    /**
     * Computed volume that is the product of the speakers relative volume and
     * the master iTunes-Volume.
     */
-   private int absoluteVolume;
+   private double absoluteVolume;
 
-   public int getAbsoluteVolume() {
+   public double getARelativeVolume() {
+      return relativeVolume;
+   }
+
+   public void setRelativeVolume(double relativeVolume) {
+      this.relativeVolume = relativeVolume;
+   }
+   
+   public double getAbsoluteVolume() {
       return absoluteVolume;
    }
 
-   public void setAbsoluteVolume(int absoluteVolume) {
+   public void setAbsoluteVolume(double absoluteVolume) {
       this.absoluteVolume = absoluteVolume;
+   }
+   
+   // if adjusting the master volume only call this to update the absolute volume
+   public void calculateAbsoluteFromMaster(double masterVolume) {
+      this.absoluteVolume = masterVolume * relativeVolume / 100.0;
+   }
+   
+   // If another speaker has updated the master volume we need to recalculate the relative
+   public void calculateRelativeFromMaster(double masterVolume) {
+      this.relativeVolume = 100.0 * this.absoluteVolume / masterVolume;
    }
 
    public boolean isActive() {

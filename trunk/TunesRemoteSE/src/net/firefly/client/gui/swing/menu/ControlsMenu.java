@@ -129,6 +129,24 @@ public class ControlsMenu extends JMenu implements PlayerModeChangedEventListene
 			}
 		});
 
+		JMenuItem incVolMenuItem = new JMenuItem();
+		incVolMenuItem.setText(ResourceManager.getLabel("menu.controls.increasevolume", context.getConfig().getLocale()));
+		incVolMenuItem.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent evt) {
+            context.getPlayer().increaseVolume();
+         }
+      });
+		incVolMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_UP, shortcutKey, true));
+		
+		JMenuItem decVolMenuItem = new JMenuItem();
+		decVolMenuItem.setText(ResourceManager.getLabel("menu.controls.decreasevolume", context.getConfig().getLocale()));
+		decVolMenuItem.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent evt) {
+            context.getPlayer().decreaseVolume();
+         }
+      });
+		decVolMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, shortcutKey, true));
+		
 		// -- Open saved library sub menu
 		repeatSubmenu = new JMenu();
 		repeatSubmenu.setText(ResourceManager.getLabel("player.control.repeat", context.getConfig().getLocale()));
@@ -175,6 +193,9 @@ public class ControlsMenu extends JMenu implements PlayerModeChangedEventListene
 		addSeparator();
 		add(nextMenuItem);
 		add(previousMenuItem);
+		addSeparator();
+		add(incVolMenuItem);
+		add(decVolMenuItem);
 		addSeparator();
 		add(shuffleMenuItem);
 		add(repeatSubmenu);

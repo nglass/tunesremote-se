@@ -27,15 +27,21 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import net.firefly.client.gui.context.Context;
+import net.firefly.client.gui.context.events.MasterVolumeChangedEvent;
+import net.firefly.client.gui.context.listeners.MasterVolumeChangedEventListener;
 import net.firefly.client.gui.swing.other.VolumeSlider;
 
-public class VolumePanel extends JPanel {
+public class VolumePanel extends JPanel implements ChangeListener, MasterVolumeChangedEventListener {
 
 	private static final long serialVersionUID = -4189993561956134241L;
 	
 	protected Context context;
+	
+	protected VolumeSlider volumeSlider;
 
 	public VolumePanel(Context context) {
 		this.context = context;
@@ -51,7 +57,8 @@ public class VolumePanel extends JPanel {
 
 		JLabel volumeLowLabel = new JLabel(volumeLowIcon);
 		JLabel volumeHighLabel = new JLabel(volumeHighIcon);
-		VolumeSlider volumeSlider = new VolumeSlider(context);
+		this.volumeSlider = new VolumeSlider((int)context.getPlayer().getInitialVolume() * 10000);
+		volumeSlider.addChangeListener(this);
 
 		volumeLowLabel.setOpaque(false);
 		volumeLowLabel.setVerticalAlignment(SwingConstants.CENTER);
@@ -68,5 +75,24 @@ public class VolumePanel extends JPanel {
 		add(volumeLowLabel);
 		add(volumeSlider);
 		add(volumeHighLabel);
+		
+		context.getPlayer().addMasterVolumeChangedEventListener(this);
 	}
+
+   @Override
+   public void stateChanged(ChangeEvent e) {
+      VolumeSlider volumeSlider = (VolumeSlider) e.getSource();
+      
+      if (volumeSlider.isVolumeChanging()) {
+         volumeSlider.setVolumeChanging(false);
+         return;
+      }
+      
+      context.getPlayer().setVolume(volumeSlider.getVolume());
+   }
+   
+   @Override
+   public void onMasterVolumeChange(MasterVolumeChangedEvent evt) {
+      volumeSlider.setVolume(evt.getNewMasterVolume());
+   }
 }

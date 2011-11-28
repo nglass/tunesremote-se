@@ -155,8 +155,7 @@ public class SongTableModel extends AbstractTableModel implements FilteredSongLi
 		}
 	}
 
-	@SuppressWarnings("unchecked")
-	public Class getColumnClass(int columnIndex) {
+	public Class<?> getColumnClass(int columnIndex) {
 		switch (columnIndex) {
 		case 0:
 			return ColumnZero.class;

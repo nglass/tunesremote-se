@@ -26,34 +26,30 @@ import java.awt.event.MouseWheelListener;
 
 import javax.swing.JSlider;
 
-import net.firefly.client.gui.context.Context;
-
 public class VolumeSlider extends JSlider implements MouseWheelListener {
 
 	private static final long serialVersionUID = -2941791192064395902L;
 
-	protected Context context;
+	protected boolean valueChanging = false;
 
 	protected VolumeSliderUI ui;
 
-	public VolumeSlider(Context context) {
-		this.context = context;
-		initialize();
+	public VolumeSlider(double initialVolume) {
+		initialize(initialVolume);
 	}
 
-	protected void initialize() {
+	protected void initialize(double initialValue) {
 
 		setMinimum(0);
-		setMaximum(100);
-		// apply inital gain value
-		setValue((int)(context.getPlayer().getInitialGain() / 0.01f), false);
+		setMaximum(1000000);
+		setValue((int)(initialValue*10000.0));
 		setOrientation(HORIZONTAL);
 		setPaintTicks(false);
 		setPaintLabels(false);
 		setFocusable(false);
 		setPaintTrack(true);
 
-		ui = new VolumeSliderUI();
+		ui = new VolumeSliderUI(this);
 		setUI(ui);
 
 		addMouseListener(new MouseAdapter() {
@@ -67,23 +63,26 @@ public class VolumeSlider extends JSlider implements MouseWheelListener {
 
 	}
 
-	public void setValue(int n, boolean send) {
-		if (n != getValue()) {
-			super.setValue(n);
-			if (send) {
-				float newGain = n * 0.01f;
-				context.getPlayer().setGain(newGain);
-			}
-		}
+	public boolean isVolumeChanging() {
+	   return valueChanging;
 	}
 	
-	public void setValue(int n) {
-		setValue(n, true);
+	public void setVolumeChanging(boolean valueChanging) {
+	   this.valueChanging = valueChanging;
 	}
-
+	
+	public void setVolume(double volume) {
+	   this.valueChanging = true;
+	   this.setValue ((int)(volume * 10000.0));
+	}
+	
+	public double getVolume() {
+	   return (double)this.getValue() / 10000.0;
+	}
+	
 	public void mouseWheelMoved(MouseWheelEvent e) {
 		int notches = e.getWheelRotation();
-		int scrollAmout = 5;
+		int scrollAmout = (getMaximum()-getMinimum())/20;
 		if (notches < 0) {
 			// -- move up
 			setValue(Math.min(getValue() - (notches * scrollAmout), getMaximum()));
