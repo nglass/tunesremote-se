@@ -7,7 +7,7 @@ TunesRemote-SE requires a Java 6 runtime environment to be able run.  I develop 
 Windows, Solaris and Linux users can get the latest Oracle JRE here:
 http://java.com/en/download/index.jsp
 
-Currently MacOSX ships with its own Java runtime, though in the future this is going to change.
+Currently MacOSX ships with its own Java runtime, though in the future this is going to change. Java 6 is available on 10.6+ (Snow Leopard) or on 10.5.8 (Leopard) if using 64-bit Intel.
 
 Ubuntu instructions can be found here:
 https://help.ubuntu.com/community/Java
