@@ -1,0 +1,13 @@
+#summary Recent Commits and Updated Issues
+#labels Featured
+<g:plusone/>
+Google decided to [http://code.google.com/p/support/issues/detail?id=24324 disable the Updates/Activity tab] so here is a temporarily replacement using Wiki gadgets.
+
+== Changes ==
+<wiki:gadget url="http://google-code-project-hosting-gadgets.googlecode.com/svn/build/prod/changes/gcChanges.xml" up_projectName="tunesremote-se" width="800" border="1"/>
+
+== Issue Tracker ==
+<wiki:gadget url="http://google-code-project-hosting-gadgets.googlecode.com/svn/build/prod/issuetracker/gcIssueTracker.xml" up_projectName="tunesremote-se" width="800" border="1"/>
+
+== Issue Updates ==
+<wiki:gadget url="http://google-code-project-hosting-gadgets.googlecode.com/svn/build/prod/issueupdates/gcIssueUpdates.xml" up_projectName="tunesremote-se" width="800" border="1"/>
