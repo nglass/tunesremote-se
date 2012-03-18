@@ -206,7 +206,7 @@ function renderCallback(D) {
                         } else {
                             var match2 = H.match(/feeds\/p\/(.*)\/issueupdates\/basic\/(.*));
                             if (match2)
-                                H = "http://code.google.com/p/" + match[1] + "/issues/detail?id=" + match[2];
+                                H = "http://code.google.com/p/" + match2[1] + "/issues/detail?id=" + match2[2];
                         }
                     }
                 }
