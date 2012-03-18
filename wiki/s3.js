@@ -201,8 +201,13 @@ function renderCallback(D) {
                         // H is of the form http://code.google.com/feeds/p/PROJECTNAME/issueupdates/basic/NNNN/NN .
                         // Covert it to the form http://code.google.com/p/PROJECTNAME/issues/detail?id=NNNN#cNN .
                         var match = H.match(/feeds\/p\/(.*)\/issueupdates\/basic\/(.*)\/(.*)/);
-                        if (match)
+                        if (match) {
                           H = "http://code.google.com/p/" + match[1] + "/issues/detail?id=" + match[2] + "#c" + match[3];
+                        } else {
+                            var match2 = H.match(/feeds\/p\/(.*)\/issueupdates\/basic\/(.*));
+                            if (match2)
+                                H = "http://code.google.com/p/" + match[1] + "/issues/detail?id=" + match[2];
+                        }
                     }
                 }
             }
