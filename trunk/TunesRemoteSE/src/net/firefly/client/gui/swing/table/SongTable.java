@@ -60,6 +60,7 @@ public class SongTable extends ETable implements SongChangedEventListener {
 	public SongTable(Frame rootContainer, Context context) {
 		this.rootContainer = rootContainer;
 		this.context = context;
+		context.setSongTable(this);
 		initialize();
 	}
 
@@ -169,17 +170,41 @@ public class SongTable extends ETable implements SongChangedEventListener {
 		rect.setLocation(rect.x - pt.x, rect.y - pt.y);
 		viewport.scrollRectToVisible(rect);
 	}
+	
+	public void selectSong(final SongContainer sc) {
+      if (sc != null) {
+         final SongTable table = this;
+         SwingUtilities.invokeLater(new Runnable() {
+
+            @Override
+            public void run() {
+               int index = context.getFilteredSongList().indexOf(sc);
+               if (index > -1 && index < context.getFilteredSongList().size()) {
+                  selectionModel.setSelectionInterval(index, index);
+                  // -- scroll the current played song row into view
+                  table.scrollToVisible(table, index);
+                  repaint();
+               }
+            }
+         });
+      } 
+	}
+	
+   public void scrollToSong(SongContainer sc) {
+      if (sc != null) {
+         int index = context.getFilteredSongList().indexOf(sc);
+         if (index > -1 && index < context.getFilteredSongList().size()) {
+            // -- scroll the current played song row into view
+            scrollToVisible(this, index);
+            repaint();
+         }
+      }
+   }
 
 	public void onSongChange(SongChangedEvent evt) {
 		SongContainer sc = evt.getSongPlayed();
 		if (sc != null) {
-			int index = context.getFilteredSongList().getSelectedIndex();
-			if (index > -1 && index < context.getFilteredSongList().size()) {
-				// -- scroll the current played song row into view
-				scrollToVisible(this, index);
-				repaint();
-			}
+		   scrollToSong(sc);
 		}
-
 	}
 }

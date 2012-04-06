@@ -1,3 +1,22 @@
+/*
+ * This file is part of TunesRemote SE.
+ *
+ * TunesRemote SE is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * any later version.
+ *
+ * TunesRemote SE is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with TunesRemote SE; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ * 
+ * Copyright 2011 Nick Glass
+ */
 package org.libtunesremote_se;
 
 import java.awt.Dimension;
@@ -58,7 +77,7 @@ public class LibrarySelector extends JDialog implements ListDataListener {
 		this.width = 300;
 		this.height = 200;
 		
-		pairingDatabase = new PairingDatabase(TunesService.getConfigDirectory());
+		pairingDatabase = new PairingDatabase();
 		lastSession = pairingDatabase.getLastSession();
 		
 		model = TunesService.getServiceList();
@@ -121,6 +140,14 @@ public class LibrarySelector extends JDialog implements ListDataListener {
 			}
 		});
 
+      JButton pairButton = new JButton("Pair");
+      buttonPane.add(pairButton);
+      pairButton.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
+            PairingDialog.showPairingDialog();
+         }
+      });
+		
 		//Set Up Window Exit
 		frame.addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {

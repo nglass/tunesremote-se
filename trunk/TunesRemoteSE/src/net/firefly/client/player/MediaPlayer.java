@@ -631,9 +631,10 @@ public class MediaPlayer implements android.os.Handler {
 			sc = masterSongList.getSongByDatabaseId(status.getTrackId());			
 		}
 		
-		// If we really cant find the song in the database then
+		// If we really cant find the song in the database
+		// (Or if we found the wrong one)
 		// Make a new song based on now playing information
-		if (sc == null) {			
+		if (sc == null || !sc.getSong().getTitle().equals(status.getTrackName())) {			
 		   sc = new SongContainer();
 		   Song s = new Song();
 			
@@ -653,6 +654,7 @@ public class MediaPlayer implements android.os.Handler {
 			sc.setContainerId(status.getContainerItemId());
 			sc.setPlaylistId(status.getPlaylistId());
 			sc.setDatabaseId(status.getDatabaseId());
+			
 			sc.setSong(s);	
 		}
 		

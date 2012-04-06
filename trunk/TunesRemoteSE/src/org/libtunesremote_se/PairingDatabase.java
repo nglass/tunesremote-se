@@ -24,12 +24,17 @@ public class PairingDatabase {
 		(byte) '6', (byte) '7', (byte) '8', (byte) '9', (byte) 'A',
 		(byte) 'B', (byte) 'C', (byte) 'D', (byte) 'E', (byte) 'F' };
 	
-	private String configDirectory = "";
+	private static String configDirectory = "";
 	
 	private Connection connection = null;
 	
-	private void initDBConnection()
-	{
+	public static void setConfigDirectory(String configDirectory) {
+	   if (configDirectory != null) {
+	      PairingDatabase.configDirectory = new String(configDirectory + File.separator);
+	   }
+	}
+	
+	private void initDBConnection() {
 		if (connection == null)
 		{
 			try {
@@ -76,12 +81,6 @@ public class PairingDatabase {
 				// sqlite distributed with app.  real problems if we get here so exit
 				System.exit(1);
 			}
-		}
-	}
-	
-	public PairingDatabase(String configDirectory) {
-		if (configDirectory != null) {
-			this.configDirectory = new String(configDirectory + File.separator);
 		}
 	}
 	

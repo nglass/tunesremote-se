@@ -135,6 +135,7 @@ public class TunesRemoteRequestManager implements IRequestManager {
             SongContainer sc = new SongContainer();
 
             try {
+               sc.setDatabaseId(session.databaseId);
                sc.setContainerId(resp.getNumberLong("mcti"));
 
                song.setDatabaseItemId(resp.getNumberLong("miid"));

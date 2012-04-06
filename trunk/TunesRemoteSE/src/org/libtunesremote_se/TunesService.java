@@ -22,7 +22,10 @@ package org.libtunesremote_se;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.jmdns.JmDNS;
@@ -37,16 +40,12 @@ import javax.swing.SwingUtilities;
 
 import android.util.Log;
 
-public class TunesService extends Thread implements ServiceListener, NetworkTopologyListener, Closeable {
+public class TunesService implements ServiceListener, NetworkTopologyListener, Closeable {
 
    public final static String TAG = TunesService.class.toString();
 
    public final static String TOUCH_ABLE_TYPE = "_touch-able._tcp.local.";
    public final static String REMOTE_TYPE = "_touch-remote._tcp.local.";
-
-   private final String applicationName;
-
-   private volatile PairingServer pairingServer;
 
    private JmmDNS jmmdns = null;
 
@@ -54,27 +53,86 @@ public class TunesService extends Thread implements ServiceListener, NetworkTopo
 
    private static TunesService instance = null;
 
-   private static String configDirectory = null;
-
-   private String pairCode = null;
-
-   private AtomicInteger servicecount;
+   private static String applicationName;
    
-   private TunesService(String applicationName) {
-      this.applicationName = applicationName;
-      
-      servicecount = new AtomicInteger(0);
-   }
-
-   @Override
-   public void run() {
-      // Start the pairing server
-      pairingServer = new PairingServer(configDirectory);
-      pairingServer.start();
-      pairCode = pairingServer.getPairCode();
-
-      jmmdns = JmmDNS.Factory.getInstance();
+   private Hashtable<String, String> serviceValues = new Hashtable<String, String>();
+   
+   private Map<JmDNS, InetAddress> interfaces = new HashMap<JmDNS, InetAddress>();
+   
+   private AtomicInteger interfaceCount = new AtomicInteger();
+   private Map<InetAddress, Integer> interfaceNumber = new HashMap<InetAddress, Integer>();
+   
+   private String serviceGuid = null;
+   
+   private int portNumber = 0;
+   
+   protected TunesService() {
+      this.jmmdns = JmmDNS.Factory.getInstance();
       jmmdns.addNetworkTopologyListener(this);
+      
+      serviceValues.put("DvNm", applicationName);
+      serviceValues.put("RemV", "10000");
+      serviceValues.put("DvTy", "iPod");
+      serviceValues.put("RemN", "Remote");
+      serviceValues.put("txtvers", "1");
+   }
+   
+   public static TunesService getInstance() {
+      return instance;
+   }
+   
+   public static void startService(String applicationName) {
+      if (instance == null) {
+         TunesService.applicationName = applicationName;
+         
+         instance = new TunesService();
+         
+         Runtime.getRuntime().addShutdownHook(new Thread() {
+            @Override
+            public void run() {
+               if (instance != null) {
+                  instance.close();
+               }
+               Log.i(TAG, "TunesService Stopped");
+            }
+         });
+      }
+   }
+   
+   protected void registerPairingService(JmDNS mdns, InetAddress address) {
+      Log.i(TAG, "Registered Pairing Service @ " + address.getHostAddress());
+      
+      if (!interfaceNumber.containsKey(address)) {
+         interfaceNumber.put(address, interfaceCount.getAndIncrement());
+      }
+      
+      serviceValues.put("DvNm", applicationName + "@" + address.getHostAddress());
+      ServiceInfo pairservice = ServiceInfo.create
+            (REMOTE_TYPE, serviceGuid + interfaceNumber.get(address), portNumber, 0, 0, serviceValues);
+   
+      try {
+         mdns.registerService(pairservice);
+      } catch (IOException e) {
+         // TODO Auto-generated catch block
+         e.printStackTrace();
+      }
+   }
+   
+   public void registerPairingService(String serviceGuid, String pairCode, int portNumber) {
+      serviceValues.put("Pair", pairCode);
+      this.serviceGuid = serviceGuid;
+      this.portNumber = portNumber;
+      
+      for (Map.Entry<JmDNS, InetAddress> entry : interfaces.entrySet()) {
+         JmDNS mdns = entry.getKey();
+         InetAddress address = entry.getValue();
+         registerPairingService(mdns, address);
+      }
+   }
+   
+   public void unregisterPairingService() {
+      serviceGuid = null;
+      jmmdns.unregisterAllServices();
    }
 
    @Override
@@ -83,8 +141,6 @@ public class TunesService extends Thread implements ServiceListener, NetworkTopo
          if (jmmdns != null) {
             jmmdns.unregisterAllServices();
             jmmdns.close();
-
-            pairingServer.destroy();
          }
       } catch (IOException e) {
          Log.e(TAG, "Exception shutting down TunesService", e);
@@ -149,28 +205,6 @@ public class TunesService extends Thread implements ServiceListener, NetworkTopo
       updateService(serviceName, serviceInfo);
    }
 
-   public static void startService(String configDirectory, String applicationName) {
-      if (instance == null) {
-         TunesService.configDirectory = configDirectory;
-         instance = new TunesService(applicationName);
-         instance.start();
-
-         Runtime.getRuntime().addShutdownHook(new Thread() {
-            @Override
-            public void run() {
-               if (instance != null) {
-                  instance.close();
-               }
-               Log.i(TAG, "TunesService Stopped");
-            }
-         });
-      }
-   }
-
-   public static String getConfigDirectory() {
-      return TunesService.configDirectory;
-   }
-
    public static DefaultListModel getServiceList() {
       if (instance != null) {
          return instance.serviceList;
@@ -182,33 +216,26 @@ public class TunesService extends Thread implements ServiceListener, NetworkTopo
    public void inetAddressAdded(NetworkTopologyEvent event) {
       Log.i(TAG, "inetAddressAdded(event=" + event.toString() + ")");
       JmDNS mdns = event.getDNS();
-
+      InetAddress address = event.getInetAddress();
+      
       // Start listening for DACP servers on this interface
       mdns.addServiceListener(TOUCH_ABLE_TYPE, this);
+      
+      interfaces.put(mdns, address);
 
-      // and re-register the pair service
-      try {
-         String name = event.getInetAddress().getHostName();
-         
-         Hashtable<String, String> serviceValues;
-         // Register the Pairing Service
-         serviceValues = new Hashtable<String, String>();
-         serviceValues.put("DvNm", applicationName + "@" + name);
-         serviceValues.put("RemV", "10000");
-         serviceValues.put("DvTy", "iPod");
-         serviceValues.put("RemN", "Remote");
-         serviceValues.put("txtvers", "1");
-         serviceValues.put("Pair", pairCode);
-         
-         ServiceInfo newpairservice = ServiceInfo.create(REMOTE_TYPE, pairingServer.getServiceGuid() + servicecount.incrementAndGet(), pairingServer.getPortNumber(), 0, 0, serviceValues);
-         mdns.registerService(newpairservice);
-      } catch (IOException e) {
-         Log.e(TAG, "Error registering service on " + event.getInetAddress(), e);
+      if (serviceGuid != null) {
+         registerPairingService(mdns, address);
       }
    }
 
    @Override
    public void inetAddressRemoved(NetworkTopologyEvent event) {
       Log.i(TAG, "inetAddressRemoved(event=" + event.toString() + ")");
+      
+      JmDNS mdns = event.getDNS();
+      mdns.removeServiceListener(TOUCH_ABLE_TYPE, this);
+      mdns.unregisterAllServices();
+      
+      interfaces.remove(mdns);
    }
 }

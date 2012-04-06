@@ -24,6 +24,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
 import org.libtunesremote_se.LibrarySelector;
+import org.libtunesremote_se.PairingDatabase;
+import org.libtunesremote_se.PairingDialog;
 import org.libtunesremote_se.TunesService;
 
 import net.firefly.client.Version;
@@ -177,7 +179,9 @@ public class TunesRemoteSE {
 		
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
-				TunesService.startService(configRootDirectory, Version.APPLICATION_NAME);
+			   PairingDatabase.setConfigDirectory(configRootDirectory);
+				TunesService.startService(Version.APPLICATION_NAME);
+				PairingDialog.setIcon(icon);
 				
 				LibrarySelector librarySelector = new LibrarySelector(new NewSessionCallback(), null);
 				librarySelector.setIconImage(icon);

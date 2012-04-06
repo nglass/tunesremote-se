@@ -106,7 +106,8 @@ public class GlobalContainer extends JPanel {
 		albumScrollPane.setBorder(new EmptyBorder(0, 0, 0, 0));
 
 		JScrollPane songScrollPane = new JScrollPane();
-		songScrollPane.setViewportView(new SongTable(rootContainer, context));
+		SongTable songTable = new SongTable(rootContainer, context);
+		songScrollPane.setViewportView(songTable);
 		songScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 		songScrollPane.setBorder(new EmptyBorder(0, 0, 0, 0));
 
