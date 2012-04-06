@@ -38,6 +38,14 @@ When you start TunesRemote-SE you will be (usually be - outstanding issue) prese
 
 If you try to select a library before you have paired with it a dialog will inform you that TunesRemote-SE has not yet paired with this library.
 
-TunesRemote-SE currently automatically launches the pairing process while it is running.  Select the TunesRemote-SE entry on your media player and enter any code (the code is not currently checked).  Your media player should now be paired with TunesRemote-SE and you should be good to go.
+To start the pairing process click on the Pair button.  You will be presented with a screen that looks like this:
 
-If you have problems pairing it is usually due to Firewall issues.  See ConnectionProblems.
+[http://tunesremote-se.googlecode.com/svn/wiki/pairing.png]
+
+After a short time TunesRemote-SE should show up in the devices section of your media player.  There will be one entry for each network interface that it is broadcasting on.
+
+On your mediaplayer select TunesRemote-SE from the devices list and enter the code displayed on the pairing screen.  Your media player should now be paired with TunesRemote-SE and you should be good to go.  Once paired you should not need to repeat the process again.
+
+If on entering a code you do not get a response then try selecting TunesRemote-SE on a different network interface from the devices list and entering the code again.
+
+If you still have problems pairing it is usually due to Firewall issues.  See ConnectionProblems.

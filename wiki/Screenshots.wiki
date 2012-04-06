@@ -16,6 +16,10 @@
 
 [http://tunesremote-se.googlecode.com/svn/wiki/libraries.png]
 
+==Pairing==
+
+[http://tunesremote-se.googlecode.com/svn/wiki/pairing.png]
+
 ==Speaker Selection==
 
 [http://tunesremote-se.googlecode.com/svn/wiki/speakers.png]
