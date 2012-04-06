@@ -98,6 +98,7 @@
 			<svn refid="svn">
 				<log path="." startRevision="HEAD" stopRevision="1" destFile="dist/CHANGES" asXml="false"/>
 			</svn>
+			<replaceregexp file="dist/CHANGES" match="\|(.*)\@.*\|" replace="|\1 |" byline="true"/>
 		</target>
 
 	</project>

@@ -118,6 +118,15 @@ public class ControlsMenu extends JMenu implements PlayerModeChangedEventListene
 		});
 		previousMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, shortcutKey, true));
 
+		JMenuItem currentMenuItem = new JMenuItem();
+		currentMenuItem.setText(ResourceManager.getLabel("menu.controls.current", context.getConfig().getLocale()));
+		currentMenuItem.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent evt) {
+            context.getPlaylistTree().goToSong(context.getPlayer().getPlayingSong());
+         }
+      });
+		currentMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L, shortcutKey, true));
+		
 		shuffleMenuItem.setText(ResourceManager.getLabel("player.control.shuffle", context.getConfig().getLocale()));
 		shuffleMenuItem.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
@@ -193,6 +202,7 @@ public class ControlsMenu extends JMenu implements PlayerModeChangedEventListene
 		addSeparator();
 		add(nextMenuItem);
 		add(previousMenuItem);
+		add(currentMenuItem);
 		addSeparator();
 		add(incVolMenuItem);
 		add(decVolMenuItem);

@@ -36,6 +36,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 
 import javax.swing.JPanel;
 import javax.swing.JTree;
@@ -47,6 +48,7 @@ import javax.swing.tree.DefaultTreeSelectionModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
+import net.firefly.client.controller.ListManager;
 import net.firefly.client.controller.ResourceManager;
 import net.firefly.client.controller.request.PlaylistRequestManager;
 import net.firefly.client.gui.context.Context;
@@ -64,6 +66,7 @@ import net.firefly.client.model.playlist.IPlaylist;
 import net.firefly.client.model.playlist.PlaylistStatus;
 import net.firefly.client.model.playlist.SmartPlaylist;
 import net.firefly.client.model.playlist.StaticPlaylist;
+import net.firefly.client.model.playlist.list.PlaylistList;
 import net.firefly.client.model.playlist.list.RadiolistList;
 import net.firefly.client.tools.FireflyClientException;
 
@@ -90,6 +93,7 @@ public class PlaylistTree extends JTree implements TreeModelListener, Autoscroll
 		this.context = context;
 		this.container = container;
 		this.rootContainer = rootContainer;
+		context.setPlaylistTree(this);
 		initialize();
 	}
 
@@ -168,7 +172,94 @@ public class PlaylistTree extends JTree implements TreeModelListener, Autoscroll
 		//dropTarget = new DropTarget(this, this);
 	}
 
-   protected void setExpandedState(TreePath path, boolean state) {
+	public void goToSong(SongContainer sc) {
+	   if (sc != null) {
+         TreePath tp = getTreePath(sc);
+         setExpandedState(tp,true);
+         setSelectionPath(tp, sc);
+         scrollPathToVisible(tp);
+	   }
+	}
+	
+	public void updateValue() {
+      Object o = getLastSelectedPathComponent();
+      if (o instanceof IPlaylist) {
+         // a playlist is selected
+         IPlaylist pl = (IPlaylist)o;
+         context.setFilteredSongList(pl.getSongList());
+         context.setFilteredGenreList(ListManager.extractGenreList(pl.getSongList(), context.getConfig().getLocale()));
+         context.setFilteredArtistList(ListManager.extractArtistList(pl.getSongList(), context.getConfig().getLocale()));
+         context.setFilteredAlbumList(ListManager.extractAlbumList(pl.getSongList(), context.getConfig().getLocale()));
+         context.setSelectedPlaylist(pl);
+      } else {
+         // the library is selected
+         context.setFilteredSongList(context.getGlobalSongList());
+         context.setFilteredGenreList(context.getGlobalGenreList());
+         context.setFilteredArtistList(context.getGlobalArtistList());
+         context.setFilteredAlbumList(context.getGlobalAlbumList());
+         context.setSelectedPlaylist(null);
+      }
+	}
+	
+	// Find the tree path to a song
+   // path[0] = root
+   // path[1] = Library | Genius | Playlist
+   // path[2..n] = playlist tree
+	public TreePath getTreePath(SongContainer sc) {
+	   PlaylistTreeModel model = (PlaylistTreeModel)getModel();
+	   ArrayList<Object> pathVector = new ArrayList<Object>();
+	   IPlaylist playlist = null;
+ 
+      if (sc.getDatabaseId() == context.getSession().radioDatabaseId) {
+         pathVector.add(model.getRoot());
+         pathVector.add(model.LibraryNode);
+         pathVector.add(context.getRadiolists());
+      } else if (sc.getDatabaseId() == context.getSession().databaseId) {
+	      // traverse playlists
+   	   long playlistid = sc.getPlaylistId();
+   	   while (playlistid != 0) {
+   	      playlist = context.getPlaylists().getPlaylistById(playlistid);
+   	      if (playlist != null) {
+   	         pathVector.add(0, playlist);
+   	      } else {
+   	         break;
+   	      }
+   	      playlistid = playlist.getParentContainer();
+   	   }
+   	   
+   	   if (playlist != null) {
+   	      if (playlist.isSavedGenius()) {
+   	         pathVector.add(0, model.GeniusNode);
+   	      } else if (playlist.getSpecialPlaylist() > 0) {
+   	         switch ((int) playlist.getSpecialPlaylist()) {
+   	         case PlaylistList.SPECIAL_GENIUS:
+   	         case PlaylistList.SPECIAL_GENIUS_MIXES:
+   	            pathVector.add(0, model.GeniusNode);
+   	            break;
+   	            
+   	         case PlaylistList.SPECIAL_ITUNES_DJ:
+   	            pathVector.add(0, model.PlaylistNode);
+   	            break;
+   	         
+   	         default:
+   	            pathVector.add(0, model.LibraryNode);
+   	            break;
+   	         }
+   	      } else {
+   	         pathVector.add(0, model.PlaylistNode);
+   	      }
+   	   } else {
+   	      pathVector.add(0, context.getLibraryInfo());
+   	      pathVector.add(0, model.LibraryNode);
+   	   }
+   	   
+   	   pathVector.add(0, model.getRoot());
+      }
+	   
+	   return new TreePath(pathVector.toArray());
+	}
+	
+   public void setExpandedState(TreePath path, boolean state) {
       if (state || path.getPathCount() > 2) {
          super.setExpandedState(path, state);
       }
@@ -209,9 +300,13 @@ public class PlaylistTree extends JTree implements TreeModelListener, Autoscroll
 	   return value.toString();
 	}
 	
+	public void setSelectionPath(TreePath path) {
+	   setSelectionPath(path, null);
+	}
+	
 	// -- ensure that only library/playlist is selected
 	// -- moreover: manage playlist lazy load
-	public void setSelectionPath(TreePath path) {
+	public void setSelectionPath(TreePath path, SongContainer sc) {
 	   int depth = 0;
 		if (path != null) {
 			depth = path.getPathCount() - 1;
@@ -227,11 +322,15 @@ public class PlaylistTree extends JTree implements TreeModelListener, Autoscroll
 					PlaylistStatus ps = pl.getStatus();
 					if (ps == PlaylistStatus.NOT_LOADED) {
 						// -- load the playlist
-						Thread t = new Thread(new PlaylistLoader(path, pl), "[PlaylistLoader]");
+						Thread t = new Thread(new PlaylistLoader(path, pl, sc), "[PlaylistLoader]");
 						t.start();
 					} else if (ps == PlaylistStatus.LOADED) {
 						super.setSelectionPath(path);
 						context.getGlobalContainer().showMusic();
+						if (sc != null) {
+						   context.getSongTable().selectSong(sc);
+						   this.updateValue();
+						}
 					} else {
 						// -- the playlist is loading: do nothing
 						;
@@ -242,7 +341,7 @@ public class PlaylistTree extends JTree implements TreeModelListener, Autoscroll
                PlaylistStatus ps = rll.getStatus();
                if (ps == PlaylistStatus.NOT_LOADED) {
                   // -- load the radiolist
-                  Thread t = new Thread(new RadiolistLoader(path, rll), "[RadiolistLoader]");
+                  Thread t = new Thread(new RadiolistLoader(path, rll, sc), "[RadiolistLoader]");
                   t.start();
                } else if (ps == PlaylistStatus.LOADED) {
                   super.setSelectionPath(path);
@@ -254,6 +353,10 @@ public class PlaylistTree extends JTree implements TreeModelListener, Autoscroll
 				} else {
 					super.setSelectionPath(path);
 					context.getGlobalContainer().showMusic();
+					if (sc != null) {
+					   context.getSongTable().selectSong(sc);
+					   this.updateValue();
+               }
 				}
 			}
 		}
@@ -301,10 +404,12 @@ public class PlaylistTree extends JTree implements TreeModelListener, Autoscroll
 	class PlaylistLoader implements Runnable {
 		TreePath path;
 		IPlaylist pl;
+		SongContainer sc;
 
-		public PlaylistLoader(TreePath path, IPlaylist pl) {
+		public PlaylistLoader(TreePath path, IPlaylist pl, SongContainer sc) {
 			this.path = path;
 			this.pl = pl;
+			this.sc = sc;
 		}
 
 		public void run() {
@@ -328,6 +433,10 @@ public class PlaylistTree extends JTree implements TreeModelListener, Autoscroll
 					public void run() {
 						PlaylistTree.this.setSelectionPath(path);
 						PlaylistTree.this.scrollPathToVisible(path);
+						if (sc != null) {
+						   context.getSongTable().selectSong(sc);
+	                  updateValue();
+						}
 					}
 				});
 			} catch (FireflyClientException ex) {
@@ -342,10 +451,12 @@ public class PlaylistTree extends JTree implements TreeModelListener, Autoscroll
    class RadiolistLoader implements Runnable {
       TreePath path;
       RadiolistList rll;
+      SongContainer sc;
 
-      public RadiolistLoader(TreePath path, RadiolistList rll) {
+      public RadiolistLoader(TreePath path, RadiolistList rll, SongContainer sc) {
          this.path = path;
          this.rll = rll;
+         this.sc = sc;
       }
 
       public void run() {

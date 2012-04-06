@@ -153,12 +153,18 @@ public class PlaylistTreeModel implements TreeModel, PlaylistListChangedEventLis
    @Override
    public Object getChild(Object parent, int index) {
       if (parent == this) {
-         switch (index) {
-         case 0: return LibraryNode;
-         case 1: return GeniusNode;
-         case 2: return PlaylistNode;
-         default: return null;
+         if (index == 0) {
+            return LibraryNode;
+         } else if (context.getPlaylists().geniusPlaylistsSize() > 0) {
+            if (index == 1) {
+               return GeniusNode;
+            } else if (index == 2) {
+               return PlaylistNode;
+            }
+         } else if (index == 1) {
+            return PlaylistNode;
          }
+         return null;
       } else if (parent instanceof String) {
          if (parent == LibraryNode) {
             int specialSize = context.getPlaylists().specialPlaylistsSize() + 1;
@@ -190,7 +196,11 @@ public class PlaylistTreeModel implements TreeModel, PlaylistListChangedEventLis
    @Override
    public int getChildCount(Object parent) {
       if (parent == this) {
-         return 3;
+         if (context.getPlaylists().geniusPlaylistsSize() > 0) {
+            return 3;
+         } else {
+            return 2;
+         }
       } else if (parent instanceof String) {
          if (parent == LibraryNode) {
             int specialSize = context.getPlaylists().specialPlaylistsSize() + 1;

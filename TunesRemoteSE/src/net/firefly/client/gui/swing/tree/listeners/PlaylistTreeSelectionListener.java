@@ -22,10 +22,8 @@ package net.firefly.client.gui.swing.tree.listeners;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 
-import net.firefly.client.controller.ListManager;
 import net.firefly.client.gui.context.Context;
 import net.firefly.client.gui.swing.tree.PlaylistTree;
-import net.firefly.client.model.playlist.IPlaylist;
 
 public class PlaylistTreeSelectionListener implements TreeSelectionListener {
 
@@ -39,22 +37,6 @@ public class PlaylistTreeSelectionListener implements TreeSelectionListener {
 	}
 
 	public void valueChanged(TreeSelectionEvent e) {
-	   Object o = tree.getLastSelectedPathComponent();
-		if (o instanceof IPlaylist) {
-			// a playlist is selected
-			IPlaylist pl = (IPlaylist)o;
-			context.setFilteredSongList(pl.getSongList());
-			context.setFilteredGenreList(ListManager.extractGenreList(pl.getSongList(), context.getConfig().getLocale()));
-			context.setFilteredArtistList(ListManager.extractArtistList(pl.getSongList(), context.getConfig().getLocale()));
-			context.setFilteredAlbumList(ListManager.extractAlbumList(pl.getSongList(), context.getConfig().getLocale()));
-			context.setSelectedPlaylist(pl);
-		} else {
-			// the library is selected
-			context.setFilteredSongList(context.getGlobalSongList());
-			context.setFilteredGenreList(context.getGlobalGenreList());
-			context.setFilteredArtistList(context.getGlobalArtistList());
-			context.setFilteredAlbumList(context.getGlobalAlbumList());
-			context.setSelectedPlaylist(null);
-		}
+	   tree.updateValue();
 	}
 }

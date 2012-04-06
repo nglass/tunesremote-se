@@ -50,6 +50,9 @@ import net.firefly.client.gui.context.listeners.SavedLibraryListChangedEventList
 import net.firefly.client.gui.context.listeners.SelectedPlaylistChangedEventListener;
 import net.firefly.client.gui.context.listeners.StaticPlaylistCreationEventListener;
 import net.firefly.client.gui.swing.panel.GlobalContainer;
+import net.firefly.client.gui.swing.table.SongTable;
+import net.firefly.client.gui.swing.tree.PlaylistTree;
+import net.firefly.client.gui.swing.tree.RadioOutline;
 import net.firefly.client.model.configuration.Configuration;
 import net.firefly.client.model.data.Album;
 import net.firefly.client.model.data.Artist;
@@ -119,6 +122,12 @@ public class Context {
 	protected String serverVersion;
 
 	protected GlobalContainer globalContainer;
+	
+	protected PlaylistTree playlistTree;
+	
+	protected RadioOutline radioOutline;
+	
+	protected SongTable songTable;
 
 	protected boolean isApplet = false;
 	
@@ -182,6 +191,30 @@ public class Context {
 
 	public void setGlobalContainer(GlobalContainer globalContainer) {
 		this.globalContainer = globalContainer;
+	}
+	
+	public PlaylistTree getPlaylistTree() {
+	   return playlistTree;
+	}
+	
+	public void setPlaylistTree(PlaylistTree playlistTree) {
+	   this.playlistTree = playlistTree;
+	}
+	
+	public RadioOutline getRadioOutline() {
+	   return radioOutline;
+	}
+	
+	public void setRadioOutline(RadioOutline radioOutline) {
+	   this.radioOutline = radioOutline;
+	}
+	
+	public SongTable getSongTable() {
+	   return songTable;
+	}
+	
+	public void setSongTable(SongTable songTable) {
+	   this.songTable = songTable;
 	}
 
 	public String getServerVersion() {

@@ -28,28 +28,35 @@ package org.libtunesremote_se;
 //package org.tunesremote.daap;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URLDecoder;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Random;
 import android.util.Log;
 
-public class PairingServer extends Thread {
+public class PairingServer {
 
+   public final static int CLOSED=-1;
+   public final static int SUCCESS=0;
+   public final static int ERROR=1;
+   
 	// the pairing service waits for any incoming requests from itunes
 	// it always returns a valid pairing code
 	public final static String TAG = PairingServer.class.toString();
-	// public final static int PORT = 1024;
 
 	protected final static byte[] CHAR_TABLE = new byte[] { (byte) '0',
 		(byte) '1', (byte) '2', (byte) '3', (byte) '4', (byte) '5',
 		(byte) '6', (byte) '7', (byte) '8', (byte) '9', (byte) 'A',
 		(byte) 'B', (byte) 'C', (byte) 'D', (byte) 'E', (byte) 'F' };
 
-	public static byte[] PAIRING_RAW = new byte[] { 0x63, 0x6d, 0x70, 0x61,
+	protected static byte[] PAIRING_RAW = new byte[] { 0x63, 0x6d, 0x70, 0x61,
 		0x00, 0x00, 0x00, 0x3a, 0x63, 0x6d, 0x70, 0x67, 0x00, 0x00, 0x00,
 		0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x63, 0x6d,
 		0x6e, 0x6d, 0x00, 0x00, 0x00, 0x16, 0x41, 0x64, 0x6d, 0x69, 0x6e,
@@ -62,146 +69,186 @@ public class PairingServer extends Thread {
 	protected int portNumber = 0;
 	protected String pairCode;
 	protected String serviceGuid;
+	protected boolean pairing = false;
+	
+	protected MessageDigest md5;
 
 	private PairingDatabase pairingDatabase; 
 
-	public int getPortNumber() {
-		return portNumber;
+	private static PairingServer instance = new PairingServer();	
+	protected PairingServer() {
+	   try {
+         md5 = MessageDigest.getInstance("MD5");
+      } catch (NoSuchAlgorithmException e) {
+         // TODO Auto-generated catch block
+         e.printStackTrace();
+         System.exit(1);
+      }
 	}
 	
-	// this code is used in validating pair codes by hashing with response
-	public String getPairCode() {
-		return pairCode;
+	// PairingServer is a singleton
+	public static PairingServer getInstance() {
+	   return instance;
 	}
 	
-	// this is the GUID that uniquely identifies this remote
-	public String getServiceGuid() {
-		return serviceGuid;
+	public synchronized int pair(String code) {
+	   
+	   int result = ERROR;
+	   pairing = true;
+	   
+	   // Open a socket if we aren't using one
+	   if (this.server == null) {
+	      try {
+	         // open a free port
+	         this.server = new ServerSocket(0);
+	         this.portNumber = this.server.getLocalPort();
+	         
+	         // set a timeout so we can cancel the pairing process
+	         server.setSoTimeout(100);
+	         
+	      } catch (IOException e) {
+	         Log.w(TAG, e);
+	      }
+	   }
+	   
+	   if (this.pairingDatabase == null) {
+	      this.pairingDatabase = new PairingDatabase();
+	      this.pairCode = pairingDatabase.getPairCode();
+	      this.serviceGuid = pairingDatabase.getServiceGuid();
+	   }
+	   
+	   Log.i(TAG, "Started Pairing Server on Port " + portNumber);
+	   
+	   String expectedCode = expectedPairingCode(code);
+	   
+	   // Register pairing service
+	   TunesService.getInstance().registerPairingService(serviceGuid, pairCode, portNumber);
+	   
+	   while (pairing && result != SUCCESS) {
+   	   try {
+            // start accepting data on incoming socket
+            final Socket socket = server.accept();
+            final String address = socket.getInetAddress().getHostAddress();
+   
+            Log.i(TAG, "accepted connection from " + address + "...");
+            OutputStream output = null;
+            
+            try {
+               String serviceName = null;
+               String pairingcode = null;
+               output = socket.getOutputStream();
+   
+               // output the contents for debugging
+               final BufferedReader br = new BufferedReader(
+                     new InputStreamReader(socket.getInputStream()));
+               while (br.ready()) {
+                  String line = br.readLine();
+                  Log.d(TAG, line);
+                  if (line.contains("servicename=")) {
+                     // Decode the input URL
+                     line = URLDecoder.decode(line, "UTF-8");
+                     
+                     String[] tokens = line.split("[ &?=]");
+                     
+                     for (int i=0; i<tokens.length - 1; i++) {
+                        if (tokens[i].equals("pairingcode")) {
+                           pairingcode = tokens[i+1];
+                           i++;
+                        }
+                        else if (tokens[i].equals("servicename")) {
+                           serviceName = tokens[i+1];
+                           i++;
+                        }
+                     }
+                  }
+               }
+   
+               if (serviceName != null && pairingcode != null && pairingcode.equals(expectedCode)) {
+                  
+                  // edit our local PAIRING_RAW to return the correct guid
+                  byte[] loginGuid = new byte[8];
+                  random.nextBytes(loginGuid);
+                  System.arraycopy(loginGuid, 0, PAIRING_RAW, 16, 8);
+                  final String niceCode = toHex(loginGuid);
+      
+                  byte[] header = String.format(
+                        "HTTP/1.1 200 OK\r\nContent-Length: %d\r\n\r\n",
+                        PAIRING_RAW.length).getBytes();
+                  byte[] reply = new byte[header.length + PAIRING_RAW.length];
+      
+                  System.arraycopy(header, 0, reply, 0, header.length);
+                  System.arraycopy(PAIRING_RAW, 0, reply, header.length,
+                        PAIRING_RAW.length);
+      
+                  output.write(reply);
+      
+                  Log.i(TAG, "Received pairing command");
+   
+                  // add this to the pairing db
+                  Log.i(TAG, "address = " + address);
+                  Log.i(TAG, "servicename = \"" + serviceName + "\"");
+                  Log.i(TAG, "pairingcode = \"" + pairingcode + "\"");
+                  Log.d(TAG, "niceCode = \"" + niceCode + "\"");
+   
+                  pairingDatabase.updateCode(serviceName, niceCode);
+                  result = SUCCESS;
+               } else {
+                  Log.i(TAG, "Wrong pairing code");
+                  output.write("HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n".getBytes());
+               }
+   
+            } finally {
+               if (output != null) {
+                  output.flush();
+                  output.close();
+               }
+               output = null;
+            }
+   	   } catch (java.net.SocketTimeoutException e) {
+   	      if (!pairing) {
+   	         result = CLOSED;
+   	         break;
+   	      }
+         } catch (java.net.SocketException e) {
+            Log.i(TAG, e.getMessage());
+            break;
+         } catch (IOException e) {
+            Log.w(TAG, e);
+            break;
+         }
+	   }
+	   
+	   Log.i(TAG, "Unregistering Pairing Service");
+
+	   TunesService.getInstance().unregisterPairingService();
+	   
+	   Log.i(TAG, "Finished Pairing");
+	   return result;
 	}
-
-	public PairingServer(String configDirectory) {
-		pairingDatabase = new PairingDatabase(configDirectory);
-		
-		pairCode = pairingDatabase.getPairCode();
-		serviceGuid = pairingDatabase.getServiceGuid();
-		
-		try {
-			// open a free port
-			this.server = new ServerSocket(0);
-			this.portNumber = this.server.getLocalPort();
-		} catch (IOException e) {
-			Log.w(TAG, e);
-		} 
+	
+	private String expectedPairingCode(String code) {
+      try {
+         ByteArrayOutputStream os = new ByteArrayOutputStream();
+         os.write(pairCode.getBytes("UTF-8"));
+         
+         byte passcode[] = code.getBytes("UTF-8");
+         for (int c=0; c<passcode.length; c++) {
+            os.write(passcode[c]);
+            os.write(0);
+         }
+         
+         return toHex(md5.digest(os.toByteArray()));
+      } catch (UnsupportedEncodingException e) {
+         Log.e(TAG, e.getMessage());
+         return "";
+      } catch (IOException e) {
+         Log.e(TAG, e.getMessage());
+         return "";
+      }
 	}
-
-	@Override
-	public void destroy() {
-		Log.d(TAG, "Destroying PairingServer " + this.portNumber);
-		try {
-			if ((this.server != null) && (!this.server.isClosed())) {
-				Log.i(TAG, "Destroying Socket " + this.portNumber);
-				this.server.close();
-				this.server = null;
-			}
-			this.interrupt();
-		} catch (IOException e) {
-			Log.w(TAG, e);
-		}
-	}
-
-	@Override
-	public void run() {
-		// start listening on a specific port for any requests
-		Log.i(TAG, "Pairing Server Listening on Port " + this.portNumber);
-
-		Thread thisThread = Thread.currentThread();
-
-		while (this == thisThread && server != null) {
-			Log.i(TAG, "awaiting connection....");
-			try {
-				// start accepting data on incoming socket
-				final Socket socket = server.accept();
-				final String address = socket.getInetAddress().getHostAddress();
-
-				Log.i(TAG, "accepted connection from " + address + "...");
-
-				// we dont care about checking the incoming pairing md5 from
-				// itunes
-				// and we always just accept the pairing
-				OutputStream output = null;
-
-				try {
-					String serviceName = null;
-					String pairingcode = null;
-					output = socket.getOutputStream();
-
-					// output the contents for debugging
-					final BufferedReader br = new BufferedReader(
-							new InputStreamReader(socket.getInputStream()));
-					while (br.ready()) {
-						String line = br.readLine();
-						Log.d(TAG, line);
-						if (line.contains("servicename=")) {
-						   // Decode the input URL
-						   line = URLDecoder.decode(line, "UTF-8");
-						   
-						   String[] tokens = line.split("[ &?=]");
-						   
-						   for (int i=0; i<tokens.length - 1; i++) {
-						      if (tokens[i].equals("pairingcode")) {
-						         pairingcode = tokens[i+1];
-						      }
-						      if (tokens[i].equals("servicename")) {
-						         serviceName = tokens[i+1];
-						      }
-						   }
-						}
-					}
-
-					// edit our local PAIRING_RAW to return the correct guid
-					byte[] code = new byte[8];
-					random.nextBytes(code);
-					System.arraycopy(code, 0, PAIRING_RAW, 16, 8);
-					final String niceCode = toHex(code);
-
-					byte[] header = String.format(
-							"HTTP/1.1 200 OK\r\nContent-Length: %d\r\n\r\n",
-							PAIRING_RAW.length).getBytes();
-					byte[] reply = new byte[header.length + PAIRING_RAW.length];
-
-					System.arraycopy(header, 0, reply, 0, header.length);
-					System.arraycopy(PAIRING_RAW, 0, reply, header.length,
-							PAIRING_RAW.length);
-
-					output.write(reply);
-
-					Log.i(TAG, "Received pairing command");
-					if (serviceName != null && pairingcode != null) {
-						// add this to the pairing db
-						Log.i(TAG, "address = " + address);
-						Log.i(TAG, "servicename = \"" + serviceName + "\"");
-						Log.i(TAG, "pairingcode = \"" + pairingcode + "\"");
-						Log.d(TAG, "niceCode = \"" + niceCode + "\"");
-
-						pairingDatabase.updateCode(serviceName, niceCode);
-					}
-
-				} finally {
-					if (output != null) {
-						output.flush();
-						output.close();
-					}
-					output = null;
-				}
-			} catch (java.net.SocketException e) {
-				Log.i(TAG, e.getMessage());
-			} catch (IOException e) {
-				Log.w(TAG, e);
-			} 
-		}
-
-		Log.i(TAG, "PairingServer thread stopped.");
-
+	
+	public void cancelPairing() {
+	   pairing = false;
 	}
 
 	public static String toHex(byte[] code) {
@@ -215,5 +262,5 @@ public class PairingServer extends Thread {
 		}
 		return new String(result);
 	}
-
+	
 }

@@ -51,6 +51,8 @@ public class RadioOutline extends Outline {
       super();
       this.context = context;
       
+      context.setRadioOutline(this);
+      
       RadioTreeModel rtm = new RadioTreeModel(context);
       RadioRowModel rrm = new RadioRowModel(context);
       
