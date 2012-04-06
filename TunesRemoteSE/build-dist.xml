@@ -45,6 +45,7 @@
 		<zip destfile="dist/TunesRemoteSE-r${revision.max}.zip">
 			<fileset file="dist/TunesRemoteSE.jar" casesensitive="yes" />
 			<fileset file="COPYING" casesensitive="yes" />
+			<fileset file="dist/CHANGES" casesensitive="yes" />
 		</zip>
 
 		<!-- create OSX app bundle -->
@@ -52,6 +53,9 @@
 		<svn refid="svn">
 			<export srcPath="osx" destPath="dist/TunesRemoteSE.app" force="true" />
 		</svn>
+		
+		<copy file="osx/Contents/Info.plist" todir="dist/TunesRemoteSE.app/Contents/" overwrite="true" />
+		<replace file="dist/TunesRemoteSE.app/Contents/Info.plist" token="@CFBundleVersion" value="${revision.max}"/>
 
 		<copy file="dist/TunesRemoteSE.jar" todir="dist/TunesRemoteSE.app/Contents/Resources/Java/" overwrite="true" />
 
@@ -65,6 +69,7 @@
 				<include name="TunesRemoteSE.app/Contents/Resources/" />
 			</zipfileset>
 		    <zipfileset file="COPYING" casesensitive="yes" />
+			<zipfileset file="dist/CHANGES" casesensitive="yes" />
 		</zip>
 
 		<!-- create the Windows EXE -->
@@ -76,6 +81,7 @@
 		<zip destfile="dist/TunesRemoteSE-Windows-r${revision.max}.zip">
 			<fileset file="dist/TunesRemoteSE.exe" casesensitive="yes" />
 			<fileset file="COPYING" casesensitive="yes" />
+			<fileset file="dist/CHANGES" casesensitive="yes" />
 		</zip>
 
 		</target>
@@ -89,6 +95,9 @@
 			<echo message="Subversion revision: ${revision.max}" />
 			<echo message="Subversion repository url: ${repository.url}" />
 			<echo message="Build platform: ${os.name}" />
+			<svn refid="svn">
+				<log path="." startRevision="HEAD" stopRevision="1" destFile="dist/CHANGES" asXml="false"/>
+			</svn>
 		</target>
 
 	</project>
