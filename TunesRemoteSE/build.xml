@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project name="TunesRemoteSE" default="compile" basedir=".">
+  <!-- set global properties for this build -->
+  <property name="src" location="src"/>
+  <property name="build" location="build"/>
+
+  <target name="init">
+    <!-- Create the time stamp -->
+    <tstamp/>
+    <!-- Create the build directory structure used by compile -->
+    <mkdir dir="${build}"/>
+  </target>
+
+  <target name="compile" depends="init"
+        description="compile the source " >
+    <!-- Compile the java code from ${src} into ${build} -->
+    <javac target="1.6" includeantruntime="false" srcdir="${src}" destdir="${build}">
+      <classpath>
+        <pathelement location="libs/jmdns.jar"/>
+        <pathelement location="libs/org-netbeans-swing-outline.jar"/>
+        <pathelement location="libs/sqlite-jdbc.jar"/>
+      </classpath>
+    </javac>
+    
+    <!-- Copy resources from ${src} into ${build} -->
+    <copy todir="build">
+    <fileset dir="src"
+             excludes="*.java" />
+    </copy>
+  </target>
+
+  <target name="clean"
+        description="clean up" >
+    <!-- Delete the ${build} directory tree -->
+    <delete dir="${build}"/>
+  </target>
+</project>
