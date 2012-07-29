@@ -4,8 +4,16 @@
 	<property name="lib.dir" value="support/svnant" />
 	<property name="launch4j.dir" value="support/launch4j" />
 
-	<condition property="l4jbin.dir" value="${launch4j.dir}/bin.Windows" else="${launch4j.dir}/bin.${os.name}">
+	<condition property="l4jbin.dir" value="${launch4j.dir}/bin-win32">
 		<os family="windows"/>
+  	</condition>
+
+	<condition property="l4jbin.dir" value="${launch4j.dir}/bin-macosx-x86">
+		<os family="mac" arch="x86_64"/>
+  	</condition>
+
+	<condition property="l4jbin.dir" value="${launch4j.dir}/bin-linux">
+		<os name="Linux"/>
   	</condition>
 
 	<!-- path to the svnant libraries. Usually they will be located in ANT_HOME/lib -->
@@ -22,9 +30,6 @@
 	<!--this file was created by Eclipse Runnable JAR Export Wizard-->
 	<!--ANT 1.7 is required                                        -->
 	<target name="build_dist" depends="version">
-		<mkdir dir="dist"/>
-		<mkdir dir="build"/>
-
 		<jar destfile="dist/TunesRemoteSE.jar" filesetmanifest="mergewithoutmain">
 			<manifest>
 				<attribute name="Main-Class" value="org.tunesremote_se.TunesRemoteSE" />
@@ -87,6 +92,7 @@
 		</target>
 
 		<target name="version">
+			<mkdir dir="dist"/>
 			<svnSetting id="svn" javahl="false" /> 
 			<svn refid="svn">
 				<wcVersion path="." />
@@ -94,7 +100,7 @@
 			<echo message="Revision Information:" />
 			<echo message="Subversion revision: ${revision.max}" />
 			<echo message="Subversion repository url: ${repository.url}" />
-			<echo message="Build platform: ${os.name}" />
+			<echo message="Build platform: ${os.name} ${os.arch}" />
 			<svn refid="svn">
 				<log path="." startRevision="HEAD" stopRevision="1" destFile="dist/CHANGES" asXml="false"/>
 			</svn>
