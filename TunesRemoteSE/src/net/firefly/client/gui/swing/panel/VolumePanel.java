@@ -57,7 +57,7 @@ public class VolumePanel extends JPanel implements ChangeListener, MasterVolumeC
 
 		JLabel volumeLowLabel = new JLabel(volumeLowIcon);
 		JLabel volumeHighLabel = new JLabel(volumeHighIcon);
-		this.volumeSlider = new VolumeSlider((int)context.getPlayer().getInitialVolume() * 10000);
+		this.volumeSlider = new VolumeSlider((int)context.getPlayer().getInitialVolume());
 		volumeSlider.addChangeListener(this);
 
 		volumeLowLabel.setOpaque(false);
