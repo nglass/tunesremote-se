@@ -33,13 +33,13 @@ The first time you run TunesRemote-SE you will be asked where you want it to sto
 ## Library Pairing ##
 When you start TunesRemote-SE you will be (usually be - outstanding issue) presented with a list of all the [DACP-compatible](DACP.md) media players on your local network.  However you need to pair the application with your media player before you can control it.
 
-![http://tunesremote-se.googlecode.com/svn/wiki/libraries.png](http://tunesremote-se.googlecode.com/svn/wiki/libraries.png)
+![libraries.png](libraries.png)
 
 If you try to select a library before you have paired with it a dialog will inform you that TunesRemote-SE has not yet paired with this library.
 
 To start the pairing process click on the Pair button.  You will be presented with a screen that looks like this:
 
-![http://tunesremote-se.googlecode.com/svn/wiki/pairing.png](http://tunesremote-se.googlecode.com/svn/wiki/pairing.png)
+![pairing.png](pairing.png)
 
 After a short time TunesRemote-SE should show up in the devices section of your media player.  There will be one entry for each network interface that it is broadcasting on.
 
