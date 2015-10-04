@@ -1,24 +1,24 @@
 # Screenshots #
 ## Main display ##
 
-![http://tunesremote-se.googlecode.com/svn/wiki/screenshot.png](http://tunesremote-se.googlecode.com/svn/wiki/screenshot.png)
+![screenshot.png](screenshot.png)
 
 ## Radio Browser ##
 
-![http://tunesremote-se.googlecode.com/svn/wiki/radio.png](http://tunesremote-se.googlecode.com/svn/wiki/radio.png)
+![radio.png](radio.png)
 
 ## Preferences ##
 
-![http://tunesremote-se.googlecode.com/svn/wiki/prefs.png](http://tunesremote-se.googlecode.com/svn/wiki/prefs.png)
+![prefs.png](prefs.png)
 
 ## Library Selector ##
 
-![http://tunesremote-se.googlecode.com/svn/wiki/libraries.png](http://tunesremote-se.googlecode.com/svn/wiki/libraries.png)
+![libraries.png](libraries.png)
 
 ## Pairing ##
 
-![http://tunesremote-se.googlecode.com/svn/wiki/pairing.png](http://tunesremote-se.googlecode.com/svn/wiki/pairing.png)
+![pairing.png](pairing.png)
 
 ## Speaker Selection ##
 
-![http://tunesremote-se.googlecode.com/svn/wiki/speakers.png](http://tunesremote-se.googlecode.com/svn/wiki/speakers.png)
+![speakers.png](speakers.png)
