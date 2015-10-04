@@ -10,6 +10,6 @@ TunesRemote SE helps you remote control your [DACP-compatible](DACP.md) media pl
 
 TunesRemote SE combines the graphical user interface of [Firefly Client](http://sourceforge.net/projects/fireflyclient/) with the DACP control software from [TunesRemote+](http://code.google.com/p/tunesremote-plus/).
 
-![http://tunesremote-se.googlecode.com/svn/wiki/screenshot.png](http://tunesremote-se.googlecode.com/svn/wiki/screenshot.png)
+![screenshot.png](screenshot.png)
 
 iTunes and iPhone are trademarks of Apple Inc., registered in the U.S. and other countries.
